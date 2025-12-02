@@ -1160,7 +1160,6 @@ boundary "LoginPage" as LoginPage
 User -> RegistrationForm: Select "Register"
 activate RegistrationForm
 
-create RegistrationForm
 User -> RegistrationForm: <<create>> (implied re-entry or init)
 
 User -> RegistrationForm: Enter credentials and profile info
@@ -1488,6 +1487,7 @@ activate NotificationController
 
 create Notification
 NotificationController -> Notification: <<create>>
+activate Notification
 
 NotificationController -> NotificationCenter: Push notification
 activate NotificationCenter
@@ -1496,7 +1496,6 @@ User -> NotificationCenter: See alert
 User -> NotificationCenter: Click to view details
 
 NotificationCenter -> Notification: Mark as read
-activate Notification
 deactivate Notification
 
 deactivate NotificationCenter
@@ -1552,18 +1551,20 @@ activate Post
 Post --> ContentController: List of posts
 deactivate Post
 
-alt No posts
-    create EmptyStateDisplay
-    ContentController -> EmptyStateDisplay: <<create>>
+alt No posts found
+    ContentController --> CommunityFeedView: Return empty list
+    CommunityFeedView -> EmptyStateDisplay: Show empty state
+    activate EmptyStateDisplay
+    deactivate EmptyStateDisplay
+
 else Posts exist
-    create CommunityFeedView
-    ContentController -> CommunityFeedView: <<create>> (with content)
-    activate CommunityFeedView
-    deactivate CommunityFeedView
+    ContentController --> CommunityFeedView: Return List<Post>
+    CommunityFeedView -> CommunityFeedView: Render feed items
 end
 
-User -> CommunityFeedView: Scroll through feed
 deactivate ContentController
+
+User -> CommunityFeedView: Scroll through feed
 deactivate CommunityFeedView
 
 @enduml
