@@ -1,0 +1,205 @@
+@startuml
+!theme plain
+hide empty members
+
+left to right direction
+
+package "Entity" {
+    class TeamProfile {
+        - Integer teamId
+        - String teamName
+        - String description
+        - String logoUrl
+        - Integer leaderId
+        - TeamStatus status
+        - String rejectionReason
+        - String location
+        - Float latitude
+        - Float longitude
+        - Integer skillLevel
+        - DateTime createdAt
+        - DateTime updatedAt
+        + create()
+        + update()
+        + updateStatus()
+        + delete()
+        + getById()
+        + getPendingTeams()
+        + searchByName()
+        + searchByLocation()
+    }
+
+    class TeamRoster {
+        - Integer rosterId
+        - Integer teamId
+        - Integer playerId
+        - TeamRole role
+        - DateTime joinedAt
+        - Boolean isActive
+        + addPlayer()
+        + removePlayer()
+        + getTeamMembers()
+        + getPlayerTeams()
+        + updateRole()
+    }
+
+    class JoinRequest {
+        - Integer requestId
+        - Integer teamId
+        - Integer playerId
+        - RequestStatus status
+        - String message
+        - DateTime createdAt
+        - DateTime processedAt
+        + create()
+        + updateStatus()
+        + getPendingByTeam()
+        + existsRequest()
+        + getById()
+    }
+
+    class TeamWallet {
+        - Integer walletId
+        - Integer teamId
+        - Decimal balance
+        - DateTime createdAt
+        - DateTime updatedAt
+        + create()
+        + getByTeam()
+        + updateBalance()
+        + getBalance()
+        + addFunds()
+        + deductFunds()
+    }
+
+    class TransactionLog {
+        - Integer transactionId
+        - Integer walletId
+        - TransactionType type
+        - Decimal amount
+        - String description
+        - String category
+        - Integer createdBy
+        - DateTime createdAt
+        + create()
+        + getByWallet()
+        + getByDateRange()
+        + getByType()
+        + getSummary()
+    }
+}
+
+package "Controller" {
+    class TeamController {
+        - TeamProfileRepository teamRepository
+        - TeamRosterRepository rosterRepository
+        - JoinRequestRepository joinRequestRepository
+        - NotificationController notificationController
+        + createTeam()
+        + updateTeam()
+        + deleteTeam()
+        + processJoinRequest()
+        + handleLeaveTeam()
+        - validateTeamData()
+        - checkNameUniqueness()
+        - notifyMembers()
+        - ensureLeaderInRoster()
+    }
+
+    class TeamVerificationController {
+        - TeamProfileRepository teamRepository
+        - NotificationController notificationController
+        + getPendingTeams()
+        + approveTeam()
+        + rejectTeam()
+        - validateRequest()
+    }
+
+    class RosterController {
+        - TeamRosterRepository rosterRepository
+        - NotificationController notificationController
+        + getTeamRoster()
+        + addPlayer()
+        + removePlayer()
+        + updatePlayerRole()
+        - notifyPlayer()
+    }
+
+    class FinanceController {
+        - TeamWalletRepository walletRepository
+        - TransactionLogRepository transactionRepository
+        + getTeamWallet()
+        + addTransaction()
+        + getTransactionHistory()
+        + getFinanceSummary()
+        - validateTransaction()
+        - updateBalance()
+    }
+}
+
+package "External" {
+    class UserAccount <<External>>
+    class PlayerProfile <<External>>
+    class NotificationController <<External>>
+}
+
+package "Repository" {
+    interface TeamProfileRepository < TeamProfile >
+    interface TeamRosterRepository < TeamRoster >
+    interface JoinRequestRepository < JoinRequest >
+    interface TeamWalletRepository < TeamWallet >
+    interface TransactionLogRepository < TransactionLog >
+}
+
+' --- RELATIONSHIPS ---
+
+UserAccount "1" -- "*" TeamProfile : leads (External)
+TeamProfile "1" --> "*" TeamRoster : contains
+TeamProfile "1" --> "1" TeamWallet : has
+TeamProfile "1" --> "*" JoinRequest : receives
+
+PlayerProfile "1" -- "*" TeamRoster : member of (External)
+PlayerProfile "1" -- "*" JoinRequest : creates (External)
+
+TeamWallet "1" --> "*" TransactionLog : records
+
+TeamController ..> TeamProfileRepository : uses
+TeamController ..> TeamRosterRepository : uses
+TeamController ..> JoinRequestRepository : uses
+TeamController ..> NotificationController : uses
+
+TeamVerificationController ..> TeamProfileRepository : uses
+TeamVerificationController ..> NotificationController : uses
+
+RosterController ..> TeamRosterRepository : uses
+RosterController ..> NotificationController : uses
+
+FinanceController ..> TeamWalletRepository : uses
+FinanceController ..> TransactionLogRepository : uses
+
+' --- ENUMS ---
+
+enum TeamStatus {
+    Pending
+    Verified
+    Rejected
+    PendingRevision
+}
+
+enum TeamRole {
+    Member
+    Captain
+    ViceCaptain
+}
+
+enum RequestStatus {
+    Pending
+    Accepted
+    Rejected
+}
+
+enum TransactionType {
+    Income
+    Expense
+}
+@enduml

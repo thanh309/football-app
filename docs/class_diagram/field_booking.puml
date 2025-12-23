@@ -1,0 +1,186 @@
+@startuml
+!theme plain
+hide empty members
+
+left to right direction
+
+package "Entity" {
+    class FieldProfile {
+        - Integer fieldId
+        - Integer ownerId
+        - String fieldName
+        - String description
+        - String location
+        - Float latitude
+        - Float longitude
+        - List<FieldAmenity> amenities
+        - Decimal pricePerHour
+        - Integer capacity
+        - List<MediaAsset> images
+        - VerificationStatus status
+        - String rejectionReason
+        - DateTime createdAt
+        - DateTime updatedAt
+        + create()
+        + update()
+        + updateStatus()
+        + getById()
+        + getByOwner()
+        + getPendingFields()
+        + searchByAmenities()
+        + searchByPrice()
+        + searchByLocation()
+    }
+
+    class FieldCalendar {
+        - Integer calendarId
+        - Integer fieldId
+        - Date date
+        - Time startTime
+        - Time endTime
+        - SlotStatus status
+        - Integer bookingId
+        + checkAvailability()
+        + updateStatus()
+        + markAsBooked()
+        + markAsAvailable()
+        + getSlotsByField()
+        + hasConflict()
+    }
+
+    class BookingRequest {
+        - Integer bookingId
+        - Integer fieldId
+        - Integer teamId
+        - Integer requesterId
+        - Date date
+        - Time startTime
+        - Time endTime
+        - BookingStatus status
+        - String notes
+        - DateTime createdAt
+        - DateTime processedAt
+        + create()
+        + updateStatus()
+        + getById()
+        + getPendingByField()
+        + getByTeam()
+        + cancel()
+    }
+
+    class Amenity {
+        - Integer amenityId
+        - String name
+        - String description
+        - String icon
+        - Boolean isActive
+        + create()
+        + getAll()
+        + getById()
+        + update()
+    }
+
+    class FieldAmenity {
+        - Integer fieldAmenityId
+        - Integer fieldId
+        - Integer amenityId
+        - Integer quantity
+        - String notes
+        + add()
+        + remove()
+        + getByField()
+        + getFieldsByAmenity()
+    }
+}
+
+package "Controller" {
+    class FieldController {
+        - FieldProfileRepository fieldRepository
+        - NotificationController notificationController
+        + createField()
+        + updateField()
+        - validateFieldData()
+        - checkCriticalChanges()
+        - notifyModerator()
+    }
+
+    class FieldVerificationController {
+        - FieldProfileRepository fieldRepository
+        - NotificationController notificationController
+        + getPendingFields()
+        + approveField()
+        + rejectField()
+        - validateRequest()
+    }
+
+    class BookingController {
+        - BookingRequestRepository bookingRepository
+        - FieldCalendarRepository calendarRepository
+        - NotificationController notificationController
+        + createBooking()
+        + approveBooking()
+        + rejectBooking()
+        + cancelBooking()
+        + getPendingByField()
+        + getCalendar()
+        + blockSlot()
+        - checkConflict()
+    }
+}
+
+package "External" {
+    class UserAccount <<External>>
+    class MatchEvent <<External>>
+    class NotificationController <<External>>
+}
+
+package "Repository" {
+    interface FieldProfileRepository < FieldProfile >
+    interface FieldCalendarRepository < FieldCalendar >
+    interface BookingRequestRepository < BookingRequest >
+    interface AmenityRepository < Amenity >
+    interface FieldAmenityRepository < FieldAmenity >
+}
+
+' --- RELATIONSHIPS ---
+
+UserAccount "1" -- "*" FieldProfile : owns (External)
+
+FieldProfile "1" --> "*" FieldCalendar : has
+FieldProfile "1" --> "*" BookingRequest : receives
+FieldProfile "1" -- "*" MatchEvent : hosts (External)
+FieldProfile "1" --> "*" FieldAmenity : has
+Amenity "1" --> "*" FieldAmenity : referenced by
+
+FieldController ..> FieldProfileRepository : uses
+FieldController ..> NotificationController : uses
+
+FieldVerificationController ..> FieldProfileRepository : uses
+FieldVerificationController ..> NotificationController : uses
+
+BookingController ..> BookingRequestRepository : uses
+BookingController ..> FieldCalendarRepository : uses
+BookingController ..> NotificationController : uses
+
+' --- ENUMS ---
+
+enum VerificationStatus {
+    Pending
+    Verified
+    Rejected
+}
+
+enum SlotStatus {
+    Available
+    Booked
+    Maintenance
+    Blocked
+}
+
+enum BookingStatus {
+    Pending
+    Confirmed
+    Rejected
+    Cancelled
+}
+@enduml

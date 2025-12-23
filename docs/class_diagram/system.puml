@@ -1,0 +1,166 @@
+@startuml
+!theme plain
+hide empty members
+
+left to right direction
+
+package "Entity" {
+    class Notification {
+        - Integer notificationId
+        - Integer userId
+        - NotificationType type
+        - String title
+        - String message
+        - Integer relatedEntityId
+        - String relatedEntityType
+        - Boolean isRead
+        - DateTime createdAt
+        + create()
+        + markAsRead()
+        + getByUser()
+        + getUnread()
+        + delete()
+        + markAllAsRead()
+    }
+
+    class MediaAsset {
+        - Integer assetId
+        - Integer ownerId
+        - AssetOwnerType ownerType
+        - Integer entityId
+        - String fileName
+        - String storagePath
+        - AssetFileType fileType
+        - Integer fileSize
+        - String mimeType
+        - DateTime createdAt
+        + upload()
+        + delete()
+        + getByEntity()
+        + getById()
+        + updateStoragePath()
+    }
+
+    class ModerationLog {
+        - Integer logId
+        - Integer moderatorId
+        - Integer targetUserId
+        - ModerationAction action
+        - String reason
+        - String details
+        - DateTime createdAt
+        + create()
+        + getByModerator()
+        + getByUser()
+        + getByAction()
+    }
+}
+
+package "Controller" {
+    class NotificationController {
+        - NotificationRepository notificationRepository
+        - UserProfileRepository userProfileRepository
+        + createNotification()
+        + getUserNotifications()
+        + markAsRead()
+        + markAllAsRead()
+        + updatePreferences()
+        - push()
+        - checkPreferences()
+    }
+
+    class UserModerationController {
+        - UserAccountRepository userRepository
+        - ModerationLogRepository moderationLogRepository
+        - NotificationController notificationController
+        + getUserDetails()
+        + suspendUser()
+        + banUser()
+        + reactivateUser()
+        + getUserHistory()
+        - logAction()
+        - notifyUser()
+    }
+
+    class SearchController {
+        - TeamProfileRepository teamRepository
+        - FieldProfileRepository fieldRepository
+        - PlayerProfileRepository playerRepository
+        - UserAccountRepository userRepository
+        + searchTeams()
+        + searchFields()
+        + searchPlayers()
+        + searchFieldOwners()
+        - buildQuery()
+        - applyFilters()
+    }
+}
+
+package "External" {
+    class UserAccount <<External>>
+    class UserProfileRepository <<External>>
+    class UserAccountRepository <<External>>
+    class TeamProfileRepository <<External>>
+    class FieldProfileRepository <<External>>
+    class PlayerProfileRepository <<External>>
+    class TeamProfile <<External>>
+    class FieldProfile <<External>>
+    class PlayerProfile <<External>>
+}
+
+package "Repository" {
+    interface NotificationRepository < Notification >
+    interface ModerationLogRepository < ModerationLog >
+    interface MediaAssetRepository < MediaAsset >
+}
+
+' --- RELATIONSHIPS ---
+
+UserAccount "1" -- "*" Notification : receives (External)
+MediaAsset "*" -- "1" UserAccount : uploaded by (External)
+
+NotificationController ..> NotificationRepository : uses
+NotificationController ..> UserProfileRepository : uses
+
+UserModerationController ..> UserAccountRepository : uses
+UserModerationController ..> ModerationLogRepository : uses
+UserModerationController ..> NotificationController : uses
+
+SearchController ..> TeamProfileRepository : uses
+SearchController ..> FieldProfileRepository : uses
+SearchController ..> PlayerProfileRepository : uses
+SearchController ..> UserAccountRepository : uses
+
+' --- ENUMS ---
+
+enum NotificationType {
+    TeamVerified
+    JoinRequest
+    MatchInvite
+    BookingUpdate
+    AccountStatusUpdate
+    TeamDeleted
+    MatchCancelled
+    FieldRejected
+}
+
+enum AssetOwnerType {
+    Team
+    Field
+    Post
+    Player
+}
+
+enum AssetFileType {
+    Image
+    Video
+}
+
+enum ModerationAction {
+    Suspend
+    Ban
+    Reactivate
+    ContentRemoval
+    Warning
+}
+@enduml

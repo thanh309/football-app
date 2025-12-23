@@ -1,0 +1,173 @@
+@startuml
+!theme plain
+hide empty members
+
+left to right direction
+
+package "Entity" {
+    class MatchEvent {
+        - Integer matchId
+        - Integer hostTeamId
+        - Integer opponentTeamId
+        - Integer fieldId
+        - Integer bookingId
+        - Date matchDate
+        - Time startTime
+        - Time endTime
+        - MatchStatus status
+        - Visibility visibility
+        - String description
+        - DateTime createdAt
+        - DateTime updatedAt
+        + create()
+        + update()
+        + updateStatus()
+        + setOpponent()
+        + getById()
+        + getByTeam()
+        + getUpcoming()
+        + cancel()
+    }
+
+    class MatchInvitation {
+        - Integer invitationId
+        - Integer matchId
+        - Integer invitingTeamId
+        - Integer invitedTeamId
+        - InvitationStatus status
+        - String message
+        - DateTime createdAt
+        - DateTime respondedAt
+        + create()
+        + updateStatus()
+        + getById()
+        + getPendingByTeam()
+        + accept()
+        + decline()
+    }
+
+    class MatchResult {
+        - Integer resultId
+        - Integer matchId
+        - Integer homeScore
+        - Integer awayScore
+        - Integer winnerId
+        - String notes
+        - Integer recordedBy
+        - DateTime createdAt
+        + create()
+        + getByMatch()
+        + update()
+        + getByTeam()
+        + getWinLossRecord()
+    }
+
+    class AttendanceRecord {
+        - Integer attendanceId
+        - Integer matchId
+        - Integer playerId
+        - AttendanceStatus status
+        - DateTime confirmedAt
+        - Integer confirmedBy
+        + create()
+        + updateStatus()
+        + getByMatch()
+        + getByPlayer()
+        + confirmPresence()
+        + getStats()
+    }
+}
+
+package "Controller" {
+    class MatchController {
+        - MatchEventRepository matchRepository
+        - MatchInvitationRepository invitationRepository
+        - FieldProfileRepository stadiumRepository
+        - NotificationController notificationController
+        + createMatch()
+        + cancelMatch()
+        + processInvitationResponse()
+        + getMatchesByTeam()
+        + getMatchDetails()
+        - checkStadiumAvailability()
+        + sendInvitation()
+        - checkPermission()
+    }
+
+    class AttendanceController {
+        - AttendanceRecordRepository attendanceRepository
+        - MatchEventRepository matchRepository
+        + getMatchAttendance()
+        + updateAttendance()
+        + confirmSelfAttendance()
+        + saveAttendanceBatch()
+        + getAttendanceStats()
+        - createRecord()
+    }
+}
+
+package "External" {
+    class TeamProfile <<External>>
+    class FieldProfile <<External>>
+    class BookingRequest <<External>>
+    class PlayerProfile <<External>>
+    class NotificationController <<External>>
+    interface FieldProfileRepository <<External>>
+}
+
+package "Repository" {
+    interface MatchEventRepository < MatchEvent >
+    interface MatchInvitationRepository < MatchInvitation >
+    interface MatchResultRepository < MatchResult >
+    interface AttendanceRecordRepository < AttendanceRecord >
+}
+
+' --- RELATIONSHIPS ---
+
+MatchEvent "1" --> "*" MatchInvitation : has
+MatchEvent "1" --> "*" AttendanceRecord : tracks
+MatchEvent "1" --> "0..1" BookingRequest : linked to (External)
+MatchEvent "1" --> "0..1" MatchResult : has result
+
+TeamProfile "1" -- "*" MatchEvent : hosts (External)
+FieldProfile "1" -- "*" MatchEvent : hosts (External)
+PlayerProfile "1" -- "*" AttendanceRecord : has (External)
+
+MatchController ..> MatchEventRepository : uses
+MatchController ..> MatchInvitationRepository : uses
+MatchController ..> FieldProfileRepository : uses
+MatchController ..> NotificationController : uses
+
+AttendanceController ..> AttendanceRecordRepository : uses
+AttendanceController ..> MatchEventRepository : uses
+
+' --- ENUMS ---
+
+enum MatchStatus {
+    PendingApproval
+    Scheduled
+    InProgress
+    Completed
+    Cancelled
+    LookingForStadium
+}
+
+enum Visibility {
+    Public
+    Private
+}
+
+enum InvitationStatus {
+    Pending
+    Accepted
+    Declined
+    Expired
+}
+
+enum AttendanceStatus {
+    Pending
+    Present
+    Absent
+    Excused
+}
+@enduml
