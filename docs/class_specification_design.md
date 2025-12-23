@@ -26,6 +26,10 @@ This document provides a comprehensive specification for all classes in the **Ki
    - [Reaction](#reaction)
    - [Report](#report)
    - [Notification](#notification)
+   - [MatchResult](#matchresult)
+   - [Amenity](#amenity)
+   - [FieldAmenity](#fieldamenity)
+   - [MediaAsset](#mediaasset)
    - [ModerationLog](#moderationlog)
    - [Content](#content)
 
@@ -50,13 +54,15 @@ This document provides a comprehensive specification for all classes in the **Ki
 3. [Service Classes](#service-classes)
    - [EmailService](#emailservice)
 
+4. [Repository Interfaces](#repository-interfaces)
+   
 ---
 
 ## Entity Classes
 
 ### UserAccount
 
-**Class Description:** Represents a user account in the system, storing authentication credentials and role-based access information. Users can be Players, Team Leaders, Field Owners, or Moderators.
+**Class Description:** Represents a user account in the system, storing authentication credentials and role-based access information. Users can have multiple roles simultaneously (e.g., a Team Leader can also be a Player).
 
 #### Attributes
 
@@ -66,19 +72,21 @@ This document provides a comprehensive specification for all classes in the **Ki
 | username | String | Private | Unique username for authentication |
 | email | String | Private | User's email address (encrypted) |
 | passwordHash | String | Private | Hashed password for secure authentication |
-| role | Enum (Player, TeamLeader, FieldOwner, Moderator) | Private | User role determining access permissions |
+| roles | List<Enum> (Player, TeamLeader, FieldOwner, Moderator) | Private | List of user roles (supports multiple roles per user) |
 | status | Enum (Active, Suspended, Banned, Pending) | Private | Current account status |
 | isVerified | Boolean | Private | Email verification status |
 | createdAt | DateTime | Private | Account creation timestamp |
 | updatedAt | DateTime | Private | Last modification timestamp |
 | contactInfo | String | Private | Contact information (encrypted) |
 | location | String | Private | User's location (encrypted) |
+| latitude | Float | Private | GPS latitude coordinate for proximity matching |
+| longitude | Float | Private | GPS longitude coordinate for proximity matching |
 
 #### Methods
 
 | Method | Input Parameters | Output Type | Accessibility | Description |
 |--------|------------------|-------------|---------------|-------------|
-| create | username: String, email: String, password: String, role: Enum | UserAccount | Public | Creates a new user account with hashed password |
+| create | username: String, email: String, password: String, roles: List<Enum> | UserAccount | Public | Creates a new user account with hashed password |
 | verifyCredentials | username: String, password: String | Boolean | Public | Validates login credentials against stored hash |
 | updateStatus | newStatus: Enum | Boolean | Public | Updates the account status (Active, Suspended, etc.) |
 | updatePassword | newPasswordHash: String | Boolean | Public | Updates the user's password hash |
@@ -163,6 +171,8 @@ This document provides a comprehensive specification for all classes in the **Ki
 | leaderId | Integer | Private | Foreign key reference to Team Leader's UserAccount |
 | status | Enum (Pending, Verified, Rejected) | Private | Verification status of the team |
 | location | String | Private | Team's home location/city |
+| latitude | Float | Private | GPS latitude coordinate for proximity matching |
+| longitude | Float | Private | GPS longitude coordinate for proximity matching |
 | skillLevel | Integer | Private | Average skill level for matchmaking |
 | createdAt | DateTime | Private | Team creation timestamp |
 | updatedAt | DateTime | Private | Last modification timestamp |
@@ -349,7 +359,8 @@ This document provides a comprehensive specification for all classes in the **Ki
 | matchId | Integer | Private | Unique identifier for the match |
 | hostTeamId | Integer | Private | Foreign key to hosting TeamProfile |
 | opponentTeamId | Integer | Private | Foreign key to opponent TeamProfile (nullable) |
-| stadiumId | Integer | Private | Foreign key to Stadium/FieldProfile |
+| fieldId | Integer | Private | Foreign key to FieldProfile (venue) |
+| bookingId | Integer | Private | Foreign key to BookingRequest (nullable, links match to field booking) |
 | matchDate | Date | Private | Date of the match |
 | startTime | Time | Private | Match start time |
 | endTime | Time | Private | Match end time |
@@ -442,8 +453,7 @@ This document provides a comprehensive specification for all classes in the **Ki
 |-----------|-----------|---------------|-------------|
 | walletId | Integer | Private | Unique identifier for the wallet |
 | teamId | Integer | Private | Foreign key to TeamProfile |
-| balance | Decimal | Private | Current wallet balance |
-| currency | String | Private | Currency code (e.g., VND) |
+| balance | Decimal | Private | Current wallet balance (in VND) |
 | createdAt | DateTime | Private | Wallet creation timestamp |
 | updatedAt | DateTime | Private | Last balance update timestamp |
 
@@ -644,6 +654,116 @@ This document provides a comprehensive specification for all classes in the **Ki
 
 ---
 
+### MatchResult
+
+**Class Description:** Records the final outcome of a completed match event, including scores and match statistics.
+
+#### Attributes
+
+| Attribute | Data Type | Accessibility | Description |
+|-----------|-----------|---------------|-------------|
+| resultId | Integer | Private | Unique identifier for the result record |
+| matchId | Integer | Private | Foreign key to MatchEvent |
+| homeScore | Integer | Private | Goals scored by home/host team |
+| awayScore | Integer | Private | Goals scored by away/opponent team |
+| winnerId | Integer | Private | Foreign key to winning TeamProfile (nullable for draws) |
+| notes | String | Private | Additional match notes or summary |
+| recordedBy | Integer | Private | Foreign key to UserAccount who recorded the result |
+| createdAt | DateTime | Private | Result creation timestamp |
+
+#### Methods
+
+| Method | Input Parameters | Output Type | Accessibility | Description |
+|--------|------------------|-------------|---------------|-------------|
+| create | matchId: Integer, homeScore: Integer, awayScore: Integer | MatchResult | Public | Creates a new match result |
+| getByMatch | matchId: Integer | MatchResult | Public | Retrieves result for a specific match |
+| update | resultId: Integer, resultData: Object | Boolean | Public | Updates match result |
+| getByTeam | teamId: Integer | List<MatchResult> | Public | Retrieves all results involving a team |
+| getWinLossRecord | teamId: Integer | Object | Public | Returns win/loss/draw statistics |
+
+---
+
+### Amenity
+
+**Class Description:** Represents a field amenity type (e.g., showers, parking, lighting) for normalized storage and efficient searching.
+
+#### Attributes
+
+| Attribute | Data Type | Accessibility | Description |
+|-----------|-----------|---------------|-------------|
+| amenityId | Integer | Private | Unique identifier for the amenity |
+| name | String | Private | Amenity name (e.g., "Showers", "Parking") |
+| description | String | Private | Description of the amenity |
+| icon | String | Private | Icon identifier for UI display |
+| isActive | Boolean | Private | Whether amenity is currently in use |
+
+#### Methods
+
+| Method | Input Parameters | Output Type | Accessibility | Description |
+|--------|------------------|-------------|---------------|-------------|
+| create | name: String, description: String | Amenity | Public | Creates a new amenity type |
+| getAll | None | List<Amenity> | Public | Retrieves all active amenities |
+| getById | amenityId: Integer | Amenity | Public | Retrieves amenity by ID |
+| update | amenityId: Integer, data: Object | Boolean | Public | Updates amenity details |
+
+---
+
+### FieldAmenity
+
+**Class Description:** Junction table linking FieldProfile to Amenity entities, enabling proper relational database structure for many-to-many relationships.
+
+#### Attributes
+
+| Attribute | Data Type | Accessibility | Description |
+|-----------|-----------|---------------|-------------|
+| fieldAmenityId | Integer | Private | Unique identifier for the junction record |
+| fieldId | Integer | Private | Foreign key to FieldProfile |
+| amenityId | Integer | Private | Foreign key to Amenity |
+| quantity | Integer | Private | Quantity available (e.g., 2 showers) |
+| notes | String | Private | Additional notes about this amenity at this field |
+
+#### Methods
+
+| Method | Input Parameters | Output Type | Accessibility | Description |
+|--------|------------------|-------------|---------------|-------------|
+| add | fieldId: Integer, amenityId: Integer | FieldAmenity | Public | Adds an amenity to a field |
+| remove | fieldId: Integer, amenityId: Integer | Boolean | Public | Removes an amenity from a field |
+| getByField | fieldId: Integer | List<Amenity> | Public | Retrieves all amenities for a field |
+| getFieldsByAmenity | amenityId: Integer | List<FieldProfile> | Public | Retrieves fields with a specific amenity |
+
+---
+
+### MediaAsset
+
+**Class Description:** Manages uploaded media files (images, videos) with proper storage path tracking and ownership for teams, fields, and posts.
+
+#### Attributes
+
+| Attribute | Data Type | Accessibility | Description |
+|-----------|-----------|---------------|-------------|
+| assetId | Integer | Private | Unique identifier for the media asset |
+| ownerId | Integer | Private | Foreign key to UserAccount who uploaded |
+| ownerType | Enum (Team, Field, Post, Player) | Private | Type of entity that owns this asset |
+| entityId | Integer | Private | ID of the owning entity |
+| fileName | String | Private | Original file name |
+| storagePath | String | Private | Server storage path or CDN URL |
+| fileType | Enum (Image, Video) | Private | Type of media file |
+| fileSize | Integer | Private | File size in bytes |
+| mimeType | String | Private | MIME type of the file |
+| createdAt | DateTime | Private | Upload timestamp |
+
+#### Methods
+
+| Method | Input Parameters | Output Type | Accessibility | Description |
+|--------|------------------|-------------|---------------|-------------|
+| upload | file: Binary, ownerId: Integer, ownerType: Enum, entityId: Integer | MediaAsset | Public | Uploads and stores a new media file |
+| delete | assetId: Integer | Boolean | Public | Deletes a media asset |
+| getByEntity | ownerType: Enum, entityId: Integer | List<MediaAsset> | Public | Retrieves all assets for an entity |
+| getById | assetId: Integer | MediaAsset | Public | Retrieves asset by ID |
+| updateStoragePath | assetId: Integer, newPath: String | Boolean | Public | Updates storage path (for migrations) |
+
+---
+
 ### ModerationLog
 
 **Class Description:** Records all moderation actions taken by moderators for audit trail and accountability.
@@ -673,7 +793,7 @@ This document provides a comprehensive specification for all classes in the **Ki
 
 ### Content
 
-**Class Description:** Abstract representation of content entities (Post/Comment) for unified content management and moderation.
+**Class Description:** Abstract base class for content entities. **`Post` and `Comment` inherit from this class**, sharing common attributes (`isHidden`, `createdAt`, `authorId`) for unified content management and moderation. The `ModerationController` uses polymorphic references to this base class.
 
 #### Attributes
 
@@ -727,7 +847,7 @@ This document provides a comprehensive specification for all classes in the **Ki
 
 ### TeamController
 
-**Class Description:** Manages team-related operations including profile CRUD, join request handling, and team deletion.
+**Class Description:** Manages team-related operations including profile CRUD, join request handling, and team deletion. **Business Rule:** The user referenced by `leaderId` in `TeamProfile` must always exist in `TeamRoster` with the `Captain` role.
 
 #### Attributes
 
@@ -750,6 +870,7 @@ This document provides a comprehensive specification for all classes in the **Ki
 | validateTeamData | teamData: Object | Boolean | Private | Validates team profile data |
 | checkNameUniqueness | teamName: String | Boolean | Private | Checks if team name is unique |
 | notifyMembers | teamId: Integer, message: String | Boolean | Private | Notifies all team members |
+| ensureLeaderInRoster | teamId: Integer, leaderId: Integer | Boolean | Private | Ensures leader exists in roster as Captain; syncs `leaderId` changes |
 
 ---
 
@@ -1122,6 +1243,39 @@ This document provides a comprehensive specification for all classes in the **Ki
 
 ---
 
+## Repository Interfaces
+
+> **Note:** Controllers reference Repository interfaces for data access operations. These follow the standard Data Access Object (DAO) pattern with common CRUD methods.
+
+| Repository Interface | Entity | Core Methods |
+|---------------------|--------|--------------|
+| UserAccountRepository | UserAccount | findById, findByUsername, save, update, delete |
+| SessionRepository | Session | findById, findByUserId, save, delete |
+| PlayerProfileRepository | PlayerProfile | findById, findByUserId, save, update, search |
+| TeamProfileRepository | TeamProfile | findById, findByLeaderId, save, update, delete, findPending |
+| TeamRosterRepository | TeamRoster | findByTeam, findByPlayer, add, remove, update |
+| JoinRequestRepository | JoinRequest | findById, findPendingByTeam, save, update |
+| FieldProfileRepository | FieldProfile | findById, findByOwner, save, update, findPending, search |
+| FieldCalendarRepository | FieldCalendar | findByField, findByDate, save, update |
+| BookingRequestRepository | BookingRequest | findById, findByField, findByTeam, save, update |
+| MatchEventRepository | MatchEvent | findById, findByTeam, save, update, delete |
+| MatchInvitationRepository | MatchInvitation | findById, findPendingByTeam, save, update |
+| MatchResultRepository | MatchResult | findByMatch, findByTeam, save, update |
+| AttendanceRecordRepository | AttendanceRecord | findByMatch, findByPlayer, save, update |
+| TeamWalletRepository | TeamWallet | findByTeam, save, update |
+| TransactionLogRepository | TransactionLog | findByWallet, findByDateRange, save |
+| PostRepository | Post | findById, findPublic, findByAuthor, save, update, delete |
+| CommentRepository | Comment | findByPost, findById, save, update, delete |
+| ReactionRepository | Reaction | findByPost, findByUser, save, delete |
+| ReportRepository | Report | findById, findPending, save, update |
+| NotificationRepository | Notification | findByUser, findUnread, save, update, markAsRead |
+| ModerationLogRepository | ModerationLog | findByModerator, findByUser, save |
+| AmenityRepository | Amenity | findAll, findById, save, update |
+| FieldAmenityRepository | FieldAmenity | findByField, add, remove |
+| MediaAssetRepository | MediaAsset | findById, findByEntity, save, delete |
+
+---
+
 ## Class Relationships Summary
 
 ```mermaid
@@ -1131,6 +1285,8 @@ classDiagram
     UserAccount "1" --> "*" TeamProfile : leads
     UserAccount "1" --> "*" FieldProfile : owns
     UserAccount "1" --> "*" Notification : receives
+    UserAccount "1" --> "*" Post : creates
+    UserAccount "1" --> "*" Comment : creates
     
     TeamProfile "1" --> "*" TeamRoster : contains
     TeamProfile "1" --> "1" TeamWallet : has
@@ -1143,21 +1299,35 @@ classDiagram
     
     FieldProfile "1" --> "*" FieldCalendar : has
     FieldProfile "1" --> "*" BookingRequest : receives
+    FieldProfile "1" --> "*" MatchEvent : hosts
+    FieldProfile "1" --> "*" FieldAmenity : has
+    
+    Amenity "1" --> "*" FieldAmenity : referenced by
     
     MatchEvent "1" --> "*" MatchInvitation : has
     MatchEvent "1" --> "*" AttendanceRecord : tracks
+    MatchEvent "1" --> "0..1" BookingRequest : linked to
+    MatchEvent "1" --> "0..1" MatchResult : has result
     
     TeamWallet "1" --> "*" TransactionLog : records
     
+    Content <|-- Post : extends
+    Content <|-- Comment : extends
     Post "1" --> "*" Comment : has
     Post "1" --> "*" Reaction : receives
     Post "1" --> "*" Report : may have
     
+    MediaAsset "*" --> "1" UserAccount : uploaded by
+    
     AuthController --> UserAccount : manages
     AuthController --> Session : manages
     TeamController --> TeamProfile : manages
+    TeamController --> TeamRoster : manages
     MatchController --> MatchEvent : manages
+    MatchController --> MatchResult : manages
     BookingController --> BookingRequest : manages
+    BookingController --> FieldCalendar : manages
     ContentController --> Post : manages
+    ContentController --> Comment : manages
     ModerationController --> Report : manages
 ```
