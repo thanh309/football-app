@@ -9,6 +9,7 @@ This document provides a comprehensive database design specification for the **K
 1. [Database Tables Overview](#database-tables-overview)
 2. [Entity Relationship Summary](#entity-relationship-summary)
 3. [Table Specifications](#table-specifications)
+4. [Design Notes](#design-notes)
 
 ---
 
@@ -38,9 +39,9 @@ This document provides a comprehensive database design specification for the **K
 | `MatchResult` | Records final outcomes of completed matches. |
 | `Amenity` | Lookup table for field amenity types. |
 | `FieldAmenity` | Junction table linking fields to amenities. |
+| `FieldPricingRule` | Stores time-based pricing rules for fields (peak, off-peak, weekends). |
 | `MediaAsset` | Manages uploaded media files (images, videos). |
 | `ModerationLog` | Records moderation actions for audit trail. |
-| `Content` | Abstract base table for content entities (Post, Comment). |
 
 ---
 
@@ -69,11 +70,14 @@ erDiagram
     TeamProfile ||--o{ MatchEvent : "hosts/joins"
     TeamProfile ||--o{ MatchInvitation : "sends/receives"
     TeamProfile ||--o{ BookingRequest : "makes"
+    TeamProfile ||--o{ MediaAsset : "has images"
     
     FieldProfile ||--o{ FieldCalendar : "has"
     FieldProfile ||--o{ BookingRequest : "receives"
     FieldProfile ||--o{ MatchEvent : "hosts"
     FieldProfile ||--o{ FieldAmenity : "has"
+    FieldProfile ||--o{ FieldPricingRule : "has pricing"
+    FieldProfile ||--o{ MediaAsset : "has images"
     
     Amenity ||--o{ FieldAmenity : "assigned to"
     
@@ -88,9 +92,10 @@ erDiagram
     
     Post ||--o{ Comment : "has"
     Post ||--o{ Reaction : "receives"
+    Post ||--o{ MediaAsset : "has media"
     Comment ||--o{ Comment : "has replies"
     
-    Content ||--o{ Report : "reported"
+    PlayerProfile ||--o{ MediaAsset : "has images"
 ```
 
 ### Key Relationships
@@ -106,9 +111,11 @@ erDiagram
 | FieldProfile → FieldCalendar | 1:N | A field has multiple calendar slots |
 | FieldProfile → FieldAmenity | 1:N | A field can have multiple amenities |
 | Amenity → FieldAmenity | 1:N | An amenity can be in multiple fields |
+| FieldProfile → FieldPricingRule | 1:N | A field can have multiple pricing rules |
 | MatchEvent → AttendanceRecord | 1:N | A match tracks multiple player attendance |
 | Post → Comment | 1:N | A post can have multiple comments |
 | Comment → Comment | 1:N (self-ref) | Comments can have nested replies |
+| MediaAsset → Entities | Polymorphic | MediaAsset links to Team, Field, Post, or Player via ownerType/entityId |
 
 ---
 
@@ -241,7 +248,7 @@ Represents a football field/stadium profile with location and pricing.
 | `location` | VARCHAR(500) | NO | | Physical address/location |
 | `latitude` | FLOAT | YES | | GPS latitude coordinate |
 | `longitude` | FLOAT | YES | | GPS longitude coordinate |
-| `pricePerHour` | DECIMAL(10,2) | NO | | Rental price per hour (VND) |
+| `defaultPricePerHour` | DECIMAL(10,2) | NO | | Default rental price per hour (VND) - used when no pricing rule matches |
 | `capacity` | INTEGER | YES | | Maximum player capacity |
 | `status` | ENUM | NO | DEFAULT 'Pending' | Verification status: Pending, Verified, Rejected |
 | `rejectionReason` | TEXT | YES | | Reason for rejection (if applicable) |
@@ -249,6 +256,26 @@ Represents a football field/stadium profile with location and pricing.
 | `updatedAt` | DATETIME | NO | | Last modification timestamp |
 
 ---
+
+### FieldPricingRule
+
+Stores time-based pricing rules for fields, supporting peak/off-peak and weekend pricing as required by UC-FO-01.
+
+| Field Name | Datatype | Nullable | Constraints | Description |
+|------------|----------|----------|-------------|-------------|
+| `pricingRuleId` | INTEGER | NO | PRIMARY KEY | Unique identifier for the pricing rule |
+| `fieldId` | INTEGER | NO | FOREIGN KEY → FieldProfile(fieldId) | Reference to the field |
+| `name` | VARCHAR(100) | NO | | Rule name (e.g., "Peak Hours", "Weekend", "Off-Peak") |
+| `dayOfWeek` | ENUM[] | YES | | Days this rule applies: Monday, Tuesday, ..., Sunday (null = all days) |
+| `startTime` | TIME | NO | | Start time for this pricing period |
+| `endTime` | TIME | NO | | End time for this pricing period |
+| `pricePerHour` | DECIMAL(10,2) | NO | | Price per hour for this rule |
+| `priority` | INTEGER | NO | DEFAULT 0 | Priority for overlapping rules (higher = takes precedence) |
+| `isActive` | BOOLEAN | NO | DEFAULT TRUE | Whether the rule is currently active |
+| `createdAt` | DATETIME | NO | DEFAULT CURRENT_TIMESTAMP | Rule creation timestamp |
+| `updatedAt` | DATETIME | NO | | Last modification timestamp |
+
+**Composite Unique Constraint**: (`fieldId`, `name`)
 
 ### FieldCalendar
 
@@ -543,14 +570,10 @@ Records moderation actions for audit trail and accountability.
 
 ---
 
-### Content
+## Design Notes
 
-Abstract base table for content entities (used for polymorphic moderation).
+### Content Inheritance Strategy
 
-| Field Name | Datatype | Nullable | Constraints | Description |
-|------------|----------|----------|-------------|-------------|
-| `contentId` | INTEGER | NO | PRIMARY KEY | Unique identifier for the content |
-| `type` | ENUM | NO | | Content type: Post, Comment |
-| `authorId` | INTEGER | NO | FOREIGN KEY → UserAccount(userId) | Reference to author's account |
-| `isHidden` | BOOLEAN | NO | DEFAULT FALSE | Whether content is hidden/deleted |
-| `createdAt` | DATETIME | NO | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
+This design uses the **Table per Concrete Class** inheritance pattern. The `Post` and `Comment` tables each contain all their own fields (including shared attributes like `authorId`, `isHidden`, `createdAt`). There is no physical `Content` table.
+
+For polymorphic content moderation (e.g., in the `Report` table), the `contentType` ENUM field specifies whether the `contentId` refers to a `Post` or `Comment` record. The application layer is responsible for resolving these references to the appropriate table.
