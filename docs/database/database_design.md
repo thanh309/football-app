@@ -36,10 +36,12 @@ This document provides a comprehensive database design specification for the **K
 | `Reaction` | Tracks user reactions (likes) on posts. |
 | `Report` | Stores misconduct reports submitted by users. |
 | `Notification` | Manages notifications sent to users for system events. |
+| `NotificationPreference` | Stores user preferences for notification types. |
 | `MatchResult` | Records final outcomes of completed matches. |
 | `Amenity` | Lookup table for field amenity types. |
 | `FieldAmenity` | Junction table linking fields to amenities. |
 | `FieldPricingRule` | Stores time-based pricing rules for fields (peak, off-peak, weekends). |
+| `CancellationPolicy` | Stores cancellation rules and penalties for fields. |
 | `MediaAsset` | Manages uploaded media files (images, videos). |
 | `ModerationLog` | Records moderation actions for audit trail. |
 
@@ -50,7 +52,7 @@ This document provides a comprehensive database design specification for the **K
 ```mermaid
 erDiagram
     UserAccount ||--o{ Session : "has"
-    UserAccount ||--o| PlayerProfile : "has"
+    UserAccount |o--|| PlayerProfile : "has"
     UserAccount ||--o{ TeamProfile : "leads"
     UserAccount ||--o{ FieldProfile : "owns"
     UserAccount ||--o{ Post : "creates"
@@ -58,6 +60,7 @@ erDiagram
     UserAccount ||--o{ Reaction : "gives"
     UserAccount ||--o{ Report : "submits"
     UserAccount ||--o{ Notification : "receives"
+    UserAccount ||--o{ NotificationPreference : "configures"
     UserAccount ||--o{ ModerationLog : "performs/receives"
     
     PlayerProfile ||--o{ TeamRoster : "belongs to"
@@ -77,6 +80,7 @@ erDiagram
     FieldProfile ||--o{ MatchEvent : "hosts"
     FieldProfile ||--o{ FieldAmenity : "has"
     FieldProfile ||--o{ FieldPricingRule : "has pricing"
+    FieldProfile ||--o| CancellationPolicy : "has policy"
     FieldProfile ||--o{ MediaAsset : "has images"
     
     Amenity ||--o{ FieldAmenity : "assigned to"
@@ -94,6 +98,9 @@ erDiagram
     Post ||--o{ Reaction : "receives"
     Post ||--o{ MediaAsset : "has media"
     Comment ||--o{ Comment : "has replies"
+    Comment ||--o{ Reaction : "receives"
+    
+    TeamProfile ||--o{ Post : "has team posts"
     
     PlayerProfile ||--o{ MediaAsset : "has images"
 ```
@@ -250,7 +257,7 @@ Represents a football field/stadium profile with location and pricing.
 | `longitude` | FLOAT | YES | | GPS longitude coordinate |
 | `defaultPricePerHour` | DECIMAL(10,2) | NO | | Default rental price per hour (VND) - used when no pricing rule matches |
 | `capacity` | INTEGER | YES | | Maximum player capacity |
-| `status` | ENUM | NO | DEFAULT 'Pending' | Verification status: Pending, Verified, Rejected |
+| `status` | ENUM | NO | DEFAULT 'Pending' | Verification status: Pending, Verified, Rejected, PendingRevision |
 | `rejectionReason` | TEXT | YES | | Reason for rejection (if applicable) |
 | `createdAt` | DATETIME | NO | DEFAULT CURRENT_TIMESTAMP | Profile creation timestamp |
 | `updatedAt` | DATETIME | NO | | Last modification timestamp |
@@ -276,6 +283,27 @@ Stores time-based pricing rules for fields, supporting peak/off-peak and weekend
 | `updatedAt` | DATETIME | NO | | Last modification timestamp |
 
 **Composite Unique Constraint**: (`fieldId`, `name`)
+
+---
+
+### CancellationPolicy
+
+Stores cancellation rules and penalty structures for fields, supporting the cancellation workflow as required by UC-TL-07.
+
+| Field Name | Datatype | Nullable | Constraints | Description |
+|------------|----------|----------|-------------|-------------|
+| `policyId` | INTEGER | NO | PRIMARY KEY | Unique identifier for the cancellation policy |
+| `fieldId` | INTEGER | NO | FOREIGN KEY → FieldProfile(fieldId), UNIQUE | Reference to the field |
+| `freeCancellationHours` | INTEGER | NO | DEFAULT 24 | Hours before booking start for free cancellation |
+| `lateCancellationPenaltyPercent` | DECIMAL(5,2) | NO | DEFAULT 50.00 | Percentage of booking fee charged for late cancellation |
+| `noShowPenaltyPercent` | DECIMAL(5,2) | NO | DEFAULT 100.00 | Percentage charged for no-show |
+| `refundProcessingDays` | INTEGER | NO | DEFAULT 7 | Business days to process refunds |
+| `policyDescription` | TEXT | YES | | Human-readable policy description |
+| `isActive` | BOOLEAN | NO | DEFAULT TRUE | Whether the policy is currently active |
+| `createdAt` | DATETIME | NO | DEFAULT CURRENT_TIMESTAMP | Policy creation timestamp |
+| `updatedAt` | DATETIME | NO | | Last modification timestamp |
+
+---
 
 ### FieldCalendar
 
@@ -327,7 +355,7 @@ Stores scheduled match events between teams.
 | `matchDate` | DATE | NO | | Date of the match |
 | `startTime` | TIME | NO | | Match start time |
 | `endTime` | TIME | YES | | Match end time |
-| `status` | ENUM | NO | DEFAULT 'PendingApproval' | Status: PendingApproval, Scheduled, InProgress, Completed, Cancelled, LookingForStadium |
+| `status` | ENUM | NO | DEFAULT 'PendingApproval' | Status: PendingApproval, Scheduled, InProgress, Completed, Cancelled, LookingForField |
 | `visibility` | ENUM | NO | DEFAULT 'Public' | Visibility: Public, Private |
 | `description` | TEXT | YES | | Match description or notes |
 | `createdAt` | DATETIME | NO | DEFAULT CURRENT_TIMESTAMP | Event creation timestamp |
@@ -361,11 +389,12 @@ Tracks player attendance for match events.
 | `attendanceId` | INTEGER | NO | PRIMARY KEY | Unique identifier for the record |
 | `matchId` | INTEGER | NO | FOREIGN KEY → MatchEvent(matchId) | Reference to the match |
 | `playerId` | INTEGER | NO | FOREIGN KEY → PlayerProfile(playerId) | Reference to the player |
+| `teamId` | INTEGER | NO | FOREIGN KEY → TeamProfile(teamId) | Reference to the team the player is representing |
 | `status` | ENUM | NO | DEFAULT 'Pending' | Status: Pending, Present, Absent, Excused |
 | `confirmedAt` | DATETIME | YES | | Timestamp of attendance confirmation |
 | `confirmedBy` | INTEGER | YES | FOREIGN KEY → UserAccount(userId) | User who confirmed (self or Team Leader) |
 
-**Composite Unique Constraint**: (`matchId`, `playerId`)
+**Composite Unique Constraint**: (`matchId`, `playerId`, `teamId`)
 
 ---
 
@@ -408,6 +437,7 @@ Represents community posts created by users.
 |------------|----------|----------|-------------|-------------|
 | `postId` | INTEGER | NO | PRIMARY KEY | Unique identifier for the post |
 | `authorId` | INTEGER | NO | FOREIGN KEY → UserAccount(userId) | Reference to author's account |
+| `teamId` | INTEGER | YES | FOREIGN KEY → TeamProfile(teamId) | Reference to team (required when visibility is TeamOnly) |
 | `content` | TEXT | NO | | Post text content |
 | `visibility` | ENUM | NO | DEFAULT 'Public' | Visibility: Public, Private, TeamOnly |
 | `reactionCount` | INTEGER | NO | DEFAULT 0 | Total number of reactions |
@@ -442,12 +472,13 @@ Tracks user reactions (likes) on posts.
 | Field Name | Datatype | Nullable | Constraints | Description |
 |------------|----------|----------|-------------|-------------|
 | `reactionId` | INTEGER | NO | PRIMARY KEY | Unique identifier for the reaction |
-| `postId` | INTEGER | NO | FOREIGN KEY → Post(postId) | Reference to the post |
+| `entityType` | ENUM | NO | | Target entity type: Post, Comment |
+| `entityId` | INTEGER | NO | | ID of the target entity (Post or Comment) |
 | `userId` | INTEGER | NO | FOREIGN KEY → UserAccount(userId) | Reference to the user |
 | `type` | ENUM | NO | | Reaction type: Like, Love, Celebrate |
 | `createdAt` | DATETIME | NO | DEFAULT CURRENT_TIMESTAMP | Reaction creation timestamp |
 
-**Composite Unique Constraint**: (`postId`, `userId`) - Prevents duplicate reactions per user
+**Composite Unique Constraint**: (`entityType`, `entityId`, `userId`) - Prevents duplicate reactions per user per entity
 
 ---
 
@@ -485,6 +516,25 @@ Manages notifications sent to users for system events.
 | `relatedEntityType` | VARCHAR(100) | YES | | Type of related entity |
 | `isRead` | BOOLEAN | NO | DEFAULT FALSE | Read status |
 | `createdAt` | DATETIME | NO | DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
+
+---
+
+### NotificationPreference
+
+Stores user preferences for receiving different types of notifications, supporting UC-CM-02.
+
+| Field Name | Datatype | Nullable | Constraints | Description |
+|------------|----------|----------|-------------|-------------|
+| `preferenceId` | INTEGER | NO | PRIMARY KEY | Unique identifier for the preference record |
+| `userId` | INTEGER | NO | FOREIGN KEY → UserAccount(userId) | Reference to user account |
+| `notificationType` | ENUM | NO | | Notification type: MatchUpdates, TeamNews, BookingAlerts, JoinRequests, SystemMessages, Promotions, Comments, Reactions |
+| `isEnabled` | BOOLEAN | NO | DEFAULT TRUE | Whether this notification type is enabled |
+| `pushEnabled` | BOOLEAN | NO | DEFAULT TRUE | Whether push notifications are enabled for this type |
+| `emailEnabled` | BOOLEAN | NO | DEFAULT FALSE | Whether email notifications are enabled for this type |
+| `createdAt` | DATETIME | NO | DEFAULT CURRENT_TIMESTAMP | Preference creation timestamp |
+| `updatedAt` | DATETIME | NO | | Last modification timestamp |
+
+**Composite Unique Constraint**: (`userId`, `notificationType`)
 
 ---
 
