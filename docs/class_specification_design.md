@@ -73,7 +73,7 @@ This document provides a comprehensive specification for all classes in the **Ki
 | email | String | Private | User's email address (encrypted) |
 | passwordHash | String | Private | Hashed password for secure authentication |
 | roles | List<Enum> (Player, TeamLeader, FieldOwner, Moderator) | Private | List of user roles (supports multiple roles per user) |
-| status | Enum (Active, Suspended, Banned, Pending) | Private | Current account status |
+| status | Enum (Active, Suspended, Banned, Pending, Deleted) | Private | Current account status |
 | isVerified | Boolean | Private | Email verification status |
 | createdAt | DateTime | Private | Account creation timestamp |
 | updatedAt | DateTime | Private | Last modification timestamp |
@@ -169,7 +169,8 @@ This document provides a comprehensive specification for all classes in the **Ki
 | description | String | Private | Team description and bio |
 | logoUrl | String | Private | URL or path to team logo image |
 | leaderId | Integer | Private | Foreign key reference to Team Leader's UserAccount |
-| status | Enum (Pending, Verified, Rejected) | Private | Verification status of the team |
+| status | Enum (Pending, Verified, Rejected, PendingRevision) | Private | Verification status of the team |
+| rejectionReason | String | Private | Reason for rejection (if applicable) |
 | location | String | Private | Team's home location/city |
 | latitude | Float | Private | GPS latitude coordinate for proximity matching |
 | longitude | Float | Private | GPS longitude coordinate for proximity matching |
@@ -262,11 +263,12 @@ This document provides a comprehensive specification for all classes in the **Ki
 | location | String | Private | Physical address/location |
 | latitude | Float | Private | GPS latitude coordinate |
 | longitude | Float | Private | GPS longitude coordinate |
-| amenities | List<String> | Private | List of available amenities |
+| amenities | List<FieldAmenity> | Private | List of available amenities (Derived from FieldAmenity junction) |
 | pricePerHour | Decimal | Private | Rental price per hour |
 | capacity | Integer | Private | Maximum player capacity |
-| images | List<String> | Private | URLs of field images |
+| images | List<MediaAsset> | Private | Lists of field image assets |
 | status | Enum (Pending, Verified, Rejected) | Private | Verification status |
+| rejectionReason | String | Private | Reason for rejection (if applicable) |
 | createdAt | DateTime | Private | Profile creation timestamp |
 | updatedAt | DateTime | Private | Last modification timestamp |
 
@@ -364,7 +366,7 @@ This document provides a comprehensive specification for all classes in the **Ki
 | matchDate | Date | Private | Date of the match |
 | startTime | Time | Private | Match start time |
 | endTime | Time | Private | Match end time |
-| status | Enum (PendingApproval, Scheduled, InProgress, Completed, Cancelled) | Private | Current match status |
+| status | Enum (PendingApproval, Scheduled, InProgress, Completed, Cancelled, LookingForStadium) | Private | Current match status |
 | visibility | Enum (Public, Private) | Private | Match visibility setting |
 | description | String | Private | Match description or notes |
 | createdAt | DateTime | Private | Event creation timestamp |
@@ -510,7 +512,7 @@ This document provides a comprehensive specification for all classes in the **Ki
 | postId | Integer | Private | Unique identifier for the post |
 | authorId | Integer | Private | Foreign key to UserAccount |
 | content | String | Private | Post text content |
-| images | List<String> | Private | URLs of attached images |
+| mediaAssets | List<MediaAsset> | Private | List of attached media assets |
 | visibility | Enum (Public, Private, TeamOnly) | Private | Post visibility setting |
 | reactionCount | Integer | Private | Total number of reactions |
 | commentCount | Integer | Private | Total number of comments |
@@ -633,7 +635,7 @@ This document provides a comprehensive specification for all classes in the **Ki
 |-----------|-----------|---------------|-------------|
 | notificationId | Integer | Private | Unique identifier for the notification |
 | userId | Integer | Private | Foreign key to recipient UserAccount |
-| type | Enum (TeamVerified, JoinRequest, MatchInvite, BookingUpdate, etc.) | Private | Notification type |
+| type | Enum (TeamVerified, JoinRequest, MatchInvite, BookingUpdate, AccountStatusUpdate, TeamDeleted, MatchCancelled, FieldRejected, etc.) | Private | Notification type |
 | title | String | Private | Notification title |
 | message | String | Private | Notification message content |
 | relatedEntityId | Integer | Private | ID of related entity (match, team, etc.) |
