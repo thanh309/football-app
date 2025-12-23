@@ -1,0 +1,88 @@
+// Match Management Module
+
+// --- External References ---
+// Ref: TeamProfile.teamId
+// Ref: FieldProfile.fieldId
+// Ref: BookingRequest.bookingId
+// Ref: PlayerProfile.playerId
+// Ref: UserAccount.userId
+
+Enum match_status {
+  PendingApproval
+  Scheduled
+  InProgress
+  Completed
+  Cancelled
+  LookingForField
+}
+
+Enum match_visibility {
+  Public
+  Private
+}
+
+Enum invitation_status {
+  Pending
+  Accepted
+  Declined
+  Expired
+}
+
+Enum attendance_status {
+  Pending
+  Present
+  Absent
+  Excused
+}
+
+Table MatchEvent {
+  matchId integer [primary key]
+  hostTeamId integer [not null] // ref: > TeamProfile.teamId
+  opponentTeamId integer // ref: > TeamProfile.teamId
+  fieldId integer // ref: > FieldProfile.fieldId
+  bookingId integer // ref: > BookingRequest.bookingId
+  matchDate date [not null]
+  startTime time [not null]
+  endTime time
+  status match_status [not null, default: 'PendingApproval']
+  visibility match_visibility [not null, default: 'Public']
+  description text
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+}
+
+Table MatchInvitation {
+  invitationId integer [primary key]
+  matchId integer [not null, ref: > MatchEvent.matchId]
+  invitingTeamId integer [not null] // ref: > TeamProfile.teamId
+  invitedTeamId integer [not null] // ref: > TeamProfile.teamId
+  status invitation_status [not null, default: 'Pending']
+  message text
+  createdAt datetime [not null, default: `now()`]
+  respondedAt datetime
+}
+
+Table AttendanceRecord {
+  attendanceId integer [primary key]
+  matchId integer [not null, ref: > MatchEvent.matchId]
+  playerId integer [not null] // ref: > PlayerProfile.playerId
+  teamId integer [not null] // ref: > TeamProfile.teamId
+  status attendance_status [not null, default: 'Pending']
+  confirmedAt datetime
+  confirmedBy integer // ref: > UserAccount.userId
+
+  indexes {
+    (matchId, playerId, teamId) [unique]
+  }
+}
+
+Table MatchResult {
+  resultId integer [primary key]
+  matchId integer [unique, not null, ref: - MatchEvent.matchId]
+  homeScore integer [not null]
+  awayScore integer [not null]
+  winnerId integer // ref: > TeamProfile.teamId
+  notes text
+  recordedBy integer [not null] // ref: > UserAccount.userId
+  createdAt datetime [not null, default: `now()`]
+}

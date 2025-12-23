@@ -1,0 +1,78 @@
+// System & Notification Module
+
+// --- External References ---
+// Ref: UserAccount.userId
+
+Enum notification_type {
+  TeamVerified
+  JoinRequest
+  MatchInvite
+  BookingUpdate
+  AccountStatusUpdate
+  TeamDeleted
+  MatchCancelled
+  FieldRejected
+}
+
+Enum preference_notification_type {
+  MatchUpdates
+  TeamNews
+  BookingAlerts
+  JoinRequests
+  SystemMessages
+  Promotions
+  Comments
+  Reactions
+}
+
+Enum media_owner_type {
+  Team
+  Field
+  Post
+  Player
+}
+
+Enum media_file_type {
+  Image
+  Video
+}
+
+Table Notification {
+  notificationId integer [primary key]
+  userId integer [not null] // ref: > UserAccount.userId
+  type notification_type [not null]
+  title varchar(255) [not null]
+  message text [not null]
+  relatedEntityId integer
+  relatedEntityType varchar(100)
+  isRead boolean [not null, default: false]
+  createdAt datetime [not null, default: `now()`]
+}
+
+Table NotificationPreference {
+  preferenceId integer [primary key]
+  userId integer [not null] // ref: > UserAccount.userId
+  notificationType preference_notification_type [not null]
+  isEnabled boolean [not null, default: true]
+  pushEnabled boolean [not null, default: true]
+  emailEnabled boolean [not null, default: false]
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+
+  indexes {
+    (userId, notificationType) [unique]
+  }
+}
+
+Table MediaAsset {
+  assetId integer [primary key]
+  ownerId integer [not null] // ref: > UserAccount.userId
+  ownerType media_owner_type [not null]
+  entityId integer [not null]
+  fileName varchar(255) [not null]
+  storagePath varchar(500) [not null]
+  fileType media_file_type [not null]
+  fileSize integer [not null]
+  mimeType varchar(100) [not null]
+  createdAt datetime [not null, default: `now()`]
+}

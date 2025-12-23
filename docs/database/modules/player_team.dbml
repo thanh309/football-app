@@ -1,0 +1,108 @@
+// Player & Team Module
+
+// --- External References ---
+// Ref: UserAccount.userId
+
+Enum preferred_foot {
+  Left
+  Right
+  Both
+}
+
+Enum verification_status {
+  Pending
+  Verified
+  Rejected
+  PendingRevision
+}
+
+Enum roster_role {
+  Member
+  Captain
+  ViceCaptain
+}
+
+Enum request_status {
+  Pending
+  Accepted
+  Rejected
+}
+
+Enum transaction_type {
+  Income
+  Expense
+}
+
+Table PlayerProfile {
+  playerId integer [primary key]
+  userId integer [unique, not null] // ref: - UserAccount.userId
+  displayName varchar(255) [not null]
+  position varchar(100)
+  skillLevel integer [note: '1-10 scale']
+  bio text
+  profileImage varchar(500)
+  dateOfBirth date
+  height float
+  weight float
+  preferredFoot preferred_foot
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+}
+
+Table TeamProfile {
+  teamId integer [primary key]
+  teamName varchar(255) [unique, not null]
+  description text
+  logoUrl varchar(500)
+  leaderId integer [not null] // ref: > UserAccount.userId
+  status verification_status [not null, default: 'Pending']
+  rejectionReason text
+  location varchar(255)
+  latitude float
+  longitude float
+  skillLevel integer
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+}
+
+Table TeamRoster {
+  rosterId integer [primary key]
+  teamId integer [not null, ref: > TeamProfile.teamId]
+  playerId integer [not null, ref: > PlayerProfile.playerId]
+  role roster_role [not null, default: 'Member']
+  joinedAt datetime [not null, default: `now()`]
+  isActive boolean [not null, default: true]
+
+  indexes {
+    (teamId, playerId) [unique]
+  }
+}
+
+Table JoinRequest {
+  requestId integer [primary key]
+  teamId integer [not null, ref: > TeamProfile.teamId]
+  playerId integer [not null, ref: > PlayerProfile.playerId]
+  status request_status [not null, default: 'Pending']
+  message text
+  createdAt datetime [not null, default: `now()`]
+  processedAt datetime
+}
+
+Table TeamWallet {
+  walletId integer [primary key]
+  teamId integer [unique, not null, ref: - TeamProfile.teamId]
+  balance decimal(15,2) [not null, default: 0]
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+}
+
+Table TransactionLog {
+  transactionId integer [primary key]
+  walletId integer [not null, ref: > TeamWallet.walletId]
+  type transaction_type [not null]
+  amount decimal(15,2) [not null]
+  description text
+  category varchar(100)
+  createdBy integer [not null] // ref: > UserAccount.userId
+  createdAt datetime [not null, default: `now()`]
+}

@@ -1,0 +1,127 @@
+// Field & Booking Module
+
+// --- External References ---
+// Ref: UserAccount.userId
+// Ref: TeamProfile.teamId
+
+Enum verification_status {
+  Pending
+  Verified
+  Rejected
+  PendingRevision
+}
+
+Enum day_of_week {
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
+  Saturday
+  Sunday
+}
+
+Enum calendar_status {
+  Available
+  Booked
+  Maintenance
+  Blocked
+}
+
+Enum booking_status {
+  Pending
+  Confirmed
+  Rejected
+  Cancelled
+}
+
+Table FieldProfile {
+  fieldId integer [primary key]
+  ownerId integer [not null] // ref: > UserAccount.userId
+  fieldName varchar(255) [not null]
+  description text
+  location varchar(500) [not null]
+  latitude float
+  longitude float
+  defaultPricePerHour decimal(10,2) [not null]
+  capacity integer
+  status verification_status [not null, default: 'Pending']
+  rejectionReason text
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+}
+
+Table FieldPricingRule {
+  pricingRuleId integer [primary key]
+  fieldId integer [not null, ref: > FieldProfile.fieldId]
+  name varchar(100) [not null]
+  dayOfWeek "day_of_week[]"
+  startTime time [not null]
+  endTime time [not null]
+  pricePerHour decimal(10,2) [not null]
+  priority integer [not null, default: 0]
+  isActive boolean [not null, default: true]
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+
+  indexes {
+    (fieldId, name) [unique]
+  }
+}
+
+Table CancellationPolicy {
+  policyId integer [primary key]
+  fieldId integer [unique, not null, ref: - FieldProfile.fieldId]
+  freeCancellationHours integer [not null, default: 24]
+  lateCancellationPenaltyPercent decimal(5,2) [not null, default: 50.00]
+  noShowPenaltyPercent decimal(5,2) [not null, default: 100.00]
+  refundProcessingDays integer [not null, default: 7]
+  policyDescription text
+  isActive boolean [not null, default: true]
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+}
+
+Table FieldCalendar {
+  calendarId integer [primary key]
+  fieldId integer [not null, ref: > FieldProfile.fieldId]
+  date date [not null]
+  startTime time [not null]
+  endTime time [not null]
+  status calendar_status [not null, default: 'Available']
+  bookingId integer // ref: > BookingRequest.bookingId
+}
+
+Table BookingRequest {
+  bookingId integer [primary key]
+  fieldId integer [not null, ref: > FieldProfile.fieldId]
+  teamId integer [not null] // ref: > TeamProfile.teamId
+  requesterId integer [not null] // ref: > UserAccount.userId
+  date date [not null]
+  startTime time [not null]
+  endTime time [not null]
+  status booking_status [not null, default: 'Pending']
+  notes text
+  createdAt datetime [not null, default: `now()`]
+  processedAt datetime
+}
+
+Table Amenity {
+  amenityId integer [primary key]
+  name varchar(100) [unique, not null]
+  description text
+  icon varchar(100)
+  isActive boolean [not null, default: true]
+}
+
+Table FieldAmenity {
+  fieldAmenityId integer [primary key]
+  fieldId integer [not null, ref: > FieldProfile.fieldId]
+  amenityId integer [not null, ref: > Amenity.amenityId]
+  quantity integer [default: 1]
+  notes text
+
+  indexes {
+    (fieldId, amenityId) [unique]
+  }
+}
