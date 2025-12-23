@@ -513,3 +513,50 @@ Table ModerationLog {
   details text
   createdAt datetime [not null, default: `now()`]
 }
+
+// --- Table Groups ---
+
+TableGroup User_Authentication {
+  UserAccount
+  Session
+}
+
+TableGroup Player_Team {
+  PlayerProfile
+  TeamProfile
+  TeamRoster
+  JoinRequest
+  TeamWallet
+  TransactionLog
+}
+
+TableGroup Field_Booking {
+  FieldProfile
+  FieldPricingRule
+  CancellationPolicy
+  FieldCalendar
+  BookingRequest
+  Amenity
+  FieldAmenity
+}
+
+TableGroup Match_Management {
+  MatchEvent
+  MatchInvitation
+  AttendanceRecord
+  MatchResult
+}
+
+TableGroup Social_Community {
+  Post
+  Comment
+  Reaction
+  Report
+  ModerationLog
+}
+
+TableGroup System_Notification {
+  Notification
+  NotificationPreference
+  MediaAsset
+}
