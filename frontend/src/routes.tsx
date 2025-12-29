@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import {
-    MainLayout,
+    PublicLayout,
     AuthLayout,
     DashboardLayout,
 } from "./layouts";
@@ -10,7 +10,7 @@ export const router = createBrowserRouter([
     // Public Routes
     {
         path: "/",
-        element: <MainLayout />,
+        element: <PublicLayout />,
         children: [
             { index: true, element: <Pages.LandingPage /> },
             { path: "community", element: <Pages.CommunityFeedPage /> },
