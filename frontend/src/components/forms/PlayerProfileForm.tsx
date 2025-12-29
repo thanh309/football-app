@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { User, Save } from 'lucide-react';
-import { FormInput, FormSelect, FormTextarea, DateTimePicker } from '../forms';
+import { FormInput, FormSelect, FormTextarea, DateTimePicker } from './';
 import { Button } from '../common';
 import { useUpdatePlayerProfile } from '../../api/hooks/usePlayer';
 import type { PlayerProfile } from '../../types';
