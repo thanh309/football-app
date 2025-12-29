@@ -1,0 +1,139 @@
+import api from '../axios';
+import type { MatchEvent, MatchInvitation, MatchResult, MatchStatus, Visibility } from '../../types';
+
+export interface CreateMatchRequest {
+    hostTeamId: number;
+    matchDate: string;
+    startTime: string;
+    endTime?: string;
+    fieldId?: number;
+    description?: string;
+    visibility?: Visibility;
+}
+
+export interface UpdateMatchRequest extends Partial<CreateMatchRequest> {
+    matchId: number;
+    opponentTeamId?: number;
+    status?: MatchStatus;
+}
+
+export interface MatchSearchParams {
+    teamId?: number;
+    status?: MatchStatus;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    limit?: number;
+}
+
+export interface SendInvitationRequest {
+    matchId: number;
+    invitedTeamId: number;
+    message?: string;
+}
+
+export interface PaginatedResponse<T> {
+    data: T[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}
+
+export const matchService = {
+    /**
+     * Create a new match event
+     */
+    createMatch: async (data: CreateMatchRequest): Promise<MatchEvent> => {
+        const response = await api.post<MatchEvent>('/matches', data);
+        return response.data;
+    },
+
+    /**
+     * Get match by ID
+     */
+    getMatchById: async (matchId: number): Promise<MatchEvent> => {
+        const response = await api.get<MatchEvent>(`/matches/${matchId}`);
+        return response.data;
+    },
+
+    /**
+     * Update match
+     */
+    updateMatch: async ({ matchId, ...data }: UpdateMatchRequest): Promise<MatchEvent> => {
+        const response = await api.put<MatchEvent>(`/matches/${matchId}`, data);
+        return response.data;
+    },
+
+    /**
+     * Cancel match
+     */
+    cancelMatch: async (matchId: number, reason?: string): Promise<MatchEvent> => {
+        const response = await api.patch<MatchEvent>(`/matches/${matchId}/cancel`, { reason });
+        return response.data;
+    },
+
+    /**
+     * Get matches for a team
+     */
+    getTeamMatches: async (teamId: number, params?: MatchSearchParams): Promise<PaginatedResponse<MatchEvent>> => {
+        const response = await api.get<PaginatedResponse<MatchEvent>>(`/teams/${teamId}/matches`, { params });
+        return response.data;
+    },
+
+    /**
+     * Get player's match schedule (all teams)
+     */
+    getPlayerSchedule: async (playerId: number): Promise<MatchEvent[]> => {
+        const response = await api.get<MatchEvent[]>(`/players/${playerId}/schedule`);
+        return response.data;
+    },
+
+    /**
+     * Send match invitation
+     */
+    sendInvitation: async (data: SendInvitationRequest): Promise<MatchInvitation> => {
+        const response = await api.post<MatchInvitation>('/match-invitations', data);
+        return response.data;
+    },
+
+    /**
+     * Get pending invitations for a team
+     */
+    getPendingInvitations: async (teamId: number): Promise<MatchInvitation[]> => {
+        const response = await api.get<MatchInvitation[]>(`/teams/${teamId}/match-invitations?status=Pending`);
+        return response.data;
+    },
+
+    /**
+     * Respond to invitation
+     */
+    respondInvitation: async (invitationId: number, accept: boolean): Promise<MatchInvitation> => {
+        const response = await api.patch<MatchInvitation>(`/match-invitations/${invitationId}`, {
+            status: accept ? 'Accepted' : 'Declined',
+        });
+        return response.data;
+    },
+
+    /**
+     * Record match result
+     */
+    recordResult: async (matchId: number, homeScore: number, awayScore: number, notes?: string): Promise<MatchResult> => {
+        const response = await api.post<MatchResult>(`/matches/${matchId}/result`, {
+            homeScore,
+            awayScore,
+            notes,
+        });
+        return response.data;
+    },
+
+    /**
+     * Get match result
+     */
+    getMatchResult: async (matchId: number): Promise<MatchResult | null> => {
+        const response = await api.get<MatchResult>(`/matches/${matchId}/result`);
+        return response.data;
+    },
+};
+
+export default matchService;

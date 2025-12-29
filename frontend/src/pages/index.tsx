@@ -1,6 +1,7 @@
+// Re-export actual page components
+export { LoginPage, RegisterPage } from './auth';
+
 export const LandingPage = () => <div>Landing Page</div>;
-export const LoginPage = () => <div>Login Page</div>;
-export const RegisterPage = () => <div>Register Page</div>;
 export const NotFoundPage = () => <div>404 Not Found</div>;
 
 export const DashboardPage = () => <div>Dashboard</div>;
