@@ -6,3 +6,7 @@ export { default as LoginForm } from './LoginForm';
 export { default as RegistrationForm } from './RegistrationForm';
 export { default as ChangePasswordForm } from './ChangePasswordForm';
 export { default as PlayerProfileForm } from './PlayerProfileForm';
+export { default as CreateTeamForm } from './CreateTeamForm';
+export { default as EditTeamForm } from './EditTeamForm';
+export { default as CreateMatchForm } from './CreateMatchForm';
+export { default as AddTransactionForm } from './AddTransactionForm';
