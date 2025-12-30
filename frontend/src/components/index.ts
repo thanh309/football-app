@@ -5,3 +5,5 @@ export * from './match';
 export * from './search';
 export * from './leader';
 export * from './owner';
+export * from './community';
+export * from './notifications';
