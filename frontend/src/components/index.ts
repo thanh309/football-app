@@ -7,3 +7,4 @@ export * from './leader';
 export * from './owner';
 export * from './community';
 export * from './notifications';
+export * from './moderator';
