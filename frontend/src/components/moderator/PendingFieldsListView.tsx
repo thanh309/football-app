@@ -66,7 +66,7 @@ const PendingFieldsListView: React.FC = () => {
                                 <span>
                                     Created {new Date(field.createdAt).toLocaleDateString()}
                                 </span>
-                                <Link to={`/moderator/fields/${field.fieldId}/review`}>
+                                <Link to={`/mod/fields/${field.fieldId}`}>
                                     <Button size="sm" variant="outline" leftIcon={<Eye className="w-4 h-4" />}>
                                         Review
                                     </Button>

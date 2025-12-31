@@ -31,7 +31,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match }) => {
 
     return (
         <Link
-            to={`/player/matches/${match.matchId}`}
+            to={`/schedule/${match.matchId}`}
             className={`block bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 overflow-hidden ${isPast ? 'opacity-75' : ''
                 }`}
         >

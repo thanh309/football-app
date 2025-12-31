@@ -74,7 +74,7 @@ const PendingTeamsListView: React.FC = () => {
                                 <span>
                                     Created {new Date(team.createdAt).toLocaleDateString()}
                                 </span>
-                                <Link to={`/moderator/teams/${team.teamId}/review`}>
+                                <Link to={`/mod/teams/${team.teamId}`}>
                                     <Button size="sm" variant="outline" leftIcon={<Eye className="w-4 h-4" />}>
                                         Review
                                     </Button>

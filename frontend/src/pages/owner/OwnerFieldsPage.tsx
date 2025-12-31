@@ -15,7 +15,7 @@ const OwnerFieldsPage: React.FC = () => {
     }
 
     const handleRegisterField = () => {
-        window.location.href = '/owner/fields/register';
+        window.location.href = '/owner/fields/create';
     };
 
     return (
@@ -25,7 +25,7 @@ const OwnerFieldsPage: React.FC = () => {
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Fields</h1>
                     <p className="text-gray-600 mt-1">Manage your registered football fields.</p>
                 </div>
-                <Link to="/owner/fields/register">
+                <Link to="/owner/fields/create">
                     <Button leftIcon={<Plus className="w-5 h-5" />}>
                         Register New Field
                     </Button>
@@ -54,10 +54,10 @@ const OwnerFieldsPage: React.FC = () => {
                                 <div className="flex items-start justify-between mb-2">
                                     <h3 className="font-semibold text-gray-900">{field.fieldName}</h3>
                                     <span className={`text-xs px-2 py-1 rounded-full ${field.status === FieldStatus.VERIFIED
-                                            ? 'bg-green-100 text-green-700'
-                                            : field.status === FieldStatus.PENDING
-                                                ? 'bg-yellow-100 text-yellow-700'
-                                                : 'bg-red-100 text-red-700'
+                                        ? 'bg-green-100 text-green-700'
+                                        : field.status === FieldStatus.PENDING
+                                            ? 'bg-yellow-100 text-yellow-700'
+                                            : 'bg-red-100 text-red-700'
                                         }`}>
                                         {field.status}
                                     </span>

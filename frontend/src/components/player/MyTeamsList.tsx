@@ -15,7 +15,7 @@ interface TeamCardProps {
 const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
     return (
         <Link
-            to={`/player/teams/${team.teamId}`}
+            to={`/my-teams/${team.teamId}`}
             className="block bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 overflow-hidden"
         >
             <div className="flex items-center gap-4 p-4">

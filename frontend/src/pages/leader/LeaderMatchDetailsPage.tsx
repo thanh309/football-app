@@ -1,11 +1,25 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { MatchDetailsCard } from '../../components/match';
 import { Button } from '../../components/common';
 import { Users, Edit, XCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const LeaderMatchDetailsPage: React.FC = () => {
     const { teamId, matchId } = useParams<{ teamId: string; matchId: string }>();
+    const navigate = useNavigate();
+
+    const handleEditMatch = () => {
+        toast('Edit Match feature coming soon', { icon: '✏️' });
+    };
+
+    const handleCancelMatch = () => {
+        if (window.confirm('Are you sure you want to cancel this match?')) {
+            toast.success('Match cancellation requested');
+            // TODO: Call cancelMatch API when available
+            navigate(`/leader/teams/${teamId}/matches`);
+        }
+    };
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
@@ -36,10 +50,10 @@ const LeaderMatchDetailsPage: React.FC = () => {
                             Manage Attendance
                         </Button>
                     </Link>
-                    <Button variant="outline" leftIcon={<Edit className="w-4 h-4" />}>
+                    <Button variant="outline" leftIcon={<Edit className="w-4 h-4" />} onClick={handleEditMatch}>
                         Edit Match
                     </Button>
-                    <Button variant="danger" leftIcon={<XCircle className="w-4 h-4" />}>
+                    <Button variant="danger" leftIcon={<XCircle className="w-4 h-4" />} onClick={handleCancelMatch}>
                         Cancel Match
                     </Button>
                 </div>

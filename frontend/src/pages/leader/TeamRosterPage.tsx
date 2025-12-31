@@ -23,7 +23,7 @@ const TeamRosterPage: React.FC = () => {
                 <p className="text-gray-600 mt-1">Manage your team members and their roles.</p>
             </div>
 
-            <TeamRosterView teamId={Number(id)} />
+            <TeamRosterView teamId={Number(id)} isLeader={true} />
         </div>
     );
 };

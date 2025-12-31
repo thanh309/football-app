@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Users, MapPin, Trophy, ChevronRight } from 'lucide-react';
 import { JoinTeamButton } from '../player';
 import type { TeamProfile } from '../../types';
+import { useAuth } from '../../contexts';
 
 interface TeamResultCardProps {
     team: TeamProfile;
@@ -9,6 +10,8 @@ interface TeamResultCardProps {
 }
 
 const TeamResultCard: React.FC<TeamResultCardProps> = ({ team, showJoinButton = true }) => {
+    const { isAuthenticated } = useAuth();
+
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'Verified':
@@ -74,7 +77,7 @@ const TeamResultCard: React.FC<TeamResultCardProps> = ({ team, showJoinButton = 
                         View Profile
                         <ChevronRight className="w-4 h-4" />
                     </Link>
-                    {showJoinButton && team.status === 'Verified' && (
+                    {showJoinButton && isAuthenticated && team.status === 'Verified' && (
                         <JoinTeamButton
                             teamId={team.teamId}
                             teamName={team.teamName}

@@ -1,7 +1,6 @@
-import { Wallet, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
+import { Wallet, TrendingUp, TrendingDown } from 'lucide-react';
 import { LoadingSpinner, EmptyState } from '../common';
 import { useTeamWallet, useTransactionHistory } from '../../api/hooks/useFinance';
-import { Link } from 'react-router-dom';
 import type { TransactionLog } from '../../types';
 
 interface FinanceDashboardViewProps {
@@ -70,13 +69,6 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ teamId }) =
             <div className="bg-white rounded-xl border border-gray-100">
                 <div className="flex items-center justify-between p-5 border-b border-gray-100">
                     <h3 className="font-semibold text-gray-900">Recent Transactions</h3>
-                    <Link
-                        to={`/leader/finance/${walletId}/transactions`}
-                        className="text-sm text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
-                    >
-                        View All
-                        <ArrowRight className="w-4 h-4" />
-                    </Link>
                 </div>
 
                 {recentTransactions.length === 0 ? (

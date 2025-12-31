@@ -1,7 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts';
 
 const LandingPage: React.FC = () => {
+    const { isAuthenticated } = useAuth();
+
     return (
         <div className="min-h-screen">
             {/* Hero Section */}
@@ -18,18 +21,29 @@ const LandingPage: React.FC = () => {
                             all in one place.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Link
-                                to="/register"
-                                className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-emerald-700 bg-white hover:bg-emerald-50 transition-colors shadow-lg"
-                            >
-                                Get Started
-                            </Link>
-                            <Link
-                                to="/login"
-                                className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-base font-medium rounded-lg text-white hover:bg-white/10 transition-colors"
-                            >
-                                Sign In
-                            </Link>
+                            {isAuthenticated ? (
+                                <Link
+                                    to="/dashboard"
+                                    className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-emerald-700 bg-white hover:bg-emerald-50 transition-colors shadow-lg"
+                                >
+                                    Go to Dashboard
+                                </Link>
+                            ) : (
+                                <>
+                                    <Link
+                                        to="/register"
+                                        className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-emerald-700 bg-white hover:bg-emerald-50 transition-colors shadow-lg"
+                                    >
+                                        Get Started
+                                    </Link>
+                                    <Link
+                                        to="/login"
+                                        className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-base font-medium rounded-lg text-white hover:bg-white/10 transition-colors"
+                                    >
+                                        Sign In
+                                    </Link>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>

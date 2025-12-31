@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { LoadingSpinner, Button } from '../../components/common';
 import { FieldStatus, type FieldProfile } from '../../types';
+import { useAuth } from '../../contexts';
 
 // Mock data for demonstration
 const mockField: FieldProfile = {
@@ -23,6 +24,7 @@ const PublicFieldProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [loading, setLoading] = React.useState(true);
     const [field, setField] = React.useState<FieldProfile | null>(null);
+    const { isAuthenticated } = useAuth();
 
     React.useEffect(() => {
         // Simulate API call
@@ -110,9 +112,17 @@ const PublicFieldProfilePage: React.FC = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-4 mt-4">
-                    <Button variant="primary">
-                        Book Now
-                    </Button>
+                    {isAuthenticated ? (
+                        <Button variant="primary">
+                            Book Now
+                        </Button>
+                    ) : (
+                        <Link to="/login">
+                            <Button variant="outline">
+                                Log in to Book
+                            </Button>
+                        </Link>
+                    )}
                     <Button variant="secondary">
                         View Calendar
                     </Button>

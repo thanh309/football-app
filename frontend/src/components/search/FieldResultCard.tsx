@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom';
 import { MapPin, DollarSign, ChevronRight, Building2 } from 'lucide-react';
 import type { FieldProfile } from '../../types';
+import { useAuth } from '../../contexts';
 
 interface FieldResultCardProps {
     field: FieldProfile;
 }
 
 const FieldResultCard: React.FC<FieldResultCardProps> = ({ field }) => {
+    const { isAuthenticated } = useAuth();
+
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'Verified':
@@ -67,12 +70,14 @@ const FieldResultCard: React.FC<FieldResultCardProps> = ({ field }) => {
                         View Details
                         <ChevronRight className="w-4 h-4" />
                     </Link>
-                    <Link
-                        to={`/fields/${field.fieldId}/book`}
-                        className="text-sm bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                    >
-                        Book Now
-                    </Link>
+                    {isAuthenticated && (
+                        <Link
+                            to={`/fields/${field.fieldId}/book`}
+                            className="text-sm bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                        >
+                            Book Now
+                        </Link>
+                    )}
                 </div>
             </div>
         </div>

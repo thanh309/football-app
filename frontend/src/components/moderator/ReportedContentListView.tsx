@@ -69,7 +69,7 @@ const ReportedContentListView: React.FC = () => {
                                     {new Date(report.createdAt).toLocaleDateString()}
                                 </td>
                                 <td className="px-4 py-3 text-right">
-                                    <Link to={`/moderator/reports/${report.reportId}`}>
+                                    <Link to={`/mod/reports/${report.reportId}`}>
                                         <Button size="sm" variant="ghost" leftIcon={<Eye className="w-4 h-4" />}>
                                             Review
                                         </Button>

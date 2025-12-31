@@ -49,6 +49,12 @@ const AccountSettingsPage: React.FC = () => {
                 </p>
                 <button
                     type="button"
+                    onClick={() => {
+                        if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                            // TODO: Call deleteAccount API when available
+                            alert('Account deletion will be processed. (Feature coming soon)');
+                        }
+                    }}
                     className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
                 >
                     Delete Account

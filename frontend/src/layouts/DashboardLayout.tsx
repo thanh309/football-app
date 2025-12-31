@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
 import {
     LayoutDashboard,
     Users,
@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { UserRole } from "@/types";
+import { useAuth } from "@/contexts";
 import clsx from "clsx";
 
 // Mock User Role for now - in real app, get from Context/Store
@@ -46,6 +47,13 @@ const SIDEBAR_ITEMS = {
 
 export const DashboardLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        await logout();
+        navigate('/login');
+    };
 
     // Flatten items based on roles
     const navItems = [
@@ -96,7 +104,7 @@ export const DashboardLayout = () => {
                             <Settings className="h-5 w-5" />
                             Settings
                         </NavLink>
-                        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10">
+                        <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10">
                             <LogOut className="h-5 w-5" />
                             Logout
                         </button>
@@ -113,9 +121,9 @@ export const DashboardLayout = () => {
                     </button>
 
                     <div className="flex items-center gap-4 ml-auto">
-                        <button className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <Link to="/notifications" className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                             <Bell className="h-6 w-6" />
-                        </button>
+                        </Link>
                         <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
                             <img src="https://ui-avatars.com/api/?name=User" alt="User" />
                         </div>

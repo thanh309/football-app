@@ -7,10 +7,11 @@ import type { ModerationLog, ModerationAction } from '../../types';
 
 const actionOptions = [
     { value: '', label: 'All Actions' },
-    { value: 'Warn', label: 'Warn' },
+    { value: 'Warning', label: 'Warning' },
     { value: 'Suspend', label: 'Suspend' },
     { value: 'Ban', label: 'Ban' },
     { value: 'Reactivate', label: 'Reactivate' },
+    { value: 'ContentRemoval', label: 'Content Removal' },
 ];
 
 const getActionColor = (action: string) => {

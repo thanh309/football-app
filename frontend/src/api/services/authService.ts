@@ -141,13 +141,19 @@ export const authService = {
     /**
      * Get current authenticated user
      */
-    getCurrentUser: async (): Promise<UserAccount> => {
-        await new Promise(r => setTimeout(r, 800)); // Simulate latency
+    getCurrentUser: async (): Promise<UserAccount | null> => {
+        await new Promise(r => setTimeout(r, 300)); // Simulate latency
 
         // --- Real API call (commented out for mock mode) ---
         // const response = await api.get<UserAccount>('/auth/me');
         // return response.data;
         // --- End Real API call ---
+
+        // Check if token exists in localStorage
+        const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+        if (!token) {
+            return null;
+        }
 
         return mockUser;
     },

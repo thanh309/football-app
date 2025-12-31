@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { LoadingSpinner, Button } from '../../components/common';
 import { TeamStatus, type TeamProfile } from '../../types';
+import { useAuth } from '../../contexts';
 
 // Mock data for demonstration
 const mockTeam: TeamProfile = {
@@ -21,6 +22,7 @@ const PublicTeamProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [loading, setLoading] = React.useState(true);
     const [team, setTeam] = React.useState<TeamProfile | null>(null);
+    const { isAuthenticated } = useAuth();
 
     React.useEffect(() => {
         // Simulate API call
@@ -118,9 +120,17 @@ const PublicTeamProfilePage: React.FC = () => {
                             </div>
                         )}
 
-                        <Button variant="primary">
-                            Request to Join
-                        </Button>
+                        {isAuthenticated ? (
+                            <Button variant="primary">
+                                Request to Join
+                            </Button>
+                        ) : (
+                            <Link to="/login">
+                                <Button variant="outline">
+                                    Log in to Join
+                                </Button>
+                            </Link>
+                        )}
                     </div>
                 </div>
             </div>
