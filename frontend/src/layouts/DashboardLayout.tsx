@@ -18,7 +18,7 @@ import { useAuth } from "@/contexts";
 import clsx from "clsx";
 
 // Mock User Role for now - in real app, get from Context/Store
-const CURRENT_USER_ROLES: UserRole[] = [UserRole.PLAYER, UserRole.TEAM_LEADER];
+const CURRENT_USER_ROLES: UserRole[] = [UserRole.PLAYER, UserRole.TEAM_LEADER, UserRole.FIELD_OWNER, UserRole.MODERATOR];
 
 const SIDEBAR_ITEMS = {
     common: [

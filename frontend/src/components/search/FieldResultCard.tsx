@@ -72,7 +72,7 @@ const FieldResultCard: React.FC<FieldResultCardProps> = ({ field }) => {
                     </Link>
                     {isAuthenticated && (
                         <Link
-                            to={`/fields/${field.fieldId}/book`}
+                            to={`/fields/${field.fieldId}`}
                             className="text-sm bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                         >
                             Book Now

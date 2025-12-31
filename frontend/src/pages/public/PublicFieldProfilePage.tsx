@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { LoadingSpinner, Button } from '../../components/common';
+import { BookFieldModal, ViewCalendarModal } from '../../components/booking';
 import { FieldStatus, type FieldProfile } from '../../types';
 import { useAuth } from '../../contexts';
 
@@ -25,6 +27,8 @@ const PublicFieldProfilePage: React.FC = () => {
     const [loading, setLoading] = React.useState(true);
     const [field, setField] = React.useState<FieldProfile | null>(null);
     const { isAuthenticated } = useAuth();
+    const [showBookingModal, setShowBookingModal] = useState(false);
+    const [showCalendarModal, setShowCalendarModal] = useState(false);
 
     React.useEffect(() => {
         // Simulate API call
@@ -65,6 +69,15 @@ const PublicFieldProfilePage: React.FC = () => {
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
+            {/* Back Button */}
+            <Link
+                to="/fields"
+                className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+            >
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Back to Fields
+            </Link>
+
             {/* Image Gallery Placeholder */}
             <div className="bg-gray-200 rounded-2xl h-64 md:h-80 mb-6 flex items-center justify-center">
                 <div className="text-center text-gray-500">
@@ -113,7 +126,7 @@ const PublicFieldProfilePage: React.FC = () => {
 
                 <div className="flex flex-wrap gap-4 mt-4">
                     {isAuthenticated ? (
-                        <Button variant="primary">
+                        <Button variant="primary" onClick={() => setShowBookingModal(true)}>
                             Book Now
                         </Button>
                     ) : (
@@ -123,7 +136,7 @@ const PublicFieldProfilePage: React.FC = () => {
                             </Button>
                         </Link>
                     )}
-                    <Button variant="secondary">
+                    <Button variant="secondary" onClick={() => setShowCalendarModal(true)}>
                         View Calendar
                     </Button>
                 </div>
@@ -212,8 +225,28 @@ const PublicFieldProfilePage: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Modals */}
+            {showBookingModal && (
+                <BookFieldModal
+                    fieldId={field.fieldId}
+                    fieldName={field.fieldName}
+                    pricePerHour={field.defaultPricePerHour}
+                    isOpen={showBookingModal}
+                    onClose={() => setShowBookingModal(false)}
+                />
+            )}
+            {showCalendarModal && (
+                <ViewCalendarModal
+                    fieldId={field.fieldId}
+                    fieldName={field.fieldName}
+                    isOpen={showCalendarModal}
+                    onClose={() => setShowCalendarModal(false)}
+                />
+            )}
         </div>
     );
 };
 
 export default PublicFieldProfilePage;
+

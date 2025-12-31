@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { LoadingSpinner, EmptyState, Button } from '../common';
 import { useInfiniteFeed } from '../../api/hooks/useCommunity';
+import { useAuth } from '../../contexts';
 import PostCard from './PostCard';
 import CommentSection from './CommentSection';
 import CreatePostForm from './CreatePostForm';
@@ -14,6 +15,7 @@ interface CommunityFeedViewProps {
 }
 
 const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ teamId, currentUserId }) => {
+    const { isAuthenticated } = useAuth();
     const {
         data,
         isLoading,
@@ -38,14 +40,14 @@ const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ teamId, currentUs
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
-            {/* Create Post */}
-            <CreatePostForm teamId={teamId} />
+            {/* Create Post - Only show for authenticated users */}
+            {isAuthenticated && <CreatePostForm teamId={teamId} />}
 
             {/* Posts */}
             {posts.length === 0 ? (
                 <EmptyState
                     title="No Posts Yet"
-                    description="Be the first to share something with the community!"
+                    description={isAuthenticated ? "Be the first to share something with the community!" : "No posts in the community yet."}
                 />
             ) : (
                 <div className="space-y-6">
@@ -54,6 +56,7 @@ const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ teamId, currentUs
                             <PostCard
                                 post={post}
                                 isOwner={currentUserId === post.authorId}
+                                isAuthenticated={isAuthenticated}
                                 onCommentClick={() =>
                                     setExpandedPostId(
                                         expandedPostId === post.postId ? null : post.postId
@@ -62,11 +65,13 @@ const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ teamId, currentUs
                                 onReportClick={() => setReportingPostId(post.postId)}
                             />
 
+                            {/* Comments Section - Always visible but toggle-able */}
                             {expandedPostId === post.postId && (
                                 <div className="ml-4 p-4 bg-gray-50 rounded-xl">
                                     <CommentSection
                                         postId={post.postId}
                                         currentUserId={currentUserId}
+                                        isAuthenticated={isAuthenticated}
                                     />
                                 </div>
                             )}
@@ -89,8 +94,8 @@ const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ teamId, currentUs
                 </div>
             )}
 
-            {/* Report Modal */}
-            {reportingPostId && (
+            {/* Report Modal - Only show for authenticated users */}
+            {isAuthenticated && reportingPostId && (
                 <ReportForm
                     contentId={reportingPostId}
                     contentType="Post"
@@ -103,3 +108,4 @@ const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ teamId, currentUs
 };
 
 export default CommunityFeedView;
+

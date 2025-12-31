@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 interface CommentSectionProps {
     postId: number;
     currentUserId?: number;
+    isAuthenticated?: boolean;
 }
 
 interface CommentItemProps {
@@ -53,7 +54,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, isOwner, onDelete, i
     );
 };
 
-const CommentSection: React.FC<CommentSectionProps> = ({ postId, currentUserId }) => {
+const CommentSection: React.FC<CommentSectionProps> = ({ postId, currentUserId, isAuthenticated = false }) => {
     const { data: comments, isLoading } = usePostComments(postId);
     const addComment = useAddComment();
     const deleteComment = useDeleteComment();
@@ -87,29 +88,31 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, currentUserId }
 
     return (
         <div className="space-y-4">
-            {/* Comment Input */}
-            <form onSubmit={handleSubmit} className="flex gap-3">
-                <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <User className="w-4 h-4 text-emerald-600" />
-                </div>
-                <div className="flex-1 flex gap-2">
-                    <input
-                        type="text"
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="Write a comment..."
-                        className="flex-1 px-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:border-emerald-500"
-                    />
-                    <Button
-                        type="submit"
-                        size="sm"
-                        isLoading={addComment.isPending}
-                        disabled={!newComment.trim()}
-                    >
-                        <Send className="w-4 h-4" />
-                    </Button>
-                </div>
-            </form>
+            {/* Comment Input - Only show for authenticated users */}
+            {isAuthenticated && (
+                <form onSubmit={handleSubmit} className="flex gap-3">
+                    <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="w-4 h-4 text-emerald-600" />
+                    </div>
+                    <div className="flex-1 flex gap-2">
+                        <input
+                            type="text"
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            placeholder="Write a comment..."
+                            className="flex-1 px-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:border-emerald-500"
+                        />
+                        <Button
+                            type="submit"
+                            size="sm"
+                            isLoading={addComment.isPending}
+                            disabled={!newComment.trim()}
+                        >
+                            <Send className="w-4 h-4" />
+                        </Button>
+                    </div>
+                </form>
+            )}
 
             {/* Comments List */}
             {comments && comments.length > 0 ? (
@@ -126,7 +129,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, currentUserId }
                 </div>
             ) : (
                 <p className="text-center text-gray-500 text-sm py-4">
-                    No comments yet. Be the first to comment!
+                    {isAuthenticated ? 'No comments yet. Be the first to comment!' : 'No comments yet.'}
                 </p>
             )}
         </div>
@@ -134,3 +137,4 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, currentUserId }
 };
 
 export default CommentSection;
+

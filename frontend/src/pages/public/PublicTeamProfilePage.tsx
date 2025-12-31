@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { LoadingSpinner, Button } from '../../components/common';
 import { TeamStatus, type TeamProfile } from '../../types';
 import { useAuth } from '../../contexts';
+import { useRequestJoinTeam } from '../../api/hooks/useTeam';
+import toast from 'react-hot-toast';
 
 // Mock data for demonstration
 const mockTeam: TeamProfile = {
@@ -23,6 +26,8 @@ const PublicTeamProfilePage: React.FC = () => {
     const [loading, setLoading] = React.useState(true);
     const [team, setTeam] = React.useState<TeamProfile | null>(null);
     const { isAuthenticated } = useAuth();
+    const requestJoinTeam = useRequestJoinTeam();
+    const [hasRequested, setHasRequested] = useState(false);
 
     React.useEffect(() => {
         // Simulate API call
@@ -32,6 +37,17 @@ const PublicTeamProfilePage: React.FC = () => {
         }, 500);
         return () => clearTimeout(timer);
     }, [id]);
+
+    const handleRequestJoin = async () => {
+        if (!team) return;
+        try {
+            await requestJoinTeam.mutateAsync({ teamId: team.teamId });
+            setHasRequested(true);
+            toast.success('Join request sent successfully!');
+        } catch {
+            toast.error('Failed to send join request');
+        }
+    };
 
     if (loading) {
         return (
@@ -56,6 +72,15 @@ const PublicTeamProfilePage: React.FC = () => {
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
+            {/* Back Button */}
+            <Link
+                to="/teams"
+                className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+            >
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Back to Teams
+            </Link>
+
             {/* Header */}
             <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
                 <div className="flex flex-col md:flex-row gap-6">
@@ -121,8 +146,13 @@ const PublicTeamProfilePage: React.FC = () => {
                         )}
 
                         {isAuthenticated ? (
-                            <Button variant="primary">
-                                Request to Join
+                            <Button
+                                variant="primary"
+                                onClick={handleRequestJoin}
+                                isLoading={requestJoinTeam.isPending}
+                                disabled={hasRequested}
+                            >
+                                {hasRequested ? 'Request Sent' : 'Request to Join'}
                             </Button>
                         ) : (
                             <Link to="/login">
@@ -169,3 +199,4 @@ const PublicTeamProfilePage: React.FC = () => {
 };
 
 export default PublicTeamProfilePage;
+

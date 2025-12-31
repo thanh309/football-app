@@ -8,8 +8,12 @@ import {
 import { LoadingSpinner } from '../../components/common';
 import { FieldStatus, type FieldProfile } from '../../types';
 
-// Mock data
-const mockFields: FieldProfile[] = [
+// Extended mock data with amenity IDs
+interface FieldWithAmenities extends FieldProfile {
+    amenityIds: number[];
+}
+
+const mockFields: FieldWithAmenities[] = [
     {
         fieldId: 1,
         ownerId: 1,
@@ -21,6 +25,7 @@ const mockFields: FieldProfile[] = [
         status: FieldStatus.VERIFIED,
         createdAt: '2023-06-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
+        amenityIds: [1, 2, 3, 5], // Floodlights, Changing Rooms, Parking, First Aid
     },
     {
         fieldId: 2,
@@ -33,6 +38,7 @@ const mockFields: FieldProfile[] = [
         status: FieldStatus.VERIFIED,
         createdAt: '2023-08-15T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
+        amenityIds: [1, 2, 3, 4, 5], // All amenities
     },
     {
         fieldId: 3,
@@ -45,12 +51,13 @@ const mockFields: FieldProfile[] = [
         status: FieldStatus.VERIFIED,
         createdAt: '2023-09-20T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
+        amenityIds: [2, 4], // Changing Rooms, Cafeteria
     },
 ];
 
 const SearchFieldsPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
-    const [fields, setFields] = useState<FieldProfile[]>(mockFields);
+    const [fields, setFields] = useState<FieldWithAmenities[]>(mockFields);
     const [searchQuery, setSearchQuery] = useState<string>('');
 
     const handleSearch = (filters: FieldSearchFilters) => {
@@ -74,6 +81,12 @@ const SearchFieldsPage: React.FC = () => {
             }
             if (filters.maxPrice !== undefined) {
                 filtered = filtered.filter((f) => f.defaultPricePerHour <= filters.maxPrice!);
+            }
+            // Filter by amenities - field must have ALL selected amenities
+            if (filters.amenityIds && filters.amenityIds.length > 0) {
+                filtered = filtered.filter((f) =>
+                    filters.amenityIds!.every((amenityId) => f.amenityIds.includes(amenityId))
+                );
             }
             setFields(filtered);
             setLoading(false);
@@ -114,3 +127,4 @@ const SearchFieldsPage: React.FC = () => {
 };
 
 export default SearchFieldsPage;
+

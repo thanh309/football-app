@@ -69,8 +69,12 @@ const SearchTeamsPage: React.FC = () => {
                     t.location?.toLowerCase().includes(filters.location!.toLowerCase())
                 );
             }
-            if (filters.skillLevel !== undefined) {
-                filtered = filtered.filter((t) => t.skillLevel === filters.skillLevel);
+            if (filters.minSkillLevel !== undefined && filters.maxSkillLevel !== undefined) {
+                filtered = filtered.filter((t) =>
+                    t.skillLevel !== undefined &&
+                    t.skillLevel >= filters.minSkillLevel! &&
+                    t.skillLevel <= filters.maxSkillLevel!
+                );
             }
             setTeams(filtered);
             setLoading(false);
