@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { FieldReviewView } from '../../components/moderator';
 
 const FieldReviewPage: React.FC = () => {
-    const { fieldId } = useParams<{ fieldId: string }>();
+    const { id } = useParams<{ id: string }>();
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
@@ -24,9 +24,10 @@ const FieldReviewPage: React.FC = () => {
                 </p>
             </div>
 
-            <FieldReviewView fieldId={Number(fieldId)} />
+            <FieldReviewView fieldId={Number(id)} />
         </div>
     );
 };
 
 export default FieldReviewPage;
+

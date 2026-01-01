@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { UserDetailsView } from '../../components/moderator';
 
 const UserDetailsPage: React.FC = () => {
-    const { userId } = useParams<{ userId: string }>();
+    const { id } = useParams<{ id: string }>();
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
@@ -24,9 +24,10 @@ const UserDetailsPage: React.FC = () => {
                 </p>
             </div>
 
-            <UserDetailsView userId={Number(userId)} />
+            <UserDetailsView userId={Number(id)} />
         </div>
     );
 };
 
 export default UserDetailsPage;
+

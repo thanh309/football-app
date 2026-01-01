@@ -125,7 +125,7 @@ const UserSearchView: React.FC = () => {
                                         {new Date(user.createdAt).toLocaleDateString()}
                                     </td>
                                     <td className="px-4 py-3 text-right">
-                                        <Link to={`/moderator/users/${user.userId}`}>
+                                        <Link to={`/mod/users/${user.userId}`}>
                                             <Button size="sm" variant="ghost" leftIcon={<Eye className="w-4 h-4" />}>
                                                 View
                                             </Button>

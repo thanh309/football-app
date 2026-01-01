@@ -51,7 +51,7 @@ const ModerationActionButtons: React.FC<ModerationActionButtonsProps> = ({
             toast.success('Report resolved');
             setShowResolve(false);
             onSuccess?.();
-            navigate('/moderator/reports');
+            navigate('/mod/reports');
         } catch {
             toast.error('Failed to resolve report');
         }
@@ -63,7 +63,7 @@ const ModerationActionButtons: React.FC<ModerationActionButtonsProps> = ({
             toast.success('Report dismissed');
             setShowDismiss(false);
             onSuccess?.();
-            navigate('/moderator/reports');
+            navigate('/mod/reports');
         } catch {
             toast.error('Failed to dismiss report');
         }

@@ -27,7 +27,7 @@ const VerifyFieldButtons: React.FC<VerifyFieldButtonsProps> = ({ fieldId, onSucc
             toast.success('Field approved successfully!');
             setShowApprove(false);
             onSuccess?.();
-            navigate('/moderator/fields');
+            navigate('/mod/fields');
         } catch {
             toast.error('Failed to approve field');
         }
@@ -48,7 +48,7 @@ const VerifyFieldButtons: React.FC<VerifyFieldButtonsProps> = ({ fieldId, onSucc
             toast.success('Field rejected');
             setShowReject(false);
             onSuccess?.();
-            navigate('/moderator/fields');
+            navigate('/mod/fields');
         } catch {
             toast.error('Failed to reject field');
         }

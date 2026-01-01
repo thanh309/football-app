@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { TeamReviewView } from '../../components/moderator';
 
 const TeamReviewPage: React.FC = () => {
-    const { teamId } = useParams<{ teamId: string }>();
+    const { id } = useParams<{ id: string }>();
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
@@ -24,9 +24,10 @@ const TeamReviewPage: React.FC = () => {
                 </p>
             </div>
 
-            <TeamReviewView teamId={Number(teamId)} />
+            <TeamReviewView teamId={Number(id)} />
         </div>
     );
 };
 
 export default TeamReviewPage;
+

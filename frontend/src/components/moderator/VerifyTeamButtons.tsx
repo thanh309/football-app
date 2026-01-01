@@ -27,7 +27,7 @@ const VerifyTeamButtons: React.FC<VerifyTeamButtonsProps> = ({ teamId, onSuccess
             toast.success('Team approved successfully!');
             setShowApprove(false);
             onSuccess?.();
-            navigate('/moderator/teams');
+            navigate('/mod/teams');
         } catch {
             toast.error('Failed to approve team');
         }
@@ -48,7 +48,7 @@ const VerifyTeamButtons: React.FC<VerifyTeamButtonsProps> = ({ teamId, onSuccess
             toast.success('Team rejected');
             setShowReject(false);
             onSuccess?.();
-            navigate('/moderator/teams');
+            navigate('/mod/teams');
         } catch {
             toast.error('Failed to reject team');
         }
