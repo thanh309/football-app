@@ -200,7 +200,7 @@ export const fieldService = {
     /**
      * Get field by ID
      */
-    getFieldById: async (_fieldId: number): Promise<FieldProfile> => {
+    getFieldById: async (fieldId: number): Promise<FieldProfile | undefined> => {
         await new Promise(r => setTimeout(r, 800)); // Simulate latency
 
         // --- Real API call (commented out for mock mode) ---
@@ -208,7 +208,7 @@ export const fieldService = {
         // return response.data;
         // --- End Real API call ---
 
-        return mockFieldProfile;
+        return mockFieldProfiles.find(f => f.fieldId === fieldId);
     },
 
     /**

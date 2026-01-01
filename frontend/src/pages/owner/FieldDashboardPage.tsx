@@ -6,8 +6,8 @@ import { useField } from '../../api/hooks/useField';
 import { FieldStatus } from '../../types';
 
 const FieldDashboardPage: React.FC = () => {
-    const { fieldId } = useParams<{ fieldId: string }>();
-    const { data: field, isLoading } = useField(Number(fieldId));
+    const { id } = useParams<{ id: string }>();
+    const { data: field, isLoading } = useField(Number(id));
 
     if (isLoading) {
         return <LoadingSpinner text="Loading field details..." />;
@@ -27,10 +27,10 @@ const FieldDashboardPage: React.FC = () => {
     }
 
     const quickActions = [
-        { label: 'Edit Field', icon: Edit, href: `/owner/fields/${fieldId}/edit`, color: 'bg-blue-500' },
-        { label: 'Manage Photos', icon: Image, href: `/owner/fields/${fieldId}/photos`, color: 'bg-purple-500' },
-        { label: 'Set Pricing', icon: DollarSign, href: `/owner/fields/${fieldId}/pricing`, color: 'bg-green-500' },
-        { label: 'View Calendar', icon: Calendar, href: `/owner/fields/${fieldId}/calendar`, color: 'bg-orange-500' },
+        { label: 'Edit Field', icon: Edit, href: `/owner/fields/${id}/edit`, color: 'bg-blue-500' },
+        { label: 'Manage Photos', icon: Image, href: `/owner/fields/${id}/photos`, color: 'bg-purple-500' },
+        { label: 'Set Pricing', icon: DollarSign, href: `/owner/fields/${id}/pricing`, color: 'bg-green-500' },
+        { label: 'View Calendar', icon: Calendar, href: `/owner/fields/${id}/calendar`, color: 'bg-orange-500' },
     ];
 
     return (
@@ -57,8 +57,8 @@ const FieldDashboardPage: React.FC = () => {
                             </p>
                         </div>
                         <span className={`text-sm px-3 py-1 rounded-full ${field.status === FieldStatus.VERIFIED
-                                ? 'bg-white/20 text-white'
-                                : 'bg-yellow-400 text-yellow-900'
+                            ? 'bg-white/20 text-white'
+                            : 'bg-yellow-400 text-yellow-900'
                             }`}>
                             {field.status === FieldStatus.VERIFIED && <CheckCircle className="w-3 h-3 inline mr-1" />}
                             {field.status}
@@ -147,7 +147,7 @@ const FieldDashboardPage: React.FC = () => {
                         <h2 className="text-lg font-semibold text-gray-900">Booking Requests</h2>
                         <p className="text-gray-500 text-sm">Manage pending and upcoming bookings</p>
                     </div>
-                    <Link to={`/owner/fields/${fieldId}/bookings`}>
+                    <Link to={`/owner/fields/${id}/bookings`}>
                         <Button variant="secondary">View All Bookings</Button>
                     </Link>
                 </div>
