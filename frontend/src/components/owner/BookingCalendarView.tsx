@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { LoadingSpinner, Button } from '../common';
 import { useFieldCalendar } from '../../api/hooks/useBooking';
 import type { FieldCalendar } from '../../types';
+import { CalendarStatus } from '../../types';
 
 interface BookingCalendarViewProps {
     fieldId: number;
@@ -45,22 +46,56 @@ const BookingCalendarView: React.FC<BookingCalendarViewProps> = ({ fieldId, onSl
         return times;
     }, []);
 
+    // Check if the given hour falls within a slot's time range
     const getSlotForTime = (day: Date, time: string): FieldCalendar | undefined => {
         if (!slots) return undefined;
         const dayStr = day.toISOString().split('T')[0];
-        return slots.find(s => s.date === dayStr && s.startTime.startsWith(time));
+        const hour = parseInt(time.split(':')[0]);
+
+        return slots.find(s => {
+            if (s.date !== dayStr) return false;
+            const startHour = parseInt(s.startTime.split(':')[0]);
+            const endHour = parseInt(s.endTime.split(':')[0]);
+            // Check if the current hour falls within [startHour, endHour)
+            return hour >= startHour && hour < endHour;
+        });
     };
 
     const getSlotStyle = (status: string) => {
         switch (status) {
+            case CalendarStatus.BOOKED:
             case 'Booked':
                 return 'bg-emerald-100 text-emerald-700 border-emerald-300';
+            case CalendarStatus.BLOCKED:
             case 'Blocked':
                 return 'bg-red-100 text-red-700 border-red-300';
+            case CalendarStatus.MAINTENANCE:
+            case 'Maintenance':
+                return 'bg-yellow-100 text-yellow-700 border-yellow-300';
+            case CalendarStatus.AVAILABLE:
             case 'Available':
                 return 'bg-green-50 text-green-600 border-green-200';
             default:
                 return 'bg-gray-50 text-gray-500 border-gray-200';
+        }
+    };
+
+    const getSlotLabel = (slot: FieldCalendar): string => {
+        switch (slot.status) {
+            case CalendarStatus.BOOKED:
+            case 'Booked':
+                return slot.bookingId ? `#${slot.bookingId}` : 'Booked';
+            case CalendarStatus.BLOCKED:
+            case 'Blocked':
+                return 'Blocked';
+            case CalendarStatus.MAINTENANCE:
+            case 'Maintenance':
+                return 'Maint.';
+            case CalendarStatus.AVAILABLE:
+            case 'Available':
+                return 'Open';
+            default:
+                return slot.status;
         }
     };
 
@@ -112,7 +147,7 @@ const BookingCalendarView: React.FC<BookingCalendarViewProps> = ({ fieldId, onSl
             </div>
 
             {/* Legend */}
-            <div className="flex gap-4 text-sm">
+            <div className="flex gap-4 text-sm flex-wrap">
                 <div className="flex items-center gap-2">
                     <div className="w-4 h-4 rounded bg-green-50 border border-green-200" />
                     <span className="text-gray-600">Available</span>
@@ -120,6 +155,10 @@ const BookingCalendarView: React.FC<BookingCalendarViewProps> = ({ fieldId, onSl
                 <div className="flex items-center gap-2">
                     <div className="w-4 h-4 rounded bg-emerald-100 border border-emerald-300" />
                     <span className="text-gray-600">Booked</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded bg-yellow-100 border border-yellow-300" />
+                    <span className="text-gray-600">Maintenance</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-4 h-4 rounded bg-red-100 border border-red-300" />
@@ -169,9 +208,7 @@ const BookingCalendarView: React.FC<BookingCalendarViewProps> = ({ fieldId, onSl
                                                     : 'bg-green-50 border-green-200 text-green-600 hover:bg-green-100'
                                                     }`}
                                             >
-                                                {slot?.status === 'Booked' && `#${slot.bookingId}`}
-                                                {slot?.status === 'Blocked' && 'Blocked'}
-                                                {!slot && 'Open'}
+                                                {slot ? getSlotLabel(slot) : 'Open'}
                                             </div>
                                         </td>
                                     );
@@ -186,3 +223,4 @@ const BookingCalendarView: React.FC<BookingCalendarViewProps> = ({ fieldId, onSl
 };
 
 export default BookingCalendarView;
+

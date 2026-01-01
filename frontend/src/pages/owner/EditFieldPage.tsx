@@ -3,12 +3,12 @@ import { useParams, Link } from 'react-router-dom';
 import { EditFieldForm } from '../../components/forms';
 
 const EditFieldPage: React.FC = () => {
-    const { fieldId } = useParams<{ fieldId: string }>();
+    const { id } = useParams<{ id: string }>();
 
     return (
         <div className="max-w-3xl mx-auto px-4 py-8">
             <Link
-                to={`/owner/fields/${fieldId}`}
+                to={`/owner/fields/${id}`}
                 className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6"
             >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,10 +23,11 @@ const EditFieldPage: React.FC = () => {
             </div>
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <EditFieldForm fieldId={Number(fieldId)} />
+                <EditFieldForm fieldId={Number(id)} />
             </div>
         </div>
     );
 };
 
 export default EditFieldPage;
+

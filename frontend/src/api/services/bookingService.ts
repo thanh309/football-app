@@ -246,7 +246,7 @@ export const bookingService = {
     /**
      * Get field calendar
      */
-    getFieldCalendar: async (_fieldId: number, _params: CalendarQueryParams): Promise<FieldCalendar[]> => {
+    getFieldCalendar: async (_fieldId: number, params: CalendarQueryParams): Promise<FieldCalendar[]> => {
         await new Promise(r => setTimeout(r, 800)); // Simulate latency
 
         // --- Real API call (commented out for mock mode) ---
@@ -254,7 +254,116 @@ export const bookingService = {
         // return response.data;
         // --- End Real API call ---
 
-        return mockFieldCalendar;
+        // Generate dynamic mock data for the requested date range
+        const result: FieldCalendar[] = [];
+        const start = new Date(params.startDate);
+        const end = new Date(params.endDate);
+        let calendarId = 1;
+
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const dateStr = d.toISOString().split('T')[0];
+            const dayOfWeek = d.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+            // Generate slots for various times based on day patterns
+            // Monday (1): has a booked slot in morning, maintenance at noon
+            // Wednesday (3): has a blocked slot in afternoon
+            // Friday (5): has booked slots in evening
+            // Others: mostly available with some variation
+
+            if (dayOfWeek === 1) { // Monday
+                result.push({
+                    calendarId: calendarId++,
+                    fieldId: 1,
+                    date: dateStr,
+                    startTime: '06:00:00',
+                    endTime: '08:00:00',
+                    status: CalendarStatusEnum.AVAILABLE,
+                });
+                result.push({
+                    calendarId: calendarId++,
+                    fieldId: 1,
+                    date: dateStr,
+                    startTime: '08:00:00',
+                    endTime: '10:00:00',
+                    status: CalendarStatusEnum.BOOKED,
+                    bookingId: 3,
+                });
+                result.push({
+                    calendarId: calendarId++,
+                    fieldId: 1,
+                    date: dateStr,
+                    startTime: '12:00:00',
+                    endTime: '14:00:00',
+                    status: CalendarStatusEnum.MAINTENANCE,
+                });
+                result.push({
+                    calendarId: calendarId++,
+                    fieldId: 1,
+                    date: dateStr,
+                    startTime: '14:00:00',
+                    endTime: '16:00:00',
+                    status: CalendarStatusEnum.BLOCKED,
+                });
+            } else if (dayOfWeek === 3) { // Wednesday
+                result.push({
+                    calendarId: calendarId++,
+                    fieldId: 1,
+                    date: dateStr,
+                    startTime: '14:00:00',
+                    endTime: '16:00:00',
+                    status: CalendarStatusEnum.BLOCKED,
+                });
+                result.push({
+                    calendarId: calendarId++,
+                    fieldId: 1,
+                    date: dateStr,
+                    startTime: '18:00:00',
+                    endTime: '20:00:00',
+                    status: CalendarStatusEnum.BOOKED,
+                    bookingId: 5,
+                });
+            } else if (dayOfWeek === 5) { // Friday
+                result.push({
+                    calendarId: calendarId++,
+                    fieldId: 1,
+                    date: dateStr,
+                    startTime: '17:00:00',
+                    endTime: '19:00:00',
+                    status: CalendarStatusEnum.BOOKED,
+                    bookingId: 7,
+                });
+                result.push({
+                    calendarId: calendarId++,
+                    fieldId: 1,
+                    date: dateStr,
+                    startTime: '19:00:00',
+                    endTime: '21:00:00',
+                    status: CalendarStatusEnum.BOOKED,
+                    bookingId: 8,
+                });
+            } else if (dayOfWeek === 0 || dayOfWeek === 6) { // Weekend
+                result.push({
+                    calendarId: calendarId++,
+                    fieldId: 1,
+                    date: dateStr,
+                    startTime: '08:00:00',
+                    endTime: '10:00:00',
+                    status: CalendarStatusEnum.BOOKED,
+                    bookingId: 10 + dayOfWeek,
+                });
+                result.push({
+                    calendarId: calendarId++,
+                    fieldId: 1,
+                    date: dateStr,
+                    startTime: '14:00:00',
+                    endTime: '16:00:00',
+                    status: CalendarStatusEnum.BOOKED,
+                    bookingId: 20 + dayOfWeek,
+                });
+            }
+        }
+
+        return result;
     },
 
     /**
