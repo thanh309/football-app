@@ -3,12 +3,12 @@ import { useParams, Link } from 'react-router-dom';
 import { BookingDetailsCard } from '../../components/owner';
 
 const BookingDetailsPage: React.FC = () => {
-    const { fieldId, bookingId } = useParams<{ fieldId: string; bookingId: string }>();
+    const { id } = useParams<{ id: string }>();
 
     return (
         <div className="max-w-3xl mx-auto px-4 py-8">
             <Link
-                to={fieldId ? `/owner/fields/${fieldId}/bookings` : '/owner/bookings/requests'}
+                to="/owner/bookings/requests"
                 className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6"
             >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -22,9 +22,10 @@ const BookingDetailsPage: React.FC = () => {
                 <p className="text-gray-600 mt-1">View and manage this booking.</p>
             </div>
 
-            <BookingDetailsCard bookingId={Number(bookingId)} />
+            <BookingDetailsCard bookingId={Number(id)} />
         </div>
     );
 };
 
 export default BookingDetailsPage;
+

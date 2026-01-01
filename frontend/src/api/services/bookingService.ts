@@ -140,7 +140,7 @@ export const bookingService = {
     /**
      * Get booking by ID
      */
-    getBookingById: async (_bookingId: number): Promise<BookingRequest> => {
+    getBookingById: async (bookingId: number): Promise<BookingRequest | undefined> => {
         await new Promise(r => setTimeout(r, 800)); // Simulate latency
 
         // --- Real API call (commented out for mock mode) ---
@@ -148,7 +148,7 @@ export const bookingService = {
         // return response.data;
         // --- End Real API call ---
 
-        return mockBookingRequest;
+        return mockBookingRequests.find(b => b.bookingId === bookingId);
     },
 
     /**

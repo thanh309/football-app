@@ -1,4 +1,5 @@
-import { Calendar, Clock, User, MapPin, Check, X } from 'lucide-react';
+import { Calendar, Clock, User, MapPin, Check, X, Eye } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { LoadingSpinner, EmptyState, Button } from '../common';
 import { useOwnerPendingBookings, useApproveBooking, useRejectBooking } from '../../api/hooks/useBooking';
 import toast from 'react-hot-toast';
@@ -59,6 +60,15 @@ const BookingCard: React.FC<BookingCardProps> = ({
             )}
 
             <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
+                <Link to={`/owner/bookings/${booking.bookingId}`}>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        leftIcon={<Eye className="w-4 h-4" />}
+                    >
+                        Details
+                    </Button>
+                </Link>
                 <Button
                     variant="ghost"
                     size="sm"
