@@ -72,7 +72,8 @@ const mockPosts: Post[] = [
     },
 ];
 
-const mockComments: Comment[] = [
+// Use let so we can mutate this in mock mode
+let mockComments: Comment[] = [
     {
         commentId: 1,
         postId: 1,
@@ -228,7 +229,7 @@ export const communityService = {
     /**
      * Get comments for a post
      */
-    getPostComments: async (_postId: number): Promise<Comment[]> => {
+    getPostComments: async (postId: number): Promise<Comment[]> => {
         await new Promise(r => setTimeout(r, 800)); // Simulate latency
 
         // --- Real API call (commented out for mock mode) ---
@@ -236,7 +237,8 @@ export const communityService = {
         // return response.data;
         // --- End Real API call ---
 
-        return mockComments;
+        // Return comments for this specific post
+        return mockComments.filter(c => c.postId === postId);
     },
 
     /**
@@ -253,7 +255,7 @@ export const communityService = {
         // return response.data;
         // --- End Real API call ---
 
-        return {
+        const newComment: Comment = {
             commentId: Math.floor(Math.random() * 1000) + 100,
             postId: data.postId,
             authorId: 1, // Assume current user
@@ -263,6 +265,11 @@ export const communityService = {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         };
+
+        // Add to mock data so it persists
+        mockComments = [...mockComments, newComment];
+
+        return newComment;
     },
 
     /**

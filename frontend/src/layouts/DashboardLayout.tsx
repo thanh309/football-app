@@ -39,9 +39,6 @@ const SIDEBAR_ITEMS = {
     ],
     [UserRole.MODERATOR]: [
         { label: "Mod Dashboard", path: "/mod", icon: Shield },
-        { label: "Pending Teams", path: "/mod/teams", icon: Users },
-        { label: "Pending Fields", path: "/mod/fields", icon: MapPin },
-        { label: "Reports", path: "/mod/reports", icon: Shield },
     ],
 };
 

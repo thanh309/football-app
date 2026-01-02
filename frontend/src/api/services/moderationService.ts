@@ -135,6 +135,41 @@ const mockUsers: UserAccount[] = [
         createdAt: '2024-03-01T00:00:00Z',
         updatedAt: '2024-11-20T14:00:00Z',
     },
+    {
+        userId: 4,
+        username: 'banned_user',
+        email: 'banned@example.com',
+        passwordHash: 'hashed',
+        roles: [UserRole.PLAYER],
+        status: AccountStatus.BANNED,
+        isVerified: true,
+        createdAt: '2024-04-10T00:00:00Z',
+        updatedAt: '2025-01-02T08:00:00Z',
+        location: 'District 3, HCMC',
+    },
+    {
+        userId: 5,
+        username: 'active_player',
+        email: 'active_player@example.com',
+        passwordHash: 'hashed',
+        roles: [UserRole.PLAYER, UserRole.TEAM_LEADER],
+        status: AccountStatus.ACTIVE,
+        isVerified: true,
+        createdAt: '2024-05-20T00:00:00Z',
+        updatedAt: '2024-12-15T12:00:00Z',
+        location: 'Thu Duc City',
+    },
+    {
+        userId: 6,
+        username: 'suspended_owner',
+        email: 'suspended_owner@example.com',
+        passwordHash: 'hashed',
+        roles: [UserRole.FIELD_OWNER],
+        status: AccountStatus.SUSPENDED,
+        isVerified: true,
+        createdAt: '2024-06-01T00:00:00Z',
+        updatedAt: '2025-01-08T10:00:00Z',
+    },
 ];
 
 const mockReports: Report[] = [
@@ -187,6 +222,31 @@ const mockModerationLogs: ModerationLog[] = [
         action: ModerationActionEnum.CONTENT_REMOVAL,
         reason: 'Inappropriate content in post #123',
         createdAt: '2025-01-09T16:00:00Z',
+    },
+    {
+        logId: 4,
+        moderatorId: 1,
+        targetUserId: 4,
+        action: ModerationActionEnum.BAN,
+        reason: 'Repeated policy violations and harassment',
+        details: 'Permanent ban - multiple offenses',
+        createdAt: '2025-01-10T09:00:00Z',
+    },
+    {
+        logId: 5,
+        moderatorId: 1,
+        targetUserId: 3,
+        action: ModerationActionEnum.WARNING,
+        reason: 'Field listing contains misleading information',
+        createdAt: '2025-01-11T11:00:00Z',
+    },
+    {
+        logId: 6,
+        moderatorId: 1,
+        targetUserId: 5,
+        action: ModerationActionEnum.REACTIVATE,
+        reason: 'Completed suspension period, user acknowledged policy',
+        createdAt: '2025-01-12T08:00:00Z',
     },
 ];
 
@@ -313,12 +373,26 @@ export const moderationService = {
         const page = params.page || 1;
         const limit = params.limit || 10;
 
+        // Filter by status if provided
+        let filteredUsers = [...mockUsers];
+        if (params.status) {
+            filteredUsers = filteredUsers.filter(u => u.status === params.status);
+        }
+        // Filter by query if provided (search in username or email)
+        if (params.query) {
+            const query = params.query.toLowerCase();
+            filteredUsers = filteredUsers.filter(u =>
+                u.username.toLowerCase().includes(query) ||
+                u.email.toLowerCase().includes(query)
+            );
+        }
+
         return {
-            data: mockUsers,
-            total: mockUsers.length,
+            data: filteredUsers,
+            total: filteredUsers.length,
             page,
             limit,
-            totalPages: Math.ceil(mockUsers.length / limit),
+            totalPages: Math.ceil(filteredUsers.length / limit),
         };
     },
 
@@ -502,12 +576,22 @@ export const moderationService = {
         const page = params?.page || 1;
         const limit = params?.limit || 10;
 
+        // Filter by action if provided
+        let filteredLogs = [...mockModerationLogs];
+        if (params?.action) {
+            filteredLogs = filteredLogs.filter(log => log.action === params.action);
+        }
+        // Filter by moderator if provided
+        if (params?.moderatorId) {
+            filteredLogs = filteredLogs.filter(log => log.moderatorId === params.moderatorId);
+        }
+
         return {
-            data: mockModerationLogs,
-            total: mockModerationLogs.length,
+            data: filteredLogs,
+            total: filteredLogs.length,
             page,
             limit,
-            totalPages: Math.ceil(mockModerationLogs.length / limit),
+            totalPages: Math.ceil(filteredLogs.length / limit),
         };
     },
 };
