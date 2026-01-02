@@ -3,38 +3,16 @@ import { useParams, Link } from 'react-router-dom';
 import { MatchDetailsCard } from '../../components/match';
 import { ConfirmAttendanceButton } from '../../components/player';
 import { LoadingSpinner, PageContainer, PageHeader, ContentCard } from '../../components/common';
-import { MatchStatus, Visibility, type MatchEvent } from '../../types';
-
-// Mock data
-const mockMatch: MatchEvent = {
-    matchId: 1,
-    hostTeamId: 1,
-    opponentTeamId: 2,
-    fieldId: 1,
-    matchDate: '2024-01-20',
-    startTime: '19:00:00',
-    endTime: '21:00:00',
-    status: MatchStatus.SCHEDULED,
-    visibility: Visibility.PUBLIC,
-    description: 'Friendly match between FC Thunder and City United.',
-    createdAt: '2024-01-10T00:00:00Z',
-    updatedAt: '2024-01-10T00:00:00Z',
-};
+import { MatchStatus } from '../../types';
+import { useMatchDetails } from '../../api/hooks/useMatch';
 
 const MatchDetailsPage: React.FC = () => {
     const { matchId } = useParams<{ matchId: string }>();
-    const [loading, setLoading] = React.useState(true);
-    const [match, setMatch] = React.useState<MatchEvent | null>(null);
+    const matchIdNum = parseInt(matchId || '0', 10);
 
-    React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setMatch(mockMatch);
-            setLoading(false);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [matchId]);
+    const { data: match, isLoading } = useMatchDetails(matchIdNum);
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <LoadingSpinner size="lg" />
@@ -64,7 +42,7 @@ const MatchDetailsPage: React.FC = () => {
 
             {/* Match Card */}
             <div className="mb-6">
-                <MatchDetailsCard matchId={Number(matchId)} />
+                <MatchDetailsCard matchId={matchIdNum} />
             </div>
 
             {/* Attendance Action */}

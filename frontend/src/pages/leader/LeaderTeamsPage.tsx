@@ -2,47 +2,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Users } from 'lucide-react';
 import { LoadingSpinner, PageContainer, PageHeader } from '../../components/common';
-import { TeamStatus, type TeamProfile } from '../../types';
-
-// Mock data
-const mockTeams: TeamProfile[] = [
-    {
-        teamId: 1,
-        teamName: 'FC Thunder',
-        description: 'A competitive amateur football team.',
-        logoUrl: 'https://via.placeholder.com/100',
-        leaderId: 1,
-        status: TeamStatus.VERIFIED,
-        location: 'Ho Chi Minh City',
-        skillLevel: 7,
-        createdAt: '2023-01-15T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
-    },
-    {
-        teamId: 2,
-        teamName: 'City Warriors',
-        description: 'Weekend football enthusiasts.',
-        logoUrl: 'https://via.placeholder.com/100',
-        leaderId: 1,
-        status: TeamStatus.PENDING,
-        location: 'District 7',
-        skillLevel: 5,
-        createdAt: '2024-01-10T00:00:00Z',
-        updatedAt: '2024-01-10T00:00:00Z',
-    },
-];
+import { TeamStatus } from '../../types';
+import { useLeaderTeams } from '../../api/hooks/useTeam';
+import { useAuth } from '../../contexts/AuthContext';
 
 const LeaderTeamsPage: React.FC = () => {
-    const [loading, setLoading] = React.useState(true);
-    const [teams, setTeams] = React.useState<TeamProfile[]>([]);
-
-    React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setTeams(mockTeams);
-            setLoading(false);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, []);
+    const { user } = useAuth();
+    const { data: teams, isLoading, error } = useLeaderTeams(user?.userId || 0);
 
     const getStatusBadge = (status: TeamStatus) => {
         const styles = {
@@ -58,11 +24,21 @@ const LeaderTeamsPage: React.FC = () => {
         );
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <LoadingSpinner size="lg" />
             </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <PageContainer maxWidth="xl">
+                <div className="text-center py-12">
+                    <p className="text-red-600">Failed to load teams. Please try again.</p>
+                </div>
+            </PageContainer>
         );
     }
 
@@ -82,7 +58,7 @@ const LeaderTeamsPage: React.FC = () => {
                 }
             />
 
-            {teams.length === 0 ? (
+            {!teams || teams.length === 0 ? (
                 <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-12 text-center">
                     <Users className="w-16 h-16 mx-auto text-slate-300 mb-4" />
                     <h3 className="text-lg font-medium text-slate-900 mb-2">No teams yet</h3>

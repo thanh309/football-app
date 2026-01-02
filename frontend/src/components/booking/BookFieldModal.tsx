@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Clock, CreditCard } from 'lucide-react';
 import { Button, LoadingSpinner } from '../common';
 import { useAvailableSlots } from '../../api/hooks/useField';
 import { useCreateBooking } from '../../api/hooks/useBooking';
+import { usePlayerTeams } from '../../api/hooks/useTeam';
+import { useAuth } from '../../contexts';
 import { CalendarStatus, type FieldCalendar } from '../../types';
 import toast from 'react-hot-toast';
 
@@ -21,15 +23,24 @@ const BookFieldModal: React.FC<BookFieldModalProps> = ({
     isOpen,
     onClose,
 }) => {
+    const { user } = useAuth();
     const [selectedDate, setSelectedDate] = useState(
         new Date().toISOString().split('T')[0]
     );
     const [selectedSlot, setSelectedSlot] = useState<FieldCalendar | null>(null);
-    const [teamId] = useState(1); // Mock team ID - in real app, user would select their team
+    const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
     const [notes, setNotes] = useState('');
 
     const { data: slots, isLoading } = useAvailableSlots(fieldId, selectedDate);
+    const { data: teams, isLoading: teamsLoading } = usePlayerTeams(user?.userId || 0);
     const createBooking = useCreateBooking();
+
+    // Auto-select first team if only one
+    useEffect(() => {
+        if (teams && teams.length === 1 && !selectedTeamId) {
+            setSelectedTeamId(teams[0].teamId);
+        }
+    }, [teams, selectedTeamId]);
 
     if (!isOpen) return null;
 
@@ -47,11 +58,15 @@ const BookFieldModal: React.FC<BookFieldModalProps> = ({
             toast.error('Please select a time slot');
             return;
         }
+        if (!selectedTeamId) {
+            toast.error('Please select a team');
+            return;
+        }
 
         try {
             await createBooking.mutateAsync({
                 fieldId,
-                teamId,
+                teamId: selectedTeamId,
                 date: selectedDate,
                 startTime: selectedSlot.startTime,
                 endTime: selectedSlot.endTime,
@@ -92,6 +107,35 @@ const BookFieldModal: React.FC<BookFieldModalProps> = ({
                         </button>
                     </div>
 
+                    {/* Team Selection */}
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Select Team
+                        </label>
+                        {teamsLoading ? (
+                            <div className="flex justify-center py-4">
+                                <LoadingSpinner size="sm" />
+                            </div>
+                        ) : teams && teams.length > 0 ? (
+                            <select
+                                value={selectedTeamId || ''}
+                                onChange={(e) => setSelectedTeamId(Number(e.target.value))}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                            >
+                                <option value="">Select a team...</option>
+                                {teams.map((team) => (
+                                    <option key={team.teamId} value={team.teamId}>
+                                        {team.teamName}
+                                    </option>
+                                ))}
+                            </select>
+                        ) : (
+                            <p className="text-sm text-gray-500 py-2">
+                                You are not a member of any team. Join a team first to book fields.
+                            </p>
+                        )}
+                    </div>
+
                     {/* Date Selection */}
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -129,8 +173,8 @@ const BookFieldModal: React.FC<BookFieldModalProps> = ({
                                         key={slot.calendarId}
                                         onClick={() => setSelectedSlot(slot)}
                                         className={`flex items-center gap-2 p-3 rounded-lg border transition-colors ${selectedSlot?.calendarId === slot.calendarId
-                                                ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                                                : 'border-gray-200 hover:border-emerald-300'
+                                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                            : 'border-gray-200 hover:border-emerald-300'
                                             }`}
                                     >
                                         <Clock className="w-4 h-4" />
@@ -175,7 +219,7 @@ const BookFieldModal: React.FC<BookFieldModalProps> = ({
                         <Button
                             onClick={handleBooking}
                             isLoading={createBooking.isPending}
-                            disabled={!selectedSlot}
+                            disabled={!selectedSlot || !selectedTeamId || (teams && teams.length === 0)}
                             className="flex-1"
                         >
                             Request Booking

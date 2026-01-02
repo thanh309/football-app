@@ -3,40 +3,19 @@ import { useParams, Link } from 'react-router-dom';
 import { MapPin, CheckCircle } from 'lucide-react';
 import { LoadingSpinner, Button, PageContainer, PageHeader, ContentCard } from '../../components/common';
 import { BookFieldModal, ViewCalendarModal } from '../../components/booking';
-import { FieldStatus, type FieldProfile } from '../../types';
+import { FieldStatus } from '../../types';
 import { useAuth } from '../../contexts';
-
-// Mock data for demonstration
-const mockField: FieldProfile = {
-    fieldId: 1,
-    ownerId: 1,
-    fieldName: 'Green Valley Football Field',
-    description: 'Professional-grade 7-a-side football pitch with artificial turf. Includes floodlights for evening games, changing rooms, and parking facilities. Perfect for friendly matches and training sessions.',
-    location: '123 Sports Avenue, District 7, Ho Chi Minh City',
-    latitude: 10.7285,
-    longitude: 106.7052,
-    defaultPricePerHour: 500000,
-    capacity: 14,
-    status: FieldStatus.VERIFIED,
-    createdAt: '2023-06-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
-};
+import { useField, useFieldAmenities } from '../../api/hooks/useField';
 
 const PublicFieldProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const [loading, setLoading] = React.useState(true);
-    const [field, setField] = React.useState<FieldProfile | null>(null);
+    const fieldId = parseInt(id || '0', 10);
     const { isAuthenticated } = useAuth();
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [showCalendarModal, setShowCalendarModal] = useState(false);
 
-    React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setField(mockField);
-            setLoading(false);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [id]);
+    const { data: field, isLoading } = useField(fieldId);
+    const { data: amenities } = useFieldAmenities(fieldId);
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('vi-VN', {
@@ -45,7 +24,7 @@ const PublicFieldProfilePage: React.FC = () => {
         }).format(price);
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <LoadingSpinner size="lg" />
@@ -155,47 +134,24 @@ const PublicFieldProfilePage: React.FC = () => {
                 </ContentCard>
 
                 <ContentCard title="Amenities">
-                    <ul className="space-y-2">
-                        <li className="flex items-center gap-2 text-slate-600">
-                            <CheckCircle className="w-5 h-5 text-primary-500" />
-                            Floodlights
-                        </li>
-                        <li className="flex items-center gap-2 text-slate-600">
-                            <CheckCircle className="w-5 h-5 text-primary-500" />
-                            Changing Rooms
-                        </li>
-                        <li className="flex items-center gap-2 text-slate-600">
-                            <CheckCircle className="w-5 h-5 text-primary-500" />
-                            Parking
-                        </li>
-                        <li className="flex items-center gap-2 text-slate-600">
-                            <CheckCircle className="w-5 h-5 text-primary-500" />
-                            Drinking Water
-                        </li>
-                    </ul>
+                    {amenities && amenities.length > 0 ? (
+                        <ul className="space-y-2">
+                            {amenities.map((amenity) => (
+                                <li key={amenity.amenityId} className="flex items-center gap-2 text-slate-600">
+                                    <CheckCircle className="w-5 h-5 text-primary-500" />
+                                    {amenity.name}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="text-slate-500 text-center py-4">No amenities listed.</p>
+                    )}
                 </ContentCard>
             </div>
 
-            {/* Operating Hours */}
+            {/* Operating Hours - Note: This would need to come from API in a real implementation */}
             <ContentCard title="Operating Hours">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                        <p className="text-sm text-slate-500">Mon - Fri</p>
-                        <p className="font-medium text-slate-900">6:00 AM - 10:00 PM</p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-slate-500">Saturday</p>
-                        <p className="font-medium text-slate-900">6:00 AM - 11:00 PM</p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-slate-500">Sunday</p>
-                        <p className="font-medium text-slate-900">7:00 AM - 10:00 PM</p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-slate-500">Holidays</p>
-                        <p className="font-medium text-slate-900">7:00 AM - 9:00 PM</p>
-                    </div>
-                </div>
+                <p className="text-slate-500 text-center py-4">Contact owner for operating hours.</p>
             </ContentCard>
 
             {/* Modals */}

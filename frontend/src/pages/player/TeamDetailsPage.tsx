@@ -1,40 +1,39 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { LoadingSpinner, PageContainer, PageHeader, ContentCard } from '../../components/common';
 import { LeaveTeamButton } from '../../components/player';
 import { useAuth } from '../../contexts';
-import { TeamStatus, type TeamProfile } from '../../types';
-
-// Mock data
-const mockTeam: TeamProfile = {
-    teamId: 1,
-    teamName: 'FC Thunder',
-    description: 'A competitive amateur football team based in the city. We play weekly and participate in local tournaments.',
-    logoUrl: 'https://via.placeholder.com/200',
-    leaderId: 1,
-    status: TeamStatus.VERIFIED,
-    location: 'Ho Chi Minh City, Vietnam',
-    skillLevel: 7,
-    createdAt: '2023-01-15T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
-};
+import { useTeam, useTeamRoster } from '../../api/hooks/useTeam';
+import { useTeamMatches } from '../../api/hooks/useMatch';
+import { MatchStatus } from '../../types';
 
 const TeamDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
+    const teamId = parseInt(id || '0', 10);
     const { user } = useAuth();
     const playerId = user?.userId || 0;
-    const [loading, setLoading] = React.useState(true);
-    const [team, setTeam] = React.useState<TeamProfile | null>(null);
 
-    React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setTeam(mockTeam);
-            setLoading(false);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [id]);
+    const { data: team, isLoading } = useTeam(teamId);
+    const { data: roster } = useTeamRoster(teamId);
+    const { data: matches, isLoading: matchesLoading } = useTeamMatches(teamId);
 
-    if (loading) {
+    // Calculate match stats
+    const matchStats = useMemo(() => {
+        const matchData = matches?.data;
+        if (!matchData || matchData.length === 0) return { played: 0, wins: 0 };
+
+        const completedMatches = matchData.filter(m => m.status === MatchStatus.COMPLETED);
+        const played = completedMatches.length;
+
+        // Count wins where this team is hostTeamId and won, or opponentTeamId and won
+        // Note: Without detailed match results, we count matches where the team participated
+        // In a real app, you'd fetch match results to determine wins
+        const wins = 0; // Would need MatchResult data to calculate
+
+        return { played, wins };
+    }, [matches]);
+
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <LoadingSpinner size="lg" />
@@ -94,25 +93,33 @@ const TeamDetailsPage: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <ContentCard>
                     <div className="text-center">
-                        <p className="text-2xl font-bold text-primary-600">12</p>
+                        <p className="text-2xl font-bold text-primary-600">{roster?.length || 0}</p>
                         <p className="text-sm text-slate-500">Members</p>
                     </div>
                 </ContentCard>
                 <ContentCard>
                     <div className="text-center">
-                        <p className="text-2xl font-bold text-primary-600">24</p>
+                        {matchesLoading ? (
+                            <LoadingSpinner size="sm" />
+                        ) : (
+                            <p className="text-2xl font-bold text-primary-600">{matchStats.played}</p>
+                        )}
                         <p className="text-sm text-slate-500">Matches Played</p>
                     </div>
                 </ContentCard>
                 <ContentCard>
                     <div className="text-center">
-                        <p className="text-2xl font-bold text-primary-600">15</p>
+                        {matchesLoading ? (
+                            <LoadingSpinner size="sm" />
+                        ) : (
+                            <p className="text-2xl font-bold text-primary-600">{matchStats.wins}</p>
+                        )}
                         <p className="text-sm text-slate-500">Wins</p>
                     </div>
                 </ContentCard>
                 <ContentCard>
                     <div className="text-center">
-                        <p className="text-2xl font-bold text-primary-600">{team.skillLevel}/10</p>
+                        <p className="text-2xl font-bold text-primary-600">{team.skillLevel || 'N/A'}/10</p>
                         <p className="text-sm text-slate-500">Skill Level</p>
                     </div>
                 </ContentCard>
@@ -120,9 +127,25 @@ const TeamDetailsPage: React.FC = () => {
 
             {/* Recent Activity */}
             <ContentCard title="Recent Team Activity">
-                <div className="text-center py-8 text-slate-500">
-                    <p>No recent activity to show.</p>
-                </div>
+                {matches?.data && matches.data.length > 0 ? (
+                    <div className="space-y-3">
+                        {matches.data.slice(0, 3).map((match) => (
+                            <div key={match.matchId} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                                <div className="w-2 h-2 rounded-full bg-primary-500"></div>
+                                <div className="flex-1">
+                                    <p className="text-sm font-medium text-slate-900">
+                                        Match on {new Date(match.matchDate).toLocaleDateString()}
+                                    </p>
+                                    <p className="text-xs text-slate-500">{match.status}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-8 text-slate-500">
+                        <p>No recent activity to show.</p>
+                    </div>
+                )}
             </ContentCard>
         </PageContainer>
     );

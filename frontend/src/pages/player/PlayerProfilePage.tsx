@@ -2,29 +2,12 @@ import React, { useState } from 'react';
 import { Edit } from 'lucide-react';
 import { PlayerProfileView } from '../../components/player';
 import { PlayerProfileForm } from '../../components/forms';
-import { Button, PageContainer, PageHeader, ContentCard } from '../../components/common';
-import { PreferredFoot, type PlayerProfile } from '../../types';
-
-// Mock data
-const mockPlayer: PlayerProfile = {
-    playerId: 1,
-    userId: 1,
-    displayName: 'Nguyen Van A',
-    position: 'Midfielder',
-    skillLevel: 7,
-    bio: 'Passionate football player with 5 years of experience.',
-    profileImage: 'https://via.placeholder.com/200',
-    dateOfBirth: '1995-05-15',
-    height: 175,
-    weight: 70,
-    preferredFoot: PreferredFoot.RIGHT,
-    createdAt: '2023-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
-};
+import { Button, PageContainer, PageHeader, ContentCard, LoadingSpinner } from '../../components/common';
+import { useMyPlayerProfile } from '../../api/hooks/usePlayer';
 
 const PlayerProfilePage: React.FC = () => {
     const [isEditing, setIsEditing] = useState(false);
-    const [player] = useState<PlayerProfile>(mockPlayer);
+    const { data: player, isLoading, error } = useMyPlayerProfile();
 
     const handleEditClick = () => {
         setIsEditing(true);
@@ -33,6 +16,24 @@ const PlayerProfilePage: React.FC = () => {
     const handleSaveSuccess = () => {
         setIsEditing(false);
     };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <LoadingSpinner size="lg" />
+            </div>
+        );
+    }
+
+    if (error || !player) {
+        return (
+            <PageContainer maxWidth="md">
+                <div className="text-center py-12">
+                    <p className="text-red-600">Failed to load profile. Please try again.</p>
+                </div>
+            </PageContainer>
+        );
+    }
 
     return (
         <PageContainer maxWidth="md">

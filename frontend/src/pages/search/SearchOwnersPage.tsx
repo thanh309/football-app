@@ -3,75 +3,21 @@ import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { OwnerSearchFilter, EmptySearchState, type OwnerSearchFilters } from '../../components/search';
 import { LoadingSpinner, PageContainer, PageHeader } from '../../components/common';
-import { AccountStatus, UserRole, type UserAccount } from '../../types';
-
-// Mock data for owners
-const mockOwners: UserAccount[] = [
-    {
-        userId: 10,
-        username: 'greenvalleysports',
-        email: 'contact@greenvalley.com',
-        passwordHash: '',
-        roles: [UserRole.FIELD_OWNER],
-        status: AccountStatus.ACTIVE,
-        isVerified: true,
-        location: 'District 7, Ho Chi Minh City',
-        contactInfo: '0901234567',
-        createdAt: '2022-06-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
-    },
-    {
-        userId: 11,
-        username: 'sunrisesports',
-        email: 'info@sunrise.com',
-        passwordHash: '',
-        roles: [UserRole.FIELD_OWNER],
-        status: AccountStatus.ACTIVE,
-        isVerified: true,
-        location: 'Binh Thanh District',
-        contactInfo: '0909876543',
-        createdAt: '2022-08-15T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
-    },
-    {
-        userId: 12,
-        username: 'centralparkarena',
-        email: 'hello@centralpark.com',
-        passwordHash: '',
-        roles: [UserRole.FIELD_OWNER],
-        status: AccountStatus.ACTIVE,
-        isVerified: true,
-        location: 'District 1',
-        contactInfo: '0905555555',
-        createdAt: '2022-09-20T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
-    },
-];
+import { useSearchOwners } from '../../api/hooks/useSearch';
 
 const SearchOwnersPage: React.FC = () => {
-    const [loading, setLoading] = useState(false);
-    const [owners, setOwners] = useState<UserAccount[]>(mockOwners);
-    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [filters, setFilters] = useState<OwnerSearchFilters>({ query: '' });
 
-    const handleSearch = (filters: OwnerSearchFilters) => {
-        setSearchQuery(filters.query || '');
-        setLoading(true);
-        setTimeout(() => {
-            let filtered = [...mockOwners];
-            if (filters.query) {
-                filtered = filtered.filter((o) =>
-                    o.username.toLowerCase().includes(filters.query.toLowerCase())
-                );
-            }
-            if (filters.location) {
-                filtered = filtered.filter((o) =>
-                    o.location?.toLowerCase().includes(filters.location!.toLowerCase())
-                );
-            }
-            setOwners(filtered);
-            setLoading(false);
-        }, 300);
+    const { data: searchResult, isLoading } = useSearchOwners({
+        query: filters.query || '',
+        location: filters.location,
+    });
+
+    const handleSearch = (newFilters: OwnerSearchFilters) => {
+        setFilters(newFilters);
     };
+
+    const owners = searchResult?.data || [];
 
     return (
         <PageContainer maxWidth="xl">
@@ -82,16 +28,16 @@ const SearchOwnersPage: React.FC = () => {
 
             {/* Filters */}
             <div className="mb-6">
-                <OwnerSearchFilter onSearch={handleSearch} isLoading={loading} />
+                <OwnerSearchFilter onSearch={handleSearch} isLoading={isLoading} />
             </div>
 
             {/* Results */}
-            {loading ? (
+            {isLoading ? (
                 <div className="flex justify-center py-12">
                     <LoadingSpinner size="lg" />
                 </div>
             ) : owners.length === 0 ? (
-                <EmptySearchState type="owner" query={searchQuery} />
+                <EmptySearchState type="owner" query={filters.query || ''} />
             ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {owners.map((owner) => (

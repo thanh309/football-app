@@ -2,36 +2,13 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Users } from 'lucide-react';
 import { LoadingSpinner, PageContainer, ContentCard } from '../../components/common';
-import { PreferredFoot, type PlayerProfile } from '../../types';
-
-const mockPlayer: PlayerProfile = {
-    playerId: 1,
-    userId: 1,
-    displayName: 'Nguyen Van A',
-    position: 'Midfielder',
-    skillLevel: 7,
-    bio: 'Passionate football player with 5 years of experience. I enjoy playing midfield and creating opportunities for my teammates.',
-    profileImage: 'https://via.placeholder.com/200',
-    dateOfBirth: '1995-05-15',
-    height: 175,
-    weight: 70,
-    preferredFoot: PreferredFoot.RIGHT,
-    createdAt: '2023-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
-};
+import { usePlayerProfile } from '../../api/hooks/usePlayer';
 
 const PublicPlayerProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const [loading, setLoading] = React.useState(true);
-    const [player, setPlayer] = React.useState<PlayerProfile | null>(null);
+    const playerId = parseInt(id || '0', 10);
 
-    React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setPlayer(mockPlayer);
-            setLoading(false);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [id]);
+    const { data: player, isLoading } = usePlayerProfile(playerId);
 
     const calculateAge = (dateOfBirth: string) => {
         const today = new Date();
@@ -44,7 +21,7 @@ const PublicPlayerProfilePage: React.FC = () => {
         return age;
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <LoadingSpinner size="lg" />

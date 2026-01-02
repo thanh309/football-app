@@ -11,10 +11,8 @@ const FieldPhotosPage: React.FC = () => {
     const [showUrlInput, setShowUrlInput] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const [photos, setPhotos] = useState<string[]>([
-        'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=400&h=300&fit=crop',
-        'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop',
-    ]);
+    // Start with empty photos - in real app, this would be fetched from API
+    const [photos, setPhotos] = useState<string[]>([]);
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();

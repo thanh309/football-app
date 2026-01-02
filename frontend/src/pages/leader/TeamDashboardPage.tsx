@@ -2,41 +2,19 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { LoadingSpinner } from '../../components/common';
 import { DeleteTeamButton } from '../../components/leader';
-import { TeamStatus, type TeamProfile } from '../../types';
-
-// Mock data
-const mockTeam: TeamProfile = {
-    teamId: 1,
-    teamName: 'FC Thunder',
-    description: 'A competitive amateur football team based in the city.',
-    logoUrl: 'https://via.placeholder.com/200',
-    leaderId: 1,
-    status: TeamStatus.VERIFIED,
-    location: 'Ho Chi Minh City, Vietnam',
-    skillLevel: 7,
-    createdAt: '2023-01-15T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
-};
-
-const mockStats = {
-    members: 15,
-    pendingRequests: 3,
-    upcomingMatches: 2,
-    walletBalance: 2500000,
-};
+import { useTeam, useTeamRoster, usePendingJoinRequests } from '../../api/hooks/useTeam';
+import { useTeamMatches } from '../../api/hooks/useMatch';
+import { useTeamWallet } from '../../api/hooks/useFinance';
 
 const TeamDashboardPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const [loading, setLoading] = React.useState(true);
-    const [team, setTeam] = React.useState<TeamProfile | null>(null);
+    const teamId = parseInt(id || '0', 10);
 
-    React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setTeam(mockTeam);
-            setLoading(false);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [id]);
+    const { data: team, isLoading: teamLoading } = useTeam(teamId);
+    const { data: roster } = useTeamRoster(teamId);
+    const { data: joinRequests } = usePendingJoinRequests(teamId);
+    const { data: matchesData } = useTeamMatches(teamId);
+    const { data: wallet } = useTeamWallet(teamId);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('vi-VN', {
@@ -45,7 +23,7 @@ const TeamDashboardPage: React.FC = () => {
         }).format(amount);
     };
 
-    if (loading) {
+    if (teamLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <LoadingSpinner size="lg" />
@@ -65,6 +43,13 @@ const TeamDashboardPage: React.FC = () => {
             </div>
         );
     }
+
+    const stats = {
+        members: roster?.length || 0,
+        pendingRequests: joinRequests?.length || 0,
+        upcomingMatches: matchesData?.data?.length || 0,
+        walletBalance: wallet?.balance || 0,
+    };
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8">
@@ -110,28 +95,28 @@ const TeamDashboardPage: React.FC = () => {
                     className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
                 >
                     <p className="text-sm text-gray-500 mb-1">Members</p>
-                    <p className="text-3xl font-bold text-emerald-600">{mockStats.members}</p>
+                    <p className="text-3xl font-bold text-emerald-600">{stats.members}</p>
                 </Link>
                 <Link
                     to={`/leader/teams/${id}/requests`}
                     className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
                 >
                     <p className="text-sm text-gray-500 mb-1">Pending Requests</p>
-                    <p className="text-3xl font-bold text-yellow-600">{mockStats.pendingRequests}</p>
+                    <p className="text-3xl font-bold text-yellow-600">{stats.pendingRequests}</p>
                 </Link>
                 <Link
                     to={`/leader/teams/${id}/matches`}
                     className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
                 >
                     <p className="text-sm text-gray-500 mb-1">Upcoming Matches</p>
-                    <p className="text-3xl font-bold text-blue-600">{mockStats.upcomingMatches}</p>
+                    <p className="text-3xl font-bold text-blue-600">{stats.upcomingMatches}</p>
                 </Link>
                 <Link
                     to={`/leader/teams/${id}/finance`}
                     className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
                 >
                     <p className="text-sm text-gray-500 mb-1">Wallet Balance</p>
-                    <p className="text-2xl font-bold text-purple-600">{formatCurrency(mockStats.walletBalance)}</p>
+                    <p className="text-2xl font-bold text-purple-600">{formatCurrency(stats.walletBalance)}</p>
                 </Link>
             </div>
 

@@ -2,50 +2,15 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Plus, Calendar, Mail } from 'lucide-react';
 import { LoadingSpinner, PageContainer, PageHeader } from '../../components/common';
-import { MatchStatus, Visibility, type MatchEvent } from '../../types';
-
-// Mock data
-const mockMatches: MatchEvent[] = [
-    {
-        matchId: 1,
-        hostTeamId: 1,
-        opponentTeamId: 2,
-        fieldId: 1,
-        matchDate: '2024-01-20',
-        startTime: '19:00:00',
-        endTime: '21:00:00',
-        status: MatchStatus.SCHEDULED,
-        visibility: Visibility.PUBLIC,
-        description: 'Friendly match',
-        createdAt: '2024-01-10T00:00:00Z',
-        updatedAt: '2024-01-10T00:00:00Z',
-    },
-    {
-        matchId: 2,
-        hostTeamId: 1,
-        matchDate: '2024-01-25',
-        startTime: '18:00:00',
-        endTime: '20:00:00',
-        status: MatchStatus.LOOKING_FOR_FIELD,
-        visibility: Visibility.PUBLIC,
-        description: 'Looking for opponent',
-        createdAt: '2024-01-12T00:00:00Z',
-        updatedAt: '2024-01-12T00:00:00Z',
-    },
-];
+import { MatchStatus } from '../../types';
+import { useTeamMatches } from '../../api/hooks/useMatch';
 
 const MatchListPage: React.FC = () => {
     const { teamId } = useParams<{ teamId: string }>();
-    const [loading, setLoading] = React.useState(true);
-    const [matches, setMatches] = React.useState<MatchEvent[]>([]);
+    const teamIdNum = parseInt(teamId || '0', 10);
 
-    React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setMatches(mockMatches);
-            setLoading(false);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [teamId]);
+    const { data: matchesData, isLoading } = useTeamMatches(teamIdNum);
+    const matches = matchesData?.data || [];
 
     const getStatusBadge = (status: MatchStatus) => {
         const styles: Record<MatchStatus, string> = {
@@ -63,7 +28,7 @@ const MatchListPage: React.FC = () => {
         );
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <LoadingSpinner size="lg" />

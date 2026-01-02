@@ -17,9 +17,6 @@ import { UserRole } from "@/types";
 import { useAuth } from "@/contexts";
 import clsx from "clsx";
 
-// Mock User Role for now - in real app, get from Context/Store
-const CURRENT_USER_ROLES: UserRole[] = [UserRole.PLAYER, UserRole.TEAM_LEADER, UserRole.FIELD_OWNER, UserRole.MODERATOR];
-
 const SIDEBAR_ITEMS = {
     common: [
         { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
@@ -44,8 +41,12 @@ const SIDEBAR_ITEMS = {
 
 export const DashboardLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
     const navigate = useNavigate();
+
+    // Get user roles from AuthContext
+    const userRoles = user?.roles || [];
+    const username = user?.username || 'User';
 
     const handleLogout = async () => {
         await logout();
@@ -55,10 +56,10 @@ export const DashboardLayout = () => {
     // Flatten items based on roles
     const navItems = [
         ...SIDEBAR_ITEMS.common,
-        ...(CURRENT_USER_ROLES.includes(UserRole.PLAYER) ? SIDEBAR_ITEMS[UserRole.PLAYER] : []),
-        ...(CURRENT_USER_ROLES.includes(UserRole.TEAM_LEADER) ? SIDEBAR_ITEMS[UserRole.TEAM_LEADER] : []),
-        ...(CURRENT_USER_ROLES.includes(UserRole.FIELD_OWNER) ? SIDEBAR_ITEMS[UserRole.FIELD_OWNER] : []),
-        ...(CURRENT_USER_ROLES.includes(UserRole.MODERATOR) ? SIDEBAR_ITEMS[UserRole.MODERATOR] : []),
+        ...(userRoles.includes(UserRole.PLAYER) ? SIDEBAR_ITEMS[UserRole.PLAYER] : []),
+        ...(userRoles.includes(UserRole.TEAM_LEADER) ? SIDEBAR_ITEMS[UserRole.TEAM_LEADER] : []),
+        ...(userRoles.includes(UserRole.FIELD_OWNER) ? SIDEBAR_ITEMS[UserRole.FIELD_OWNER] : []),
+        ...(userRoles.includes(UserRole.MODERATOR) ? SIDEBAR_ITEMS[UserRole.MODERATOR] : []),
     ];
 
     // Remove duplicates by path
@@ -121,8 +122,10 @@ export const DashboardLayout = () => {
                         <Link to="/notifications" className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
                             <Bell className="h-6 w-6" />
                         </Link>
-                        <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                            <img src="https://ui-avatars.com/api/?name=User" alt="User" />
+                        <div className="h-8 w-8 rounded-full bg-primary-100 overflow-hidden flex items-center justify-center">
+                            <span className="text-sm font-bold text-primary-600">
+                                {username.charAt(0).toUpperCase()}
+                            </span>
                         </div>
                     </div>
                 </header>

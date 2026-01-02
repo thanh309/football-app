@@ -2,35 +2,15 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { PostCard, CommentSection } from '../../components/community';
 import { LoadingSpinner, PageContainer, PageHeader, ContentCard } from '../../components/common';
-import { Visibility, type Post } from '../../types';
-
-// Mock data for demonstration
-const mockPost: Post = {
-    postId: 1,
-    authorId: 1,
-    content: 'Great match yesterday! Our team played really well and we managed to secure a 3-2 victory against City United. Special thanks to our goalkeeper for some amazing saves! 🎉⚽',
-    visibility: Visibility.PUBLIC,
-    reactionCount: 24,
-    commentCount: 8,
-    isHidden: false,
-    createdAt: '2024-01-15T14:30:00Z',
-    updatedAt: '2024-01-15T14:30:00Z',
-};
+import { usePost } from '../../api/hooks/useCommunity';
 
 const PostDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const [loading, setLoading] = React.useState(true);
-    const [post, setPost] = React.useState<Post | null>(null);
+    const postId = parseInt(id || '0', 10);
 
-    React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setPost(mockPost);
-            setLoading(false);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [id]);
+    const { data: post, isLoading } = usePost(postId);
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <LoadingSpinner size="lg" />

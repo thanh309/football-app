@@ -1,15 +1,44 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, Edit, Image, DollarSign, MapPin, Clock, CheckCircle, Users } from 'lucide-react';
 import { LoadingSpinner, PageContainer, PageHeader, ContentCard } from '../../components/common';
 import { useField } from '../../api/hooks/useField';
-import { FieldStatus } from '../../types';
+import { usePendingBookings, useFieldCalendar } from '../../api/hooks/useBooking';
+import { FieldStatus, CalendarStatus } from '../../types';
 
 const FieldDashboardPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const { data: field, isLoading } = useField(Number(id));
+    const fieldId = Number(id);
+    const { data: field, isLoading: fieldLoading } = useField(fieldId);
+    const { data: pendingBookings, isLoading: bookingsLoading } = usePendingBookings(fieldId);
 
-    if (isLoading) {
+    // Get calendar for current month to calculate stats
+    const today = new Date();
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    const { data: calendar, isLoading: calendarLoading } = useFieldCalendar(fieldId, {
+        startDate: startOfMonth.toISOString().split('T')[0],
+        endDate: endOfMonth.toISOString().split('T')[0],
+    });
+
+    // Calculate stats from calendar data
+    const stats = useMemo(() => {
+        if (!calendar) return { todayBookings: 0, monthBookings: 0 };
+
+        const todayStr = today.toISOString().split('T')[0];
+        const todayBookings = calendar.filter(
+            slot => slot.date === todayStr && slot.status === CalendarStatus.BOOKED
+        ).length;
+
+        const monthBookings = calendar.filter(
+            slot => slot.status === CalendarStatus.BOOKED
+        ).length;
+
+        return { todayBookings, monthBookings };
+    }, [calendar, today]);
+
+    if (fieldLoading) {
         return <LoadingSpinner text="Loading field details..." />;
     }
 
@@ -46,8 +75,8 @@ const FieldDashboardPage: React.FC = () => {
                 backLink={{ label: 'Back to My Fields', to: '/owner/fields' }}
                 action={
                     <span className={`text-sm px-3 py-1 rounded-full ${field.status === FieldStatus.VERIFIED
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-yellow-100 text-yellow-800'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-yellow-100 text-yellow-800'
                         }`}>
                         {field.status === FieldStatus.VERIFIED && <CheckCircle className="w-3 h-3 inline mr-1" />}
                         {field.status}
@@ -102,7 +131,11 @@ const FieldDashboardPage: React.FC = () => {
                         </div>
                         <div>
                             <p className="text-sm text-slate-500">Today's Bookings</p>
-                            <p className="text-2xl font-bold text-slate-900">0</p>
+                            {calendarLoading ? (
+                                <LoadingSpinner size="sm" />
+                            ) : (
+                                <p className="text-2xl font-bold text-slate-900">{stats.todayBookings}</p>
+                            )}
                         </div>
                     </div>
                 </ContentCard>
@@ -113,7 +146,11 @@ const FieldDashboardPage: React.FC = () => {
                         </div>
                         <div>
                             <p className="text-sm text-slate-500">Pending Requests</p>
-                            <p className="text-2xl font-bold text-slate-900">0</p>
+                            {bookingsLoading ? (
+                                <LoadingSpinner size="sm" />
+                            ) : (
+                                <p className="text-2xl font-bold text-slate-900">{pendingBookings?.length || 0}</p>
+                            )}
                         </div>
                     </div>
                 </ContentCard>
@@ -124,7 +161,11 @@ const FieldDashboardPage: React.FC = () => {
                         </div>
                         <div>
                             <p className="text-sm text-slate-500">This Month's Bookings</p>
-                            <p className="text-2xl font-bold text-slate-900">0</p>
+                            {calendarLoading ? (
+                                <LoadingSpinner size="sm" />
+                            ) : (
+                                <p className="text-2xl font-bold text-slate-900">{stats.monthBookings}</p>
+                            )}
                         </div>
                     </div>
                 </ContentCard>

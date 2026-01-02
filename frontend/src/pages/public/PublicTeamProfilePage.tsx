@@ -1,41 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MapPin, CheckCircle, Users } from 'lucide-react';
 import { LoadingSpinner, Button, PageContainer, PageHeader, ContentCard } from '../../components/common';
-import { TeamStatus, type TeamProfile } from '../../types';
+import { TeamStatus, MatchStatus } from '../../types';
 import { useAuth } from '../../contexts';
-import { useRequestJoinTeam } from '../../api/hooks/useTeam';
+import { useTeam, useTeamRoster, useRequestJoinTeam } from '../../api/hooks/useTeam';
+import { useTeamMatches } from '../../api/hooks/useMatch';
 import toast from 'react-hot-toast';
-
-// Mock data for demonstration
-const mockTeam: TeamProfile = {
-    teamId: 1,
-    teamName: 'FC Thunder',
-    description: 'A competitive amateur football team based in the city. We play weekly and participate in local tournaments. Looking for dedicated players who want to improve and have fun!',
-    logoUrl: 'https://via.placeholder.com/200',
-    leaderId: 1,
-    status: TeamStatus.VERIFIED,
-    location: 'Ho Chi Minh City, Vietnam',
-    skillLevel: 7,
-    createdAt: '2023-01-15T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
-};
 
 const PublicTeamProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const [loading, setLoading] = React.useState(true);
-    const [team, setTeam] = React.useState<TeamProfile | null>(null);
+    const teamId = parseInt(id || '0', 10);
     const { isAuthenticated } = useAuth();
     const requestJoinTeam = useRequestJoinTeam();
     const [hasRequested, setHasRequested] = useState(false);
 
-    React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setTeam(mockTeam);
-            setLoading(false);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [id]);
+    const { data: team, isLoading } = useTeam(teamId);
+    const { data: roster } = useTeamRoster(teamId);
+    const { data: matches, isLoading: matchesLoading } = useTeamMatches(teamId);
+
+    // Calculate match stats
+    const matchStats = useMemo(() => {
+        const matchData = matches?.data;
+        if (!matchData || matchData.length === 0) return { played: 0, wins: 0 };
+
+        const completedMatches = matchData.filter(m => m.status === MatchStatus.COMPLETED);
+        const played = completedMatches.length;
+
+        // Note: Would need MatchResult data to determine wins accurately
+        const wins = 0;
+
+        return { played, wins };
+    }, [matches]);
 
     const handleRequestJoin = async () => {
         if (!team) return;
@@ -48,7 +44,7 @@ const PublicTeamProfilePage: React.FC = () => {
         }
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <LoadingSpinner size="lg" />
@@ -147,15 +143,23 @@ const PublicTeamProfilePage: React.FC = () => {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <ContentCard className="text-center">
-                    <p className="text-2xl font-bold text-primary-600">12</p>
+                    <p className="text-2xl font-bold text-primary-600">{roster?.length || 0}</p>
                     <p className="text-sm text-slate-500">Members</p>
                 </ContentCard>
                 <ContentCard className="text-center">
-                    <p className="text-2xl font-bold text-primary-600">24</p>
+                    {matchesLoading ? (
+                        <LoadingSpinner size="sm" />
+                    ) : (
+                        <p className="text-2xl font-bold text-primary-600">{matchStats.played}</p>
+                    )}
                     <p className="text-sm text-slate-500">Matches Played</p>
                 </ContentCard>
                 <ContentCard className="text-center">
-                    <p className="text-2xl font-bold text-primary-600">15</p>
+                    {matchesLoading ? (
+                        <LoadingSpinner size="sm" />
+                    ) : (
+                        <p className="text-2xl font-bold text-primary-600">{matchStats.wins}</p>
+                    )}
                     <p className="text-sm text-slate-500">Wins</p>
                 </ContentCard>
                 <ContentCard className="text-center">
