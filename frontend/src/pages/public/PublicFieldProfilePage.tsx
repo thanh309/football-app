@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
-import { LoadingSpinner, Button } from '../../components/common';
+import { MapPin, CheckCircle } from 'lucide-react';
+import { LoadingSpinner, Button, PageContainer, PageHeader, ContentCard } from '../../components/common';
 import { BookFieldModal, ViewCalendarModal } from '../../components/booking';
 import { FieldStatus, type FieldProfile } from '../../types';
 import { useAuth } from '../../contexts';
@@ -31,7 +31,6 @@ const PublicFieldProfilePage: React.FC = () => {
     const [showCalendarModal, setShowCalendarModal] = useState(false);
 
     React.useEffect(() => {
-        // Simulate API call
         const timer = setTimeout(() => {
             setField(mockField);
             setLoading(false);
@@ -56,175 +55,148 @@ const PublicFieldProfilePage: React.FC = () => {
 
     if (!field) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Field Not Found</h2>
-                    <Link to="/search/fields" className="text-emerald-600 hover:underline">
+            <PageContainer maxWidth="md">
+                <div className="text-center py-12">
+                    <h2 className="text-2xl font-bold text-slate-900 mb-4">Field Not Found</h2>
+                    <Link to="/search/fields" className="text-primary-600 hover:underline">
                         Browse Fields
                     </Link>
                 </div>
-            </div>
+            </PageContainer>
         );
     }
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-8">
-            {/* Back Button */}
-            <Link
-                to="/search/fields"
-                className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
-            >
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Back to Fields
-            </Link>
+        <PageContainer maxWidth="lg">
+            <PageHeader
+                title={field.fieldName}
+                subtitle={
+                    <span className="flex items-center">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        {field.location}
+                    </span>
+                }
+                backLink={{ label: 'Back to Fields', to: '/search/fields' }}
+                action={
+                    field.status === FieldStatus.VERIFIED ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                            <CheckCircle className="w-3.5 h-3.5 mr-1" />
+                            Verified
+                        </span>
+                    ) : undefined
+                }
+            />
 
             {/* Image Gallery Placeholder */}
-            <div className="bg-gray-200 rounded-2xl h-64 md:h-80 mb-6 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                    <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-slate-200 rounded-xl h-64 md:h-80 mb-6 flex items-center justify-center border border-slate-300">
+                <div className="text-center text-slate-500">
+                    <svg className="w-16 h-16 mx-auto mb-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <p>Field Photos</p>
                 </div>
             </div>
 
-            {/* Header */}
-            <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            {/* Pricing and Actions */}
+            <ContentCard className="mb-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                                {field.fieldName}
-                            </h1>
-                            {field.status === FieldStatus.VERIFIED && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                                    <svg className="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                    Verified
-                                </span>
-                            )}
-                        </div>
-
-                        <p className="text-gray-600 flex items-center gap-2 mb-4">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            {field.location}
-                        </p>
-                    </div>
-
-                    <div className="text-right">
-                        <p className="text-sm text-gray-500">Starting from</p>
-                        <p className="text-2xl font-bold text-emerald-600">
+                        <p className="text-sm text-slate-500">Starting from</p>
+                        <p className="text-2xl font-bold text-primary-600">
                             {formatPrice(field.defaultPricePerHour)}
                         </p>
-                        <p className="text-sm text-gray-500">per hour</p>
+                        <p className="text-sm text-slate-500">per hour</p>
+                    </div>
+                    <div className="flex flex-wrap gap-4">
+                        {isAuthenticated ? (
+                            <Button variant="primary" onClick={() => setShowBookingModal(true)}>
+                                Book Now
+                            </Button>
+                        ) : (
+                            <Link to="/login">
+                                <Button variant="outline">
+                                    Log in to Book
+                                </Button>
+                            </Link>
+                        )}
+                        <Button variant="secondary" onClick={() => setShowCalendarModal(true)}>
+                            View Calendar
+                        </Button>
                     </div>
                 </div>
-
-                <div className="flex flex-wrap gap-4 mt-4">
-                    {isAuthenticated ? (
-                        <Button variant="primary" onClick={() => setShowBookingModal(true)}>
-                            Book Now
-                        </Button>
-                    ) : (
-                        <Link to="/login">
-                            <Button variant="outline">
-                                Log in to Book
-                            </Button>
-                        </Link>
-                    )}
-                    <Button variant="secondary" onClick={() => setShowCalendarModal(true)}>
-                        View Calendar
-                    </Button>
-                </div>
-            </div>
+            </ContentCard>
 
             {/* Description */}
-            <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">About This Field</h2>
-                <p className="text-gray-600 whitespace-pre-wrap">
+            <ContentCard title="About This Field" className="mb-6">
+                <p className="text-slate-600 whitespace-pre-wrap">
                     {field.description || 'No description provided.'}
                 </p>
-            </div>
+            </ContentCard>
 
             {/* Details */}
             <div className="grid md:grid-cols-2 gap-6 mb-6">
-                <div className="bg-white rounded-2xl shadow-sm p-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Field Details</h2>
+                <ContentCard title="Field Details">
                     <dl className="space-y-3">
                         {field.capacity && (
                             <div className="flex justify-between">
-                                <dt className="text-gray-500">Capacity</dt>
-                                <dd className="font-medium text-gray-900">{field.capacity} players</dd>
+                                <dt className="text-slate-500">Capacity</dt>
+                                <dd className="font-medium text-slate-900">{field.capacity} players</dd>
                             </div>
                         )}
                         <div className="flex justify-between">
-                            <dt className="text-gray-500">Field Type</dt>
-                            <dd className="font-medium text-gray-900">7-a-side</dd>
+                            <dt className="text-slate-500">Field Type</dt>
+                            <dd className="font-medium text-slate-900">7-a-side</dd>
                         </div>
                         <div className="flex justify-between">
-                            <dt className="text-gray-500">Surface</dt>
-                            <dd className="font-medium text-gray-900">Artificial Turf</dd>
+                            <dt className="text-slate-500">Surface</dt>
+                            <dd className="font-medium text-slate-900">Artificial Turf</dd>
                         </div>
                     </dl>
-                </div>
+                </ContentCard>
 
-                <div className="bg-white rounded-2xl shadow-sm p-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Amenities</h2>
+                <ContentCard title="Amenities">
                     <ul className="space-y-2">
-                        <li className="flex items-center gap-2 text-gray-600">
-                            <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
+                        <li className="flex items-center gap-2 text-slate-600">
+                            <CheckCircle className="w-5 h-5 text-primary-500" />
                             Floodlights
                         </li>
-                        <li className="flex items-center gap-2 text-gray-600">
-                            <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
+                        <li className="flex items-center gap-2 text-slate-600">
+                            <CheckCircle className="w-5 h-5 text-primary-500" />
                             Changing Rooms
                         </li>
-                        <li className="flex items-center gap-2 text-gray-600">
-                            <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
+                        <li className="flex items-center gap-2 text-slate-600">
+                            <CheckCircle className="w-5 h-5 text-primary-500" />
                             Parking
                         </li>
-                        <li className="flex items-center gap-2 text-gray-600">
-                            <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
+                        <li className="flex items-center gap-2 text-slate-600">
+                            <CheckCircle className="w-5 h-5 text-primary-500" />
                             Drinking Water
                         </li>
                     </ul>
-                </div>
+                </ContentCard>
             </div>
 
             {/* Operating Hours */}
-            <div className="bg-white rounded-2xl shadow-sm p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Operating Hours</h2>
+            <ContentCard title="Operating Hours">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
-                        <p className="text-sm text-gray-500">Mon - Fri</p>
-                        <p className="font-medium text-gray-900">6:00 AM - 10:00 PM</p>
+                        <p className="text-sm text-slate-500">Mon - Fri</p>
+                        <p className="font-medium text-slate-900">6:00 AM - 10:00 PM</p>
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500">Saturday</p>
-                        <p className="font-medium text-gray-900">6:00 AM - 11:00 PM</p>
+                        <p className="text-sm text-slate-500">Saturday</p>
+                        <p className="font-medium text-slate-900">6:00 AM - 11:00 PM</p>
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500">Sunday</p>
-                        <p className="font-medium text-gray-900">7:00 AM - 10:00 PM</p>
+                        <p className="text-sm text-slate-500">Sunday</p>
+                        <p className="font-medium text-slate-900">7:00 AM - 10:00 PM</p>
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500">Holidays</p>
-                        <p className="font-medium text-gray-900">7:00 AM - 9:00 PM</p>
+                        <p className="text-sm text-slate-500">Holidays</p>
+                        <p className="font-medium text-slate-900">7:00 AM - 9:00 PM</p>
                     </div>
                 </div>
-            </div>
+            </ContentCard>
 
             {/* Modals */}
             {showBookingModal && (
@@ -244,9 +216,8 @@ const PublicFieldProfilePage: React.FC = () => {
                     onClose={() => setShowCalendarModal(false)}
                 />
             )}
-        </div>
+        </PageContainer>
     );
 };
 
 export default PublicFieldProfilePage;
-

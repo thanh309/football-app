@@ -169,17 +169,6 @@ const LandingPage: React.FC = () => {
                     </div>
                 </div>
             </section>
-
-            {/* Footer */}
-            <footer className="bg-slate-900 text-slate-400 py-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center">
-                        <p className="text-lg font-semibold text-white mb-2">Kick-off</p>
-                        <p className="text-sm">Amateur Football Management and Connection Platform</p>
-                        <p className="text-sm mt-4">&copy; {new Date().getFullYear()} Kick-off. All rights reserved.</p>
-                    </div>
-                </div>
-            </footer>
         </div>
     );
 };

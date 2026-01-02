@@ -7,7 +7,7 @@ export interface PageHeaderProps {
     /** Page title */
     title: string;
     /** Optional subtitle displayed below title */
-    subtitle?: string;
+    subtitle?: React.ReactNode;
     /** Optional back navigation link */
     backLink?: {
         label: string;
@@ -43,7 +43,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                         {title}
                     </h1>
                     {subtitle && (
-                        <p className="text-slate-600 mt-1">{subtitle}</p>
+                        <div className="text-slate-600 mt-1">{subtitle}</div>
                     )}
                 </div>
                 {action && <div className="flex-shrink-0">{action}</div>}
