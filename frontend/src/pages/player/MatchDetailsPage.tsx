@@ -47,7 +47,7 @@ const MatchDetailsPage: React.FC = () => {
             <div className="max-w-4xl mx-auto px-4 py-8">
                 <div className="text-center py-12">
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">Match Not Found</h2>
-                    <Link to="/player/schedule" className="text-emerald-600 hover:underline">
+                    <Link to="/schedule" className="text-emerald-600 hover:underline">
                         Back to Schedule
                     </Link>
                 </div>
@@ -59,7 +59,7 @@ const MatchDetailsPage: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 py-8">
             {/* Back link */}
             <Link
-                to="/player/schedule"
+                to="/schedule"
                 className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6"
             >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

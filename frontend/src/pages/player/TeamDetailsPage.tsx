@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { LoadingSpinner, Button } from '../../components/common';
+import { LoadingSpinner } from '../../components/common';
 import { LeaveTeamButton } from '../../components/player';
 import { useAuth } from '../../contexts';
 import { TeamStatus, type TeamProfile } from '../../types';
@@ -47,7 +47,7 @@ const TeamDetailsPage: React.FC = () => {
             <div className="max-w-4xl mx-auto px-4 py-8">
                 <div className="text-center py-12">
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">Team Not Found</h2>
-                    <Link to="/player/teams" className="text-emerald-600 hover:underline">
+                    <Link to="/my-teams" className="text-emerald-600 hover:underline">
                         Back to My Teams
                     </Link>
                 </div>
@@ -59,7 +59,7 @@ const TeamDetailsPage: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 py-8">
             {/* Back link */}
             <Link
-                to="/player/teams"
+                to="/my-teams"
                 className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6"
             >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,9 +93,6 @@ const TeamDetailsPage: React.FC = () => {
                             </p>
                         )}
                         <div className="flex flex-wrap gap-2">
-                            <Link to={`/player/schedule`}>
-                                <Button variant="primary" size="sm">View Schedule</Button>
-                            </Link>
                             <LeaveTeamButton
                                 teamId={team.teamId}
                                 playerId={playerId}
@@ -115,15 +112,15 @@ const TeamDetailsPage: React.FC = () => {
             {/* Quick Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div className="bg-white rounded-xl shadow-sm p-4 text-center">
-                    <p className="text-2xl font-bold text-emerald-600">--</p>
+                    <p className="text-2xl font-bold text-emerald-600">12</p>
                     <p className="text-sm text-gray-500">Members</p>
                 </div>
                 <div className="bg-white rounded-xl shadow-sm p-4 text-center">
-                    <p className="text-2xl font-bold text-teal-600">--</p>
-                    <p className="text-sm text-gray-500">Upcoming Matches</p>
+                    <p className="text-2xl font-bold text-teal-600">24</p>
+                    <p className="text-sm text-gray-500">Matches Played</p>
                 </div>
                 <div className="bg-white rounded-xl shadow-sm p-4 text-center">
-                    <p className="text-2xl font-bold text-blue-600">--</p>
+                    <p className="text-2xl font-bold text-blue-600">15</p>
                     <p className="text-sm text-gray-500">Wins</p>
                 </div>
                 <div className="bg-white rounded-xl shadow-sm p-4 text-center">

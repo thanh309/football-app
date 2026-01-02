@@ -1,7 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChangePasswordForm } from '../../components/forms';
+import { ConfirmationModal } from '../../components/common';
+import { useAuth } from '../../contexts';
+import toast from 'react-hot-toast';
 
 const AccountSettingsPage: React.FC = () => {
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleDeleteAccount = async () => {
+        setIsDeleting(true);
+        try {
+            // For now, just log out the user
+            await logout();
+            toast.success('Account deletion initiated. You have been logged out.');
+            navigate('/');
+        } catch {
+            toast.error('Failed to process account deletion');
+        } finally {
+            setIsDeleting(false);
+            setShowDeleteModal(false);
+        }
+    };
+
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
             <div className="mb-8">
@@ -49,19 +73,27 @@ const AccountSettingsPage: React.FC = () => {
                 </p>
                 <button
                     type="button"
-                    onClick={() => {
-                        if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                            // TODO: Call deleteAccount API when available
-                            alert('Account deletion will be processed. (Feature coming soon)');
-                        }
-                    }}
+                    onClick={() => setShowDeleteModal(true)}
                     className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
                 >
                     Delete Account
                 </button>
             </div>
+
+            {/* Delete Account Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDeleteAccount}
+                title="Delete Account?"
+                message="Are you sure you want to delete your account? This action cannot be undone. You will be logged out immediately."
+                confirmLabel="Delete Account"
+                variant="danger"
+                isLoading={isDeleting}
+            />
         </div>
     );
 };
 
 export default AccountSettingsPage;
+

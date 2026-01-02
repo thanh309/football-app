@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { Button, ConfirmationModal } from '../common';
 import { useLeaveTeam } from '../../api/hooks/useTeam';
@@ -23,6 +24,7 @@ const LeaveTeamButton: React.FC<LeaveTeamButtonProps> = ({
 }) => {
     const [showConfirm, setShowConfirm] = useState(false);
     const leaveMutation = useLeaveTeam();
+    const navigate = useNavigate();
 
     const handleLeave = async () => {
         try {
@@ -33,6 +35,7 @@ const LeaveTeamButton: React.FC<LeaveTeamButtonProps> = ({
                     : 'You have left the team'
             );
             setShowConfirm(false);
+            navigate('/my-teams');
         } catch (error: unknown) {
             const err = error as { response?: { data?: { message?: string } } };
             const message = err.response?.data?.message || 'Failed to leave team';
