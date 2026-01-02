@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
+import { PageContainer, PageHeader, LoadingSpinner } from '../../components/common';
 import {
     FieldSearchFilter,
     FieldResultCard,
     EmptySearchState,
     type FieldSearchFilters,
 } from '../../components/search';
-import { LoadingSpinner } from '../../components/common';
 import { FieldStatus, type FieldProfile } from '../../types';
 
 // Extended mock data with amenity IDs
@@ -25,7 +25,7 @@ const mockFields: FieldWithAmenities[] = [
         status: FieldStatus.VERIFIED,
         createdAt: '2023-06-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
-        amenityIds: [1, 2, 3, 5], // Floodlights, Changing Rooms, Parking, First Aid
+        amenityIds: [1, 2, 3, 5],
     },
     {
         fieldId: 2,
@@ -38,7 +38,7 @@ const mockFields: FieldWithAmenities[] = [
         status: FieldStatus.VERIFIED,
         createdAt: '2023-08-15T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
-        amenityIds: [1, 2, 3, 4, 5], // All amenities
+        amenityIds: [1, 2, 3, 4, 5],
     },
     {
         fieldId: 3,
@@ -51,7 +51,7 @@ const mockFields: FieldWithAmenities[] = [
         status: FieldStatus.VERIFIED,
         createdAt: '2023-09-20T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
-        amenityIds: [2, 4], // Changing Rooms, Cafeteria
+        amenityIds: [2, 4],
     },
 ];
 
@@ -63,7 +63,6 @@ const SearchFieldsPage: React.FC = () => {
     const handleSearch = (filters: FieldSearchFilters) => {
         setSearchQuery(filters.query || '');
         setLoading(true);
-        // Simulate search
         setTimeout(() => {
             let filtered = [...mockFields];
             if (filters.query) {
@@ -82,7 +81,6 @@ const SearchFieldsPage: React.FC = () => {
             if (filters.maxPrice !== undefined) {
                 filtered = filtered.filter((f) => f.defaultPricePerHour <= filters.maxPrice!);
             }
-            // Filter by amenities - field must have ALL selected amenities
             if (filters.amenityIds && filters.amenityIds.length > 0) {
                 filtered = filtered.filter((f) =>
                     filters.amenityIds!.every((amenityId) => f.amenityIds.includes(amenityId))
@@ -94,11 +92,11 @@ const SearchFieldsPage: React.FC = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="mb-8">
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Search Fields</h1>
-                <p className="text-gray-600 mt-1">Find and book football fields near you.</p>
-            </div>
+        <PageContainer maxWidth="xl">
+            <PageHeader
+                title="Search Fields"
+                subtitle="Find and book football fields near you."
+            />
 
             {/* Filters */}
             <div className="mb-6">
@@ -122,9 +120,8 @@ const SearchFieldsPage: React.FC = () => {
                     ))}
                 </div>
             )}
-        </div>
+        </PageContainer>
     );
 };
 
 export default SearchFieldsPage;
-

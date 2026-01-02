@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MatchDetailsCard } from '../../components/match';
 import { ConfirmAttendanceButton } from '../../components/player';
-import { LoadingSpinner } from '../../components/common';
+import { LoadingSpinner, PageContainer, PageHeader, ContentCard } from '../../components/common';
 import { MatchStatus, Visibility, type MatchEvent } from '../../types';
 
 // Mock data
@@ -44,60 +44,48 @@ const MatchDetailsPage: React.FC = () => {
 
     if (!match) {
         return (
-            <div className="max-w-4xl mx-auto px-4 py-8">
+            <PageContainer maxWidth="md">
                 <div className="text-center py-12">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Match Not Found</h2>
-                    <Link to="/schedule" className="text-emerald-600 hover:underline">
+                    <h2 className="text-2xl font-bold text-slate-900 mb-4">Match Not Found</h2>
+                    <Link to="/schedule" className="text-primary-600 hover:underline">
                         Back to Schedule
                     </Link>
                 </div>
-            </div>
+            </PageContainer>
         );
     }
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-8">
-            {/* Back link */}
-            <Link
-                to="/schedule"
-                className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6"
-            >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Back to Schedule
-            </Link>
+        <PageContainer maxWidth="md">
+            <PageHeader
+                title="Match Details"
+                backLink={{ label: 'Back to Schedule', to: '/schedule' }}
+            />
 
-            <div className="mb-8">
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Match Details</h1>
-            </div>
-
-            {/* Match Card - use matchId prop instead of match */}
+            {/* Match Card */}
             <div className="mb-6">
                 <MatchDetailsCard matchId={Number(matchId)} />
             </div>
 
             {/* Attendance Action */}
             {match.status === MatchStatus.SCHEDULED && (
-                <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Attendance</h2>
-                    <p className="text-gray-600 mb-4">
+                <ContentCard title="Your Attendance" className="mb-6">
+                    <p className="text-slate-600 mb-4">
                         Please confirm whether you will attend this match.
                     </p>
                     <ConfirmAttendanceButton matchId={match.matchId} />
-                </div>
+                </ContentCard>
             )}
 
             {/* Match Info */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Additional Information</h2>
+            <ContentCard title="Additional Information">
                 {match.description ? (
-                    <p className="text-gray-600">{match.description}</p>
+                    <p className="text-slate-600">{match.description}</p>
                 ) : (
-                    <p className="text-gray-500">No additional information provided.</p>
+                    <p className="text-slate-500">No additional information provided.</p>
                 )}
-            </div>
-        </div>
+            </ContentCard>
+        </PageContainer>
     );
 };
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { LoadingSpinner } from '../../components/common';
+import { Plus, Users } from 'lucide-react';
+import { LoadingSpinner, PageContainer, PageHeader } from '../../components/common';
 import { TeamStatus, type TeamProfile } from '../../types';
 
 // Mock data
@@ -66,33 +67,29 @@ const LeaderTeamsPage: React.FC = () => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Teams</h1>
-                    <p className="text-gray-600 mt-1">Teams you manage as a leader.</p>
-                </div>
-                <Link
-                    to="/leader/teams/create"
-                    className="inline-flex items-center px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors"
-                >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Create Team
-                </Link>
-            </div>
-
-            {teams.length === 0 ? (
-                <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-                    <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No teams yet</h3>
-                    <p className="text-gray-500 mb-6">Create your first team to get started.</p>
+        <PageContainer maxWidth="xl">
+            <PageHeader
+                title="My Teams"
+                subtitle="Teams you manage as a leader."
+                action={
                     <Link
                         to="/leader/teams/create"
-                        className="inline-flex items-center px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors"
+                        className="inline-flex items-center px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors"
+                    >
+                        <Plus className="w-5 h-5 mr-2" />
+                        Create Team
+                    </Link>
+                }
+            />
+
+            {teams.length === 0 ? (
+                <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-12 text-center">
+                    <Users className="w-16 h-16 mx-auto text-slate-300 mb-4" />
+                    <h3 className="text-lg font-medium text-slate-900 mb-2">No teams yet</h3>
+                    <p className="text-slate-500 mb-6">Create your first team to get started.</p>
+                    <Link
+                        to="/leader/teams/create"
+                        className="inline-flex items-center px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors"
                     >
                         Create Team
                     </Link>
@@ -103,28 +100,26 @@ const LeaderTeamsPage: React.FC = () => {
                         <Link
                             key={team.teamId}
                             to={`/leader/teams/${team.teamId}`}
-                            className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
+                            className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 hover:shadow-md transition-shadow"
                         >
                             <div className="flex items-center gap-4 mb-4">
-                                <div className="w-16 h-16 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0">
+                                <div className="w-16 h-16 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0">
                                     {team.logoUrl ? (
                                         <img src={team.logoUrl} alt={team.teamName} className="w-full h-full object-cover" />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
+                                        <div className="w-full h-full flex items-center justify-center text-slate-400">
+                                            <Users className="w-8 h-8" />
                                         </div>
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold text-gray-900 truncate">{team.teamName}</h3>
-                                    <p className="text-sm text-gray-500 truncate">{team.location}</p>
+                                    <h3 className="font-semibold text-slate-900 truncate">{team.teamName}</h3>
+                                    <p className="text-sm text-slate-500 truncate">{team.location}</p>
                                 </div>
                             </div>
                             <div className="flex items-center justify-between">
                                 {getStatusBadge(team.status)}
-                                <span className="text-sm text-gray-500">
+                                <span className="text-sm text-slate-500">
                                     {new Date(team.createdAt).toLocaleDateString()}
                                 </span>
                             </div>
@@ -132,7 +127,7 @@ const LeaderTeamsPage: React.FC = () => {
                     ))}
                 </div>
             )}
-        </div>
+        </PageContainer>
     );
 };
 

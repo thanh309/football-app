@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
+import { PageContainer, PageHeader, LoadingSpinner } from '../../components/common';
 import {
     TeamSearchFilter,
     TeamResultCard,
     EmptySearchState,
     type TeamSearchFilters,
 } from '../../components/search';
-import { LoadingSpinner } from '../../components/common';
 import { TeamStatus, type TeamProfile } from '../../types';
 
 // Mock data
@@ -56,7 +56,6 @@ const SearchTeamsPage: React.FC = () => {
     const handleSearch = (filters: TeamSearchFilters) => {
         setSearchQuery(filters.query || '');
         setLoading(true);
-        // Simulate search
         setTimeout(() => {
             let filtered = [...mockTeams];
             if (filters.query) {
@@ -82,11 +81,11 @@ const SearchTeamsPage: React.FC = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="mb-8">
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Search Teams</h1>
-                <p className="text-gray-600 mt-1">Find and join football teams near you.</p>
-            </div>
+        <PageContainer maxWidth="xl">
+            <PageHeader
+                title="Search Teams"
+                subtitle="Find and join football teams near you."
+            />
 
             {/* Filters */}
             <div className="mb-6">
@@ -110,7 +109,7 @@ const SearchTeamsPage: React.FC = () => {
                     ))}
                 </div>
             )}
-        </div>
+        </PageContainer>
     );
 };
 

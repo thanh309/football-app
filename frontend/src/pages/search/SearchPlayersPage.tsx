@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
+import { PageContainer, PageHeader, LoadingSpinner } from '../../components/common';
 import {
     PlayerSearchFilter,
     PlayerResultCard,
     EmptySearchState,
     type PlayerSearchFilters,
 } from '../../components/search';
-import { LoadingSpinner } from '../../components/common';
 import { PreferredFoot, type PlayerProfile } from '../../types';
 
 // Mock data
@@ -56,7 +56,6 @@ const SearchPlayersPage: React.FC = () => {
     const handleSearch = (filters: PlayerSearchFilters) => {
         setSearchQuery(filters.query || '');
         setLoading(true);
-        // Simulate search
         setTimeout(() => {
             let filtered = [...mockPlayers];
             if (filters.query) {
@@ -79,27 +78,22 @@ const SearchPlayersPage: React.FC = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="mb-8">
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Search Players</h1>
-                <p className="text-gray-600 mt-1">Find players to invite to your team.</p>
-            </div>
+        <PageContainer maxWidth="xl">
+            <PageHeader
+                title="Search Players"
+                subtitle="Find players to invite to your team."
+            />
 
-            {/* Filters */}
             <div className="mb-6">
                 <PlayerSearchFilter onSearch={handleSearch} isLoading={loading} />
             </div>
 
-            {/* Results */}
             {loading ? (
                 <div className="flex justify-center py-12">
                     <LoadingSpinner size="lg" />
                 </div>
             ) : players.length === 0 ? (
-                <EmptySearchState
-                    type="player"
-                    query={searchQuery}
-                />
+                <EmptySearchState type="player" query={searchQuery} />
             ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {players.map((player) => (
@@ -107,7 +101,7 @@ const SearchPlayersPage: React.FC = () => {
                     ))}
                 </div>
             )}
-        </div>
+        </PageContainer>
     );
 };
 
