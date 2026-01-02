@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: kickoff-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: kickoff
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - kickoff-network
+
+  api:
+    build: .
+    container_name: kickoff-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=mysql+aiomysql://root:${DB_PASSWORD:-password}@db:3306/kickoff
+      - SECRET_KEY=${SECRET_KEY:-your-super-secret-key}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - kickoff-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  kickoff-network:
+    driver: bridge
