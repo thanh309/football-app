@@ -56,7 +56,7 @@ const CreateMatchForm: React.FC<CreateMatchFormProps> = ({ teamId, onSuccess }) 
         if (!validate()) return;
 
         try {
-            const match = await createMutation.mutateAsync({
+            await createMutation.mutateAsync({
                 hostTeamId: teamId,
                 matchDate: formData.matchDate,
                 startTime: formData.startTime,
@@ -66,8 +66,11 @@ const CreateMatchForm: React.FC<CreateMatchFormProps> = ({ teamId, onSuccess }) 
                 fieldId: formData.fieldId ? parseInt(formData.fieldId) : undefined,
             });
             toast.success('Match created successfully!');
-            onSuccess?.();
-            navigate(`/leader/matches/${match.matchId}`);
+            if (onSuccess) {
+                onSuccess();
+            } else {
+                navigate(`/leader/teams/${teamId}/matches`);
+            }
         } catch (error: unknown) {
             const err = error as { response?: { data?: { message?: string } } };
             const message = err.response?.data?.message || 'Failed to create match';

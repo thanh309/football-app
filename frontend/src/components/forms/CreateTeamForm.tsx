@@ -60,7 +60,7 @@ const CreateTeamForm: React.FC<CreateTeamFormProps> = ({ onSuccess }) => {
         if (!validate()) return;
 
         try {
-            const team = await createMutation.mutateAsync({
+            await createMutation.mutateAsync({
                 teamName: formData.teamName,
                 description: formData.description || undefined,
                 logoUrl: formData.logoUrl || undefined,
@@ -68,8 +68,11 @@ const CreateTeamForm: React.FC<CreateTeamFormProps> = ({ onSuccess }) => {
                 skillLevel: parseInt(formData.skillLevel),
             });
             toast.success('Team created successfully! Waiting for moderator approval.');
-            onSuccess?.();
-            navigate(`/leader/teams/${team.teamId}`);
+            if (onSuccess) {
+                onSuccess();
+            } else {
+                navigate('/leader/teams');
+            }
         } catch (error: unknown) {
             const err = error as { response?: { data?: { message?: string } } };
             const message = err.response?.data?.message || 'Failed to create team';
