@@ -40,6 +40,20 @@ async def test_comment_on_post(client: AsyncClient, player_headers, test_team):
     assert c_data["postId"] == post_id
 
 @pytest.mark.asyncio
+async def test_get_post_by_id(client: AsyncClient, player_headers, test_team):
+    """Test retrieving a single post by ID."""
+    # Create Post
+    post_res = await client.post("/api/posts", json={"content": "Single post", "visibility": "Public", "teamId": test_team["teamId"]}, headers=player_headers)
+    post_id = post_res.json()["postId"]
+    
+    # Get by ID
+    get_res = await client.get(f"/api/posts/{post_id}", headers=player_headers)
+    assert get_res.status_code == status.HTTP_200_OK
+    data = get_res.json()
+    assert data["postId"] == post_id
+    assert data["content"] == "Single post"
+
+@pytest.mark.asyncio
 async def test_delete_post(client: AsyncClient, player_headers, test_team):
     """Test deleting a post."""
     # Create Post

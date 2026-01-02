@@ -96,7 +96,19 @@ async def update_field(
     if field.owner_id != user.user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
     
-    updated = await field_service.update_field(field, **data.model_dump(exclude_unset=True))
+    update_data = data.model_dump(exclude_unset=True)
+    
+    # Map camelCase to snake_case for model update
+    if "fieldName" in update_data:
+        update_data["field_name"] = update_data.pop("fieldName")
+    if "defaultPricePerHour" in update_data:
+        update_data["default_price_per_hour"] = update_data.pop("defaultPricePerHour")
+    if "pricingRules" in update_data: # If applicable
+        pass
+    if "rejectionReason" in update_data:
+        update_data["rejection_reason"] = update_data.pop("rejectionReason")
+        
+    updated = await field_service.update_field(field, **update_data)
     return field_to_response(updated)
 
 

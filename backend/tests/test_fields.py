@@ -34,3 +34,45 @@ async def test_get_my_fields(client: AsyncClient, owner_headers, test_field):
     data = response.json()
     assert len(data) >= 1
     assert data[0]["fieldName"] == test_field["fieldName"]
+@pytest.mark.asyncio
+async def test_get_field_by_id(client: AsyncClient, owner_headers, test_field):
+    """Test retrieving field by ID."""
+    response = await client.get(f"/api/fields/{test_field['fieldId']}", headers=owner_headers)
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["fieldId"] == test_field["fieldId"]
+    assert data["fieldName"] == test_field["fieldName"]
+
+@pytest.mark.asyncio
+async def test_update_field(client: AsyncClient, owner_headers, test_field):
+    """Test updating field details."""
+    payload = {
+        "description": "Updated Description",
+        "defaultPricePerHour": 120.0
+    }
+    # Using PUT /api/fields/{field_id}
+    # Schema check: FieldProfileUpdate usually allows partial? Or maybe all fields?
+    # Based on `app/controllers/field_controller.py`:
+    # @router.put("/{field_id}") async def update_field(..., data: FieldProfileUpdate)
+    # FieldProfileUpdate typically Pydantic, if fields optional it's PATCH-like, but method is PUT.
+    # Usually better to provide full relevant fields or strict partial if explicitly allowed.
+    # For safety, let's assume partials are handled or providing keys is enough.
+    # If not, we might get 422 for missing required fields.
+    # Let's inspect app/schemas/field.py if fails. For now, try partial.
+    response = await client.put(f"/api/fields/{test_field['fieldId']}", json=payload, headers=owner_headers)
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["description"] == "Updated Description"
+    assert data["defaultPricePerHour"] == 120.0
+
+@pytest.mark.asyncio
+async def test_get_field_calendar(client: AsyncClient, owner_headers, test_field):
+    """Test getting field calendar."""
+    # Endpoint: GET /api/fields/{field_id}/calendar
+    # Params: date (optional, defaults to today/week?)
+    response = await client.get(f"/api/fields/{test_field['fieldId']}/calendar", headers=owner_headers)
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert isinstance(data, list)
+    # Might be empty slots or generated slots.
+    # Assuming list of slots.

@@ -98,3 +98,32 @@ async def test_join_request_flow(client: AsyncClient, player_headers, test_team,
     list_res_after = await client.get(f"/api/teams/{team_id}/join-requests", headers=player_headers)
     requests_after = list_res_after.json()
     assert not any(r["requestId"] == req_id for r in requests_after)
+@pytest.mark.asyncio
+async def test_get_team_by_id(client: AsyncClient, player_headers, test_team):
+    """Test retrieving team by ID."""
+    response = await client.get(f"/api/teams/{test_team['teamId']}", headers=player_headers)
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["teamId"] == test_team["teamId"]
+    assert data["teamName"] == test_team["teamName"]
+
+@pytest.mark.asyncio
+async def test_decline_join_request(client: AsyncClient, player_headers, test_team, create_auth_headers):
+    """Test declining a join request."""
+    team_id = test_team["teamId"]
+    
+    # Create Applicant
+    applicant_headers = await create_auth_headers("applicant_decline", "Player")
+    
+    # Request to Join
+    payload = {"message": "Please reject me"}
+    req_res = await client.post(f"/api/teams/{team_id}/join-requests", json=payload, headers=applicant_headers)
+    req_id = req_res.json()["requestId"]
+    
+    # Leader Declines
+    action_res = await client.put(f"/api/teams/join-requests/{req_id}/reject", headers=player_headers)
+    assert action_res.status_code == status.HTTP_200_OK
+    
+    # Verify gone from pending list
+    list_res = await client.get(f"/api/teams/{team_id}/join-requests", headers=player_headers)
+    assert not any(r["requestId"] == req_id for r in list_res.json())

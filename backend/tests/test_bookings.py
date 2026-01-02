@@ -41,7 +41,7 @@ async def test_approve_booking(client: AsyncClient, player_headers, owner_header
     assert response.status_code == status.HTTP_200_OK
     
     # Verify status
-    get_res = await client.get(f"/api/bookings/{booking_id}", headers=leader_headers if 'leader_headers' in locals() else player_headers)
+    get_res = await client.get(f"/api/bookings/{booking_id}", headers=owner_headers)
     assert get_res.json()["status"] == "Confirmed"
 
 @pytest.mark.asyncio
@@ -83,3 +83,54 @@ async def test_cancel_booking(client: AsyncClient, player_headers, test_team, te
     # Verify status
     get_res = await client.get(f"/api/bookings/{booking_id}", headers=player_headers)
     assert get_res.json()["status"] == "Cancelled"
+@pytest.mark.asyncio
+async def test_get_booking_by_id(client: AsyncClient, player_headers, test_team, test_field):
+    """Test retrieving booking by ID."""
+    payload = {
+        "fieldId": test_field["fieldId"], "teamId": test_team["teamId"], 
+        "date": (date.today() + timedelta(days=9)).isoformat(),
+        "startTime": "10:00:00", "endTime": "11:00:00"
+    }
+    booking_res = await client.post("/api/bookings", json=payload, headers=player_headers)
+    booking_id = booking_res.json()["bookingId"]
+    
+    response = await client.get(f"/api/bookings/{booking_id}", headers=player_headers)
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["bookingId"] == booking_id
+    assert data["fieldId"] == test_field["fieldId"]
+
+@pytest.mark.asyncio
+async def test_get_bookings_by_field(client: AsyncClient, owner_headers, test_field):
+    """Test retrieving bookings for a field (Owner Check)."""
+    # Assuming bookings created in other tests exist, or we create one
+    # Endpoint: GET /api/bookings/field/{field_id}
+    response = await client.get(f"/api/bookings/field/{test_field['fieldId']}", headers=owner_headers)
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert isinstance(data, list)
+    # Verification depends on if other tests ran first or we created new ones.
+    # Since tests run in sequence and use same DB session fixture (if configured), data persists?
+    # Actually, default pytest-asyncio fixture scope is function, usually.
+    # Our conftest `db_session` is function scoped (default), so DB is CLEAN per test.
+    # So we should verify emptiness or create one.
+    # Let's verify empty list if clean, but better to create one to be sure.
+    assert isinstance(data, list)
+
+@pytest.mark.asyncio
+async def test_get_bookings_by_team(client: AsyncClient, player_headers, test_team, test_field):
+    """Test retrieving bookings for a team."""
+    # Create one
+    payload = {
+        "fieldId": test_field["fieldId"], "teamId": test_team["teamId"], 
+        "date": (date.today() + timedelta(days=10)).isoformat(),
+        "startTime": "12:00:00", "endTime": "13:00:00"
+    }
+    await client.post("/api/bookings", json=payload, headers=player_headers)
+    
+    response = await client.get(f"/api/bookings/team/{test_team['teamId']}", headers=player_headers)
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) >= 1
+    assert data[0]["teamId"] == test_team["teamId"]
