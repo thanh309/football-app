@@ -11,7 +11,8 @@ export interface UpdatePreferencesRequest {
 }
 
 // --- Mock Data ---
-const mockNotifications: Notification[] = [
+// Use let so we can mutate this in mock mode
+let mockNotifications: Notification[] = [
     {
         notificationId: 1,
         userId: 1,
@@ -166,14 +167,17 @@ export const notificationService = {
     /**
      * Mark notification as read
      */
-    markAsRead: async (_notificationId: number): Promise<void> => {
+    markAsRead: async (notificationId: number): Promise<void> => {
         await new Promise(r => setTimeout(r, 800)); // Simulate latency
 
         // --- Real API call (commented out for mock mode) ---
         // await api.patch(`/notifications/${notificationId}/read`);
         // --- End Real API call ---
 
-        console.log('Mock: Notification marked as read');
+        // Update mock data so UI reflects the change
+        mockNotifications = mockNotifications.map(n =>
+            n.notificationId === notificationId ? { ...n, isRead: true } : n
+        );
     },
 
     /**
@@ -186,7 +190,8 @@ export const notificationService = {
         // await api.patch('/notifications/read-all');
         // --- End Real API call ---
 
-        console.log('Mock: All notifications marked as read');
+        // Update mock data so UI reflects the change
+        mockNotifications = mockNotifications.map(n => ({ ...n, isRead: true }));
     },
 
     /**

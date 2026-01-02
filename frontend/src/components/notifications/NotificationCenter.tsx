@@ -67,14 +67,14 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose }) => {
                 <div className="flex items-center gap-2">
                     <Bell className="w-5 h-5 text-emerald-600" />
                     <h2 className="font-semibold text-gray-900">Notifications</h2>
-                    {unreadCount && unreadCount > 0 && (
+                    {typeof unreadCount === 'number' && unreadCount > 0 && (
                         <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
                             {unreadCount}
                         </span>
                     )}
                 </div>
                 <div className="flex items-center gap-2">
-                    {unreadCount && unreadCount > 0 && (
+                    {typeof unreadCount === 'number' && unreadCount > 0 && (
                         <Button
                             variant="ghost"
                             size="sm"
@@ -97,8 +97,8 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose }) => {
                 <button
                     onClick={() => setFilter('all')}
                     className={`flex-1 py-2 text-sm font-medium transition-colors ${filter === 'all'
-                            ? 'text-emerald-600 border-b-2 border-emerald-600'
-                            : 'text-gray-500 hover:text-gray-700'
+                        ? 'text-emerald-600 border-b-2 border-emerald-600'
+                        : 'text-gray-500 hover:text-gray-700'
                         }`}
                 >
                     All
@@ -106,8 +106,8 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose }) => {
                 <button
                     onClick={() => setFilter('unread')}
                     className={`flex-1 py-2 text-sm font-medium transition-colors ${filter === 'unread'
-                            ? 'text-emerald-600 border-b-2 border-emerald-600'
-                            : 'text-gray-500 hover:text-gray-700'
+                        ? 'text-emerald-600 border-b-2 border-emerald-600'
+                        : 'text-gray-500 hover:text-gray-700'
                         }`}
                 >
                     Unread
@@ -128,23 +128,31 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose }) => {
                         {notifications.map((notification: Notification) => (
                             <div
                                 key={notification.notificationId}
-                                className={`p-4 hover:bg-gray-50 transition-colors ${!notification.isRead ? 'bg-emerald-50/50' : ''
+                                className={`p-4 hover:bg-gray-50 transition-colors ${!notification.isRead
+                                    ? 'bg-emerald-50 border-l-4 border-emerald-500'
+                                    : 'bg-white opacity-75'
                                     }`}
                             >
                                 <div className="flex gap-3">
                                     <div className="text-2xl">{getNotificationIcon(notification.type)}</div>
                                     <div className="flex-1 min-w-0">
-                                        <p className={`text-sm font-medium ${!notification.isRead ? '' : 'text-gray-700'} text-gray-900`}>
+                                        <p className={`text-sm font-medium ${!notification.isRead
+                                            ? 'text-gray-900'
+                                            : 'text-gray-500'
+                                            }`}>
                                             {notification.title}
                                         </p>
-                                        <p className={`text-sm ${!notification.isRead ? '' : ''} text-gray-600`}>
+                                        <p className={`text-sm ${!notification.isRead
+                                            ? 'text-gray-700'
+                                            : 'text-gray-400'
+                                            }`}>
                                             {notification.message}
                                         </p>
                                         <p className="text-xs text-gray-500 mt-1">
                                             {new Date(notification.createdAt).toLocaleString()}
                                         </p>
                                     </div>
-                                    {!notification.isRead && (
+                                    {!notification.isRead ? (
                                         <button
                                             onClick={() => handleMarkAsRead(notification.notificationId)}
                                             className="p-1 text-emerald-600 hover:bg-emerald-100 rounded transition-colors"
@@ -152,6 +160,10 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose }) => {
                                         >
                                             <Check className="w-4 h-4" />
                                         </button>
+                                    ) : (
+                                        <span className="p-1 text-gray-400" title="Read">
+                                            <Check className="w-4 h-4" />
+                                        </span>
                                     )}
                                 </div>
                             </div>

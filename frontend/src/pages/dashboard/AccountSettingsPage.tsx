@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { Bell, ChevronRight } from 'lucide-react';
 import { ChangePasswordForm } from '../../components/forms';
 import { ConfirmationModal } from '../../components/common';
 import { useAuth } from '../../contexts';
@@ -58,6 +59,23 @@ const AccountSettingsPage: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Notification Settings Link */}
+            <Link
+                to="/settings/notifications"
+                className="bg-white rounded-xl shadow-sm p-6 mb-6 flex items-center justify-between hover:bg-gray-50 transition-colors group"
+            >
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+                        <Bell className="w-6 h-6 text-emerald-600" />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-semibold text-gray-900">Notification Settings</h2>
+                        <p className="text-gray-600 text-sm">Manage how you receive notifications</p>
+                    </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
+            </Link>
 
             {/* Change Password */}
             <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
