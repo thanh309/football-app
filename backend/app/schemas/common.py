@@ -1,24 +1,10 @@
 """
-Common schemas and enums for API responses.
+Common Pydantic schemas used across the application.
 """
-from typing import TypeVar, Generic, Optional, List
+from typing import TypeVar, Generic, List, Optional
 from pydantic import BaseModel
 
-
-# Generic type for paginated response
 T = TypeVar('T')
-
-
-class PaginatedResponse(BaseModel, Generic[T]):
-    """Paginated response wrapper matching frontend expectations."""
-    data: List[T]
-    total: int
-    page: int
-    limit: int
-    total_pages: int
-    
-    class Config:
-        from_attributes = True
 
 
 class MessageResponse(BaseModel):
@@ -27,6 +13,16 @@ class MessageResponse(BaseModel):
 
 
 class ErrorResponse(BaseModel):
-    """Error response."""
+    """Error response schema."""
     detail: str
-    code: Optional[str] = None
+    error_code: Optional[str] = None
+
+
+class PaginatedResponse(BaseModel, Generic[T]):
+    """Generic paginated response."""
+    items: List[T]
+    total: int
+    page: int
+    page_size: int
+    has_next: bool
+    has_previous: bool

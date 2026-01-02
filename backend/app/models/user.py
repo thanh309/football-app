@@ -3,7 +3,7 @@ User and Session models.
 """
 from datetime import datetime
 from typing import Optional, List
-from sqlalchemy import String, Text, Float, Boolean, DateTime, Enum as SQLEnum, JSON
+from sqlalchemy import String, Text, Float, Boolean, DateTime, Enum as SQLEnum, JSON, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -56,7 +56,7 @@ class Session(Base):
     __tablename__ = "session"
     
     session_id: Mapped[str] = mapped_column(String(255), primary_key=True)
-    user_id: Mapped[int] = mapped_column(nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user_account.user_id"), nullable=False, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     ip_address: Mapped[Optional[str]] = mapped_column(String(45), nullable=True)

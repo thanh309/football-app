@@ -48,24 +48,26 @@ app.add_middleware(
 app.mount("/uploads", StaticFiles(directory=settings.upload_dir), name="uploads")
 
 
-# --- Router Registration ---
-from app.routers import auth
+# --- Controller Registration (MVC Architecture) ---
+from app.controllers import auth_controller
+from app.controllers import team_controller
+from app.controllers import field_controller
+from app.controllers import booking_controller
+from app.controllers import match_controller
+from app.controllers import content_controller
+from app.controllers import notification_controller
+from app.controllers import player_controller
+from app.controllers import search_controller
 
-app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-
-# Additional routers will be registered as they are created:
-# from app.routers import players, teams, fields, bookings, matches
-# from app.routers import posts, notifications, moderation, search, media
-# app.include_router(players.router, prefix="/api/players", tags=["Players"])
-# app.include_router(teams.router, prefix="/api/teams", tags=["Teams"])
-# app.include_router(fields.router, prefix="/api/fields", tags=["Fields"])
-# app.include_router(bookings.router, prefix="/api/bookings", tags=["Bookings"])
-# app.include_router(matches.router, prefix="/api/matches", tags=["Matches"])
-# app.include_router(posts.router, prefix="/api/posts", tags=["Community"])
-# app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
-# app.include_router(moderation.router, prefix="/api/mod", tags=["Moderation"])
-# app.include_router(search.router, prefix="/api/search", tags=["Search"])
-# app.include_router(media.router, prefix="/api/media", tags=["Media"])
+app.include_router(auth_controller.router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(player_controller.router, prefix="/api/players", tags=["Players"])
+app.include_router(team_controller.router, prefix="/api/teams", tags=["Teams"])
+app.include_router(field_controller.router, prefix="/api/fields", tags=["Fields"])
+app.include_router(booking_controller.router, prefix="/api/bookings", tags=["Bookings"])
+app.include_router(match_controller.router, prefix="/api/matches", tags=["Matches"])
+app.include_router(content_controller.router, prefix="/api/posts", tags=["Community"])
+app.include_router(notification_controller.router, prefix="/api/notifications", tags=["Notifications"])
+app.include_router(search_controller.router, prefix="/api/search", tags=["Search"])
 
 
 @app.get("/")
