@@ -80,8 +80,8 @@ async def register(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
     # Create tokens
-    access_token = create_access_token({"sub": user.user_id})
-    refresh_token = create_refresh_token({"sub": user.user_id})
+    access_token = create_access_token({"sub": str(user.user_id)})
+    refresh_token = create_refresh_token({"sub": str(user.user_id)})
     
     return AuthResponse(
         accessToken=access_token,

@@ -3,7 +3,7 @@ Team-related schemas matching frontend types.
 """
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 # --- Team Profile ---
@@ -19,13 +19,16 @@ class TeamProfileCreate(BaseModel):
 
 class TeamProfileUpdate(BaseModel):
     """Team profile update."""
-    teamName: Optional[str] = None
+    team_name: Optional[str] = Field(None, alias="teamName")
     description: Optional[str] = None
-    logoUrl: Optional[str] = None
+    logo_url: Optional[str] = Field(None, alias="logoUrl")
     location: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
-    skillLevel: Optional[int] = None
+    skill_level: Optional[int] = Field(None, alias="skillLevel")
+    
+    class Config:
+        populate_by_name = True
 
 
 class TeamProfileResponse(BaseModel):

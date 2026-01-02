@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.user_repository import UserRepository, SessionRepository
 from app.models.user import UserAccount, Session
-from app.models.enums import AccountStatus
+from app.models.enums import AccountStatus, UserRole
 from app.utils.security import hash_password, verify_password, create_access_token, create_refresh_token
 from app.config import get_settings
 
@@ -55,6 +55,23 @@ class AuthService:
         )
         
         await self.user_repo.save(user)
+        await self.db.flush()
+        
+        # Create Player Profile if role is Player
+        if UserRole.PLAYER.value in roles:
+            from app.models.player import PlayerProfile
+            player_profile = PlayerProfile(
+                user_id=user.user_id,
+                display_name=username, # Default display name
+                bio="New player",
+                skill_level=5
+            )
+            # Use player repo from init or just use session directly? 
+            # AuthService init has player_repo? No.
+            # I should use session or add player_repo to init.
+            # But simpler to just add to db.
+            self.db.add(player_profile)
+        
         await self.user_repo.commit()
         
         return user
@@ -76,8 +93,8 @@ class AuthService:
             raise ValueError(f"Account is {user.status.value}")
         
         # Create tokens
-        access_token = create_access_token({"sub": user.user_id})
-        refresh_token = create_refresh_token({"sub": user.user_id})
+        access_token = create_access_token({"sub": str(user.user_id)})
+        refresh_token = create_refresh_token({"sub": str(user.user_id)})
         
         return user, access_token, refresh_token
     
