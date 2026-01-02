@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, Edit, Image, DollarSign, MapPin, Clock, CheckCircle, Users } from 'lucide-react';
-import { Button, LoadingSpinner } from '../../components/common';
+import { LoadingSpinner } from '../../components/common';
 import { useField } from '../../api/hooks/useField';
 import { FieldStatus } from '../../types';
 
@@ -139,21 +139,9 @@ const FieldDashboardPage: React.FC = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Booking Requests Link */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h2 className="text-lg font-semibold text-gray-900">Booking Requests</h2>
-                        <p className="text-gray-500 text-sm">Manage pending and upcoming bookings</p>
-                    </div>
-                    <Link to={`/owner/fields/${id}/bookings`}>
-                        <Button variant="secondary">View All Bookings</Button>
-                    </Link>
-                </div>
-            </div>
         </div>
     );
 };
 
 export default FieldDashboardPage;
+

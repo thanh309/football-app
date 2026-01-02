@@ -1,17 +1,45 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, DollarSign, TrendingUp, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, DollarSign, TrendingUp, Clock, CheckCircle, XCircle, MapPin, Users } from 'lucide-react';
 
 const BookingDashboardPage: React.FC = () => {
     // Mock stats for demonstration
     const stats = {
-        totalBookings: 0,
-        todayBookings: 0,
-        pendingRequests: 0,
-        thisMonthRevenue: 0,
-        completedBookings: 0,
-        cancelledBookings: 0,
+        totalBookings: 15,
+        todayBookings: 2,
+        pendingRequests: 3,
+        thisMonthRevenue: 7500000,
+        completedBookings: 10,
+        cancelledBookings: 2,
     };
+
+    // Mock recent bookings data
+    const recentBookings = [
+        {
+            bookingId: 1,
+            fieldName: 'Green Valley Field',
+            teamName: 'FC Thunder',
+            date: '2025-01-20',
+            time: '18:00 - 20:00',
+            status: 'Confirmed',
+        },
+        {
+            bookingId: 2,
+            fieldName: 'Green Valley Field',
+            teamName: 'City United',
+            date: '2025-01-21',
+            time: '19:00 - 21:00',
+            status: 'Pending',
+        },
+        {
+            bookingId: 3,
+            fieldName: 'Sunrise Arena',
+            teamName: 'Blue Eagles',
+            date: '2025-01-22',
+            time: '17:00 - 19:00',
+            status: 'Confirmed',
+        },
+    ];
 
     const statCards = [
         { label: 'Total Bookings', value: stats.totalBookings, icon: Calendar, color: 'bg-blue-500' },
@@ -21,6 +49,15 @@ const BookingDashboardPage: React.FC = () => {
         { label: 'Completed', value: stats.completedBookings, icon: CheckCircle, color: 'bg-emerald-500' },
         { label: 'Cancelled', value: stats.cancelledBookings, icon: XCircle, color: 'bg-red-500' },
     ];
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'Confirmed': return 'bg-green-100 text-green-700';
+            case 'Pending': return 'bg-yellow-100 text-yellow-700';
+            case 'Cancelled': return 'bg-red-100 text-red-700';
+            default: return 'bg-gray-100 text-gray-700';
+        }
+    };
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -63,12 +100,40 @@ const BookingDashboardPage: React.FC = () => {
                     </Link>
                 </div>
 
-                <div className="text-center py-12 text-gray-500">
-                    <Calendar className="w-12 h-12 mx-auto text-gray-300 mb-4" />
-                    <p>No recent bookings</p>
-                    <p className="text-sm text-gray-400 mt-1">
-                        Bookings will appear here once customers start booking your fields.
-                    </p>
+                <div className="space-y-4">
+                    {recentBookings.map((booking) => (
+                        <Link
+                            key={booking.bookingId}
+                            to={`/owner/bookings/${booking.bookingId}`}
+                            className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                                    <Calendar className="w-5 h-5 text-emerald-600" />
+                                </div>
+                                <div>
+                                    <p className="font-medium text-gray-900">{booking.fieldName}</p>
+                                    <div className="flex items-center gap-3 text-sm text-gray-500">
+                                        <span className="flex items-center gap-1">
+                                            <Users className="w-3 h-3" />
+                                            {booking.teamName}
+                                        </span>
+                                        <span className="flex items-center gap-1">
+                                            <MapPin className="w-3 h-3" />
+                                            {booking.date}
+                                        </span>
+                                        <span className="flex items-center gap-1">
+                                            <Clock className="w-3 h-3" />
+                                            {booking.time}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${getStatusColor(booking.status)}`}>
+                                {booking.status}
+                            </span>
+                        </Link>
+                    ))}
                 </div>
             </div>
         </div>
@@ -76,3 +141,4 @@ const BookingDashboardPage: React.FC = () => {
 };
 
 export default BookingDashboardPage;
+

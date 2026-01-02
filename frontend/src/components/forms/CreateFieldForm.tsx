@@ -63,7 +63,7 @@ const CreateFieldForm: React.FC<CreateFieldFormProps> = ({ onSuccess }) => {
         if (!validate()) return;
 
         try {
-            const field = await createMutation.mutateAsync({
+            await createMutation.mutateAsync({
                 fieldName: formData.fieldName,
                 description: formData.description || undefined,
                 location: formData.location,
@@ -74,8 +74,11 @@ const CreateFieldForm: React.FC<CreateFieldFormProps> = ({ onSuccess }) => {
                 amenityIds: selectedAmenities.length > 0 ? selectedAmenities : undefined,
             });
             toast.success('Field created successfully! Waiting for moderator approval.');
-            onSuccess?.();
-            navigate(`/owner/fields/${field.fieldId}`);
+            if (onSuccess) {
+                onSuccess();
+            } else {
+                navigate('/owner/fields');
+            }
         } catch (error: unknown) {
             const err = error as { response?: { data?: { message?: string } } };
             toast.error(err.response?.data?.message || 'Failed to create field');

@@ -1,15 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { Upload, Image as ImageIcon, Trash2, Link as LinkIcon, Plus } from 'lucide-react';
 import { Button } from '../../components/common';
 import toast from 'react-hot-toast';
 
 const FieldPhotosPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [isDragging, setIsDragging] = useState(false);
+    const [urlInput, setUrlInput] = useState('');
+    const [showUrlInput, setShowUrlInput] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Mock photos for demonstration
-    const [photos] = useState<string[]>([]);
+    // Mock photos for demonstration - start with some sample photos
+    const [photos, setPhotos] = useState<string[]>([
+        'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop',
+    ]);
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
@@ -23,11 +29,53 @@ const FieldPhotosPage: React.FC = () => {
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
-        toast.success('Photo upload functionality coming soon!');
+        const files = Array.from(e.dataTransfer.files);
+        handleFiles(files);
+    };
+
+    const handleFiles = (files: File[]) => {
+        const imageFiles = files.filter(file => file.type.startsWith('image/'));
+        if (imageFiles.length === 0) {
+            toast.error('Please select image files only');
+            return;
+        }
+
+        // Create preview URLs for the selected files
+        const newPhotos = imageFiles.map(file => URL.createObjectURL(file));
+        setPhotos(prev => [...prev, ...newPhotos]);
+        toast.success(`${imageFiles.length} photo(s) added!`);
     };
 
     const handleFileSelect = () => {
-        toast.success('Photo upload functionality coming soon!');
+        fileInputRef.current?.click();
+    };
+
+    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            handleFiles(Array.from(e.target.files));
+        }
+    };
+
+    const handleAddUrl = () => {
+        if (!urlInput.trim()) {
+            toast.error('Please enter a valid URL');
+            return;
+        }
+        // Basic URL validation
+        try {
+            new URL(urlInput);
+            setPhotos(prev => [...prev, urlInput.trim()]);
+            setUrlInput('');
+            setShowUrlInput(false);
+            toast.success('Photo added from URL!');
+        } catch {
+            toast.error('Please enter a valid URL');
+        }
+    };
+
+    const handleDeletePhoto = (index: number) => {
+        setPhotos(prev => prev.filter((_, i) => i !== index));
+        toast.success('Photo removed');
     };
 
     return (
@@ -49,6 +97,16 @@ const FieldPhotosPage: React.FC = () => {
                 </p>
             </div>
 
+            {/* Hidden file input */}
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileInputChange}
+                className="hidden"
+            />
+
             {/* Upload Area */}
             <div
                 onDragOver={handleDragOver}
@@ -67,18 +125,48 @@ const FieldPhotosPage: React.FC = () => {
                     <p className="text-gray-500 mb-4">
                         Drag and drop photos here, or click to browse
                     </p>
-                    <Button onClick={handleFileSelect} variant="secondary">
-                        Select Files
-                    </Button>
+                    <div className="flex justify-center gap-3">
+                        <Button onClick={handleFileSelect} variant="secondary">
+                            Select Files
+                        </Button>
+                        <Button
+                            onClick={() => setShowUrlInput(!showUrlInput)}
+                            variant="outline"
+                            leftIcon={<LinkIcon className="w-4 h-4" />}
+                        >
+                            Add from URL
+                        </Button>
+                    </div>
                     <p className="text-xs text-gray-400 mt-3">
                         Supports JPG, PNG, WebP. Max 5MB per file.
                     </p>
                 </div>
             </div>
 
+            {/* URL Input */}
+            {showUrlInput && (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Image URL
+                    </label>
+                    <div className="flex gap-2">
+                        <input
+                            type="url"
+                            value={urlInput}
+                            onChange={(e) => setUrlInput(e.target.value)}
+                            placeholder="https://example.com/image.jpg"
+                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        />
+                        <Button onClick={handleAddUrl} leftIcon={<Plus className="w-4 h-4" />}>
+                            Add
+                        </Button>
+                    </div>
+                </div>
+            )}
+
             {/* Photos Grid */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Current Photos</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Current Photos ({photos.length})</h2>
 
                 {photos.length === 0 ? (
                     <div className="text-center py-12">
@@ -96,9 +184,15 @@ const FieldPhotosPage: React.FC = () => {
                                     src={photo}
                                     alt={`Field photo ${index + 1}`}
                                     className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Image+Error';
+                                    }}
                                 />
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                    <button className="p-2 bg-white rounded-full hover:bg-gray-100">
+                                    <button
+                                        onClick={() => handleDeletePhoto(index)}
+                                        className="p-2 bg-white rounded-full hover:bg-gray-100"
+                                    >
                                         <Trash2 className="w-5 h-5 text-red-500" />
                                     </button>
                                 </div>
@@ -112,3 +206,4 @@ const FieldPhotosPage: React.FC = () => {
 };
 
 export default FieldPhotosPage;
+

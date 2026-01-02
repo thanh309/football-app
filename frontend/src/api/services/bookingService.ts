@@ -148,7 +148,23 @@ export const bookingService = {
         // return response.data;
         // --- End Real API call ---
 
-        return mockBookingRequests.find(b => b.bookingId === bookingId);
+        // Try to find in existing mock data first
+        const existing = mockBookingRequests.find(b => b.bookingId === bookingId);
+        if (existing) return existing;
+
+        // If not found, create mock data with the requested ID
+        return {
+            bookingId,
+            fieldId: 1,
+            teamId: 1,
+            requesterId: 1,
+            date: '2025-01-20',
+            startTime: '18:00:00',
+            endTime: '20:00:00',
+            status: BookingStatusEnum.PENDING,
+            notes: 'Booking request',
+            createdAt: '2025-01-10T10:00:00Z',
+        };
     },
 
     /**
