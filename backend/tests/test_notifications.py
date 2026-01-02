@@ -1,64 +1,92 @@
+
 import pytest
 from httpx import AsyncClient
 from fastapi import status
 from datetime import date, timedelta
+import uuid
 
 @pytest.mark.asyncio
-async def test_notifications_flow(client: AsyncClient):
-    """Test notification generation and retrieval."""
-    # 1. Host User (Inviter)
-    host_res = await client.post("/api/auth/register", json={"username": "notif_host", "email": "nh@e.com", "password": "p", "roles": ["Player"]})
-    host_token = host_res.json()["accessToken"]
-    host_headers = {"Authorization": f"Bearer {host_token}"}
+async def test_notification_flow(client: AsyncClient, player_headers, test_team, test_field, create_auth_headers):
+    """Test notification generation and marking as read."""
+    # 1. Trigger Notification (e.g. Match Invite)
+    # Host (player_headers/test_team) invites Guest
     
-    host_team_res = await client.post("/api/teams", json={"teamName": "Host Team", "description": "D", "logoUrl": "U", "location": "L", "latitude": 0, "longitude": 0}, headers=host_headers)
-    host_team_id = host_team_res.json()["teamId"]
-
-    # 2. Guest User (Invitee Leader)
-    guest_res = await client.post("/api/auth/register", json={"username": "notif_guest", "email": "ng@e.com", "password": "p", "roles": ["Player"]})
-    guest_token = guest_res.json()["accessToken"]
-    guest_headers = {"Authorization": f"Bearer {guest_token}"}
+    # Guest
+    guest_headers = await create_auth_headers("guest")
+    g_team_res = await client.post("/api/teams", json={
+        "teamName": f"Guest FC {str(uuid.uuid4())[:6]}",
+        "description": "Guest team", "logoUrl": "U", "location": "L", "latitude": 0, "longitude": 0
+    }, headers=guest_headers)
+    g_team_id = g_team_res.json()["teamId"]
     
-    guest_team_res = await client.post("/api/teams", json={"teamName": "Guest Team", "description": "D", "logoUrl": "U", "location": "L", "latitude": 0, "longitude": 0}, headers=guest_headers)
-    guest_team_id = guest_team_res.json()["teamId"]
-
-    # 3. Create Match (Host) - Needs a field
-    owner_res = await client.post("/api/auth/register", json={"username": "notif_owner", "email": "no@e.com", "password": "p", "roles": ["FieldOwner"]})
-    field_res = await client.post("/api/fields", json={"fieldName": "NF", "description": "D", "location": "L", "latitude": 0, "longitude": 0, "defaultPricePerHour": 10, "capacity": 10}, headers={"Authorization": f"Bearer {owner_res.json()['accessToken']}"})
-    field_id = field_res.json()["fieldId"]
-    
-    match_res = await client.post("/api/matches", json={
-        "hostTeamId": host_team_id,
+    # Match
+    match_payload = {
+        "hostTeamId": test_team["teamId"],
         "matchDate": (date.today() + timedelta(days=10)).isoformat(),
-        "startTime": "12:00:00",
-        "fieldId": field_id,
-        "visibility": "Public",
-        "description": "Notif Match"
-    }, headers=host_headers)
+        "startTime": "16:00:00",
+        "fieldId": test_field["fieldId"],
+        "visibility": "Public", "description": "Notify me"
+    }
+    match_res = await client.post("/api/matches", json=match_payload, headers=player_headers)
     match_id = match_res.json()["matchId"]
     
-    # 4. Invite Guest Team (Host) -> Should trigger notification for Guest Leader
-    await client.post(f"/api/matches/{match_id}/invitations", json={"invitedTeamId": guest_team_id, "message": "Invited"}, headers=host_headers)
+    # Invite Guest -> Should notify Guest Leader
+    inv_payload = {"invitedTeamId": g_team_id, "message": "Inviting you"}
+    await client.post(f"/api/matches/{match_id}/invitations", json=inv_payload, headers=player_headers)
     
-    # 5. Check Notifications (Guest)
-    # Using 'unread_only=false' to be safe, though it should be unread
-    response = await client.get("/api/notifications?unread_only=false", headers=guest_headers)
+    # 2. Guest checks notifications
+    n_res = await client.get("/api/notifications", headers=guest_headers)
+    assert n_res.status_code == status.HTTP_200_OK
+    notifications = n_res.json()
+    assert len(notifications) >= 1
+    # Check type
+    assert any(n["type"] == "MatchInvite" for n in notifications)
     
-    assert response.status_code == status.HTTP_200_OK
-    notifs = response.json()
+    nid = notifications[0]["notificationId"]
     
-    # Depending on implementation, sending invite might create notification.
-    # Assuming match invite creates a notification for the invited team leader.
-    # If not implemented in service, this test might fail assertion on length, 
-    # but serves as verification of the feature.
-    # Let's Assert >= 0 to pass initially, but ideally >= 1.
-    # checking logic in match_service would confirm.
+    # 3. Mark as read
+    read_res = await client.put(f"/api/notifications/{nid}/read", headers=guest_headers)
+    assert read_res.status_code == status.HTTP_200_OK
     
-    # For now, verify response structure
-    assert isinstance(notifs, list)
+    # 4. Verify read status
+    # Get all
+    n_res_2 = await client.get("/api/notifications", headers=guest_headers)
+    notifications_2 = n_res_2.json()
+    target = next(n for n in notifications_2 if n["notificationId"] == nid)
+    assert target["isRead"] is True
+
+@pytest.mark.asyncio
+async def test_mark_all_read(client: AsyncClient, player_headers, test_team, test_field, create_auth_headers):
+    """Test marking all notifications as read."""
+    # Setup Guest to receive notifications
+    guest_headers = await create_auth_headers("guest_notify")
+    g_team_res = await client.post("/api/teams", json={
+        "teamName": f"Notify FC {str(uuid.uuid4())[:6]}",
+        "description": "Desc", "logoUrl": "U", "location": "L", "latitude": 0, "longitude": 0
+    }, headers=guest_headers)
+    g_team_id = g_team_res.json()["teamId"]
     
-    if len(notifs) > 0:
-        notif_id = notifs[0]["notificationId"]
-        # Mark read
-        read_res = await client.put(f"/api/notifications/{notif_id}/read", headers=guest_headers)
-        assert read_res.status_code == status.HTTP_200_OK
+    # Create Match & Invite to trigger notification
+    match_payload = {
+        "hostTeamId": test_team["teamId"],
+        "matchDate": (date.today() + timedelta(days=11)).isoformat(),
+        "startTime": "17:00:00",
+        "fieldId": test_field["fieldId"],
+        "visibility": "Public", "description": "Notify me all"
+    }
+    match_res = await client.post("/api/matches", json=match_payload, headers=player_headers)
+    match_id = match_res.json()["matchId"]
+    
+    await client.post(f"/api/matches/{match_id}/invitations", json={"invitedTeamId": g_team_id, "message": "1"}, headers=player_headers)
+    
+    # Check unread count or existence
+    n_res = await client.get("/api/notifications?unread_only=true", headers=guest_headers)
+    assert len(n_res.json()) >= 1
+    
+    # Mark All Read
+    res = await client.put("/api/notifications/mark-all-read", headers=guest_headers)
+    assert res.status_code == status.HTTP_200_OK
+    
+    # Check unread count is 0
+    n_res_after = await client.get("/api/notifications?unread_only=true", headers=guest_headers)
+    assert len(n_res_after.json()) == 0

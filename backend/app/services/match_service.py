@@ -7,9 +7,10 @@ from datetime import datetime, date, time
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.match_repository import MatchRepository, InvitationRepository, AttendanceRepository
+from app.repositories.team_repository import TeamRepository
+from app.services.notification_service import NotificationService
 from app.models.match import MatchEvent, MatchInvitation, AttendanceRecord, MatchResult
-from app.models.enums import MatchStatus, Visibility, InvitationStatus
-
+from app.models.enums import MatchStatus, Visibility, InvitationStatus, NotificationType
 
 class MatchService:
     """Service handling match business logic."""
@@ -19,6 +20,8 @@ class MatchService:
         self.match_repo = MatchRepository(db)
         self.invitation_repo = InvitationRepository(db)
         self.attendance_repo = AttendanceRepository(db)
+        self.team_repo = TeamRepository(db)
+        self.notification_service = NotificationService(db)
     
     async def create_match(
         self,
@@ -87,6 +90,19 @@ class MatchService:
             message=message,
         )
         await self.invitation_repo.save(invitation)
+        
+        # Notify invited team leader
+        invited_team = await self.team_repo.find_by_id(invited_team_id)
+        if invited_team:
+            await self.notification_service.create_notification(
+                user_id=invited_team.leader_id,
+                notification_type=NotificationType.MATCH_INVITE,
+                title="Match Invitation",
+                message=f"You have been invited to a match.",
+                related_entity_id=match.match_id,
+                related_entity_type="Match"
+            )
+            
         await self.invitation_repo.commit()
         return invitation
     
