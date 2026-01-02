@@ -26,7 +26,7 @@ const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
                 {label && (
                     <label
                         htmlFor={selectId}
-                        className="block text-sm font-medium text-gray-700 mb-1"
+                        className="block text-sm font-medium text-slate-700 mb-1"
                     >
                         {label}
                         {props.required && <span className="text-red-500 ml-1">*</span>}
@@ -41,10 +41,10 @@ const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
                             'w-full px-4 py-2.5 rounded-lg border appearance-none bg-white',
                             'transition-colors duration-200',
                             'focus:outline-none focus:ring-2 focus:ring-offset-0',
-                            'disabled:bg-gray-100 disabled:cursor-not-allowed',
+                            'disabled:bg-slate-100 disabled:cursor-not-allowed',
                             error
                                 ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
-                                : 'border-gray-300 focus:border-emerald-500 focus:ring-emerald-200',
+                                : 'border-slate-200 focus:border-primary-500 focus:ring-primary-200',
                             className
                         )}
                         {...props}
@@ -64,13 +64,13 @@ const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
                             </option>
                         ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
                 </div>
                 {error && (
                     <p className="mt-1 text-sm text-red-500">{error}</p>
                 )}
                 {helperText && !error && (
-                    <p className="mt-1 text-sm text-gray-500">{helperText}</p>
+                    <p className="mt-1 text-sm text-slate-500">{helperText}</p>
                 )}
             </div>
         );

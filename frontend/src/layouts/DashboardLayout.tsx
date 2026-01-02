@@ -65,15 +65,15 @@ export const DashboardLayout = () => {
     const uniqueNavItems = Array.from(new Map(navItems.map(item => [item.path, item])).values());
 
     return (
-        <div className="min-h-screen flex bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-screen flex bg-slate-50 dark:bg-slate-900">
             {/* Sidebar */}
             <aside
                 className={clsx(
-                    "fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-200 ease-in-out md:translate-x-0 md:static",
+                    "fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform transition-transform duration-200 ease-in-out md:translate-x-0 md:static",
                     isSidebarOpen ? "translate-x-0" : "-translate-x-full"
                 )}
             >
-                <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-700">
+                <div className="h-16 flex items-center justify-center border-b border-slate-200 dark:border-slate-700">
                     <span className="text-xl font-bold text-primary-600">Kick-off</span>
                 </div>
 
@@ -87,7 +87,7 @@ export const DashboardLayout = () => {
                                     "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
                                     isActive
                                         ? "bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400"
-                                        : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                        : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
                                 )
                             }
                         >
@@ -96,8 +96,8 @@ export const DashboardLayout = () => {
                         </NavLink>
                     ))}
 
-                    <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
-                        <NavLink to="/settings/account" className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-700">
+                        <NavLink to="/settings/account" className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700">
                             <Settings className="h-5 w-5" />
                             Settings
                         </NavLink>
@@ -112,16 +112,16 @@ export const DashboardLayout = () => {
             {/* Main Content Wrapper */}
             <div className="flex-1 flex flex-col min-w-0">
                 {/* Mobile Header */}
-                <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 md:px-8">
+                <header className="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 md:px-8">
                     <button className="md:hidden p-2 -ml-2" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-                        <Menu className="h-6 w-6 text-gray-700 dark:text-gray-200" />
+                        <Menu className="h-6 w-6 text-slate-700 dark:text-slate-200" />
                     </button>
 
                     <div className="flex items-center gap-4 ml-auto">
-                        <Link to="/notifications" className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <Link to="/notifications" className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
                             <Bell className="h-6 w-6" />
                         </Link>
-                        <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                        <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
                             <img src="https://ui-avatars.com/api/?name=User" alt="User" />
                         </div>
                     </div>

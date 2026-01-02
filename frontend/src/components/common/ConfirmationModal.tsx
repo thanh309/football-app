@@ -107,7 +107,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 {/* Content */}
                 <div className="p-6">
                     {typeof message === 'string' ? (
-                        <p className="text-gray-600">{message}</p>
+                        <p className="text-slate-600">{message}</p>
                     ) : (
                         message
                     )}

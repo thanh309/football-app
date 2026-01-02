@@ -8,9 +8,9 @@ export const PublicLayout = () => {
     const { isAuthenticated, user } = useAuth();
 
     return (
-        <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+        <div className="min-h-screen flex flex-col bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
             {/* Navbar */}
-            <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+            <header className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
                 <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                     <Link to="/" className="flex items-center gap-2 font-bold text-xl text-primary-600">
                         <Rocket className="h-6 w-6" />
@@ -24,18 +24,18 @@ export const PublicLayout = () => {
                         <Link to="/search/players" className="text-sm font-medium hover:text-primary-600 transition-colors">Find Players</Link>
                         <Link to="/search/owners" className="text-sm font-medium hover:text-primary-600 transition-colors">Find Owners</Link>
                         <Link to="/community" className="text-sm font-medium hover:text-primary-600 transition-colors">Community</Link>
-                        <div className="h-4 w-px bg-gray-200 dark:bg-gray-700 mx-2" />
+                        <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-2" />
                         {isAuthenticated ? (
                             <>
                                 <Link to="/dashboard" className="text-sm font-medium hover:text-primary-600 transition-colors">Dashboard</Link>
-                                <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                                <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
                                     <img src={`https://ui-avatars.com/api/?name=${user?.username || 'User'}`} alt="User" />
                                 </div>
                             </>
                         ) : (
                             <>
                                 <Link to="/login" className="text-sm font-medium hover:text-primary-600 transition-colors">Log in</Link>
-                                <Link to="/register" className="text-sm font-medium bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                <Link to="/register" className="text-sm font-medium bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors">
                                     Get Started
                                 </Link>
                             </>
@@ -50,19 +50,19 @@ export const PublicLayout = () => {
 
                 {/* Mobile Nav */}
                 {isMenuOpen && (
-                    <div className="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-4 flex flex-col gap-4">
+                    <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-4 flex flex-col gap-4">
                         <Link to="/search/teams" className="text-sm font-medium py-2">Find Teams</Link>
                         <Link to="/search/fields" className="text-sm font-medium py-2">Book Fields</Link>
                         <Link to="/search/players" className="text-sm font-medium py-2">Find Players</Link>
                         <Link to="/search/owners" className="text-sm font-medium py-2">Find Owners</Link>
                         <Link to="/community" className="text-sm font-medium py-2">Community</Link>
-                        <hr className="border-gray-200 dark:border-gray-800" />
+                        <hr className="border-slate-200 dark:border-slate-800" />
                         {isAuthenticated ? (
-                            <Link to="/dashboard" className="text-sm font-medium py-2 text-blue-600">Dashboard</Link>
+                            <Link to="/dashboard" className="text-sm font-medium py-2 text-primary-600">Dashboard</Link>
                         ) : (
                             <>
                                 <Link to="/login" className="text-sm font-medium py-2">Log in</Link>
-                                <Link to="/register" className="text-sm font-medium py-2 text-blue-600">Get Started</Link>
+                                <Link to="/register" className="text-sm font-medium py-2 text-primary-600">Get Started</Link>
                             </>
                         )}
                     </div>
@@ -75,13 +75,13 @@ export const PublicLayout = () => {
             </main>
 
             {/* Footer */}
-            <footer className="border-t border-gray-200 dark:border-gray-800 py-8 bg-gray-50 dark:bg-gray-950">
+            <footer className="border-t border-slate-200 dark:border-slate-800 py-8 bg-slate-50 dark:bg-slate-950">
                 <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-2 font-bold text-lg">
                         <Rocket className="h-5 w-5" />
                         <span>Kick-off</span>
                     </div>
-                    <p className="text-sm text-gray-500">© 2024 Kick-off Platform. All rights reserved.</p>
+                    <p className="text-sm text-slate-500">© 2024 Kick-off Platform. All rights reserved.</p>
                 </div>
             </footer>
         </div>

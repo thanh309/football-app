@@ -1,3 +1,128 @@
+/* Import Inter font - must be first */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+
+    /* Smooth scrolling */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* Base body styles */
+    body {
+        @apply font-sans text-slate-700 antialiased;
+    }
+
+    /* Consistent focus states - using emerald as it maps to primary */
+    *:focus-visible {
+        @apply outline-none ring-2 ring-emerald-500 ring-offset-2;
+    }
+
+    /* Remove default button styles */
+    button {
+        @apply cursor-pointer;
+    }
+}
+
+@layer components {
+
+    /* Card component */
+    .card {
+        @apply bg-white rounded-xl shadow-sm border border-slate-100;
+    }
+
+    .card-hover {
+        @apply hover:shadow-md transition-shadow duration-200;
+    }
+
+    /* Section padding */
+    .section-padding {
+        @apply px-4 md:px-6 lg:px-8;
+    }
+
+    /* Container with max-width */
+    .container-app {
+        @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    }
+
+    /* Page title */
+    .page-title {
+        @apply text-2xl md:text-3xl font-bold text-slate-900;
+    }
+
+    /* Page subtitle */
+    .page-subtitle {
+        @apply text-slate-600 mt-1;
+    }
+
+    /* Link styles - using emerald as it maps to primary */
+    .link-primary {
+        @apply text-emerald-600 hover:text-emerald-700 font-medium transition-colors;
+    }
+
+    /* Badge base */
+    .badge {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    }
+
+    .badge-success {
+        @apply bg-emerald-100 text-emerald-700;
+    }
+
+    .badge-warning {
+        @apply bg-amber-100 text-amber-700;
+    }
+
+    .badge-error {
+        @apply bg-red-100 text-red-700;
+    }
+
+    .badge-info {
+        @apply bg-sky-100 text-sky-700;
+    }
+
+    .badge-neutral {
+        @apply bg-slate-100 text-slate-700;
+    }
+
+    /* Icon container */
+    .icon-container {
+        @apply w-12 h-12 rounded-xl flex items-center justify-center;
+    }
+
+    .icon-container-sm {
+        @apply w-10 h-10 rounded-lg flex items-center justify-center;
+    }
+
+    /* Stat card */
+    .stat-card {
+        @apply card p-6 card-hover;
+    }
+
+    /* Form group spacing */
+    .form-group {
+        @apply space-y-1.5;
+    }
+}
+
+@layer utilities {
+
+    /* Text gradient - using emerald as primary */
+    .text-gradient-primary {
+        @apply bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent;
+    }
+
+    /* Background gradient */
+    .bg-gradient-primary {
+        @apply bg-gradient-to-br from-emerald-600 via-emerald-600 to-emerald-700;
+    }
+
+    /* Subtle hover background */
+    .hover-bg-subtle {
+        @apply hover:bg-slate-50 transition-colors;
+    }
+}

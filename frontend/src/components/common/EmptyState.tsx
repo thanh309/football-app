@@ -27,14 +27,14 @@ const EmptyState: React.FC<EmptyStateProps> = ({
                 className
             )}
         >
-            <div className="text-gray-300 mb-4">
+            <div className="text-slate-300 mb-4">
                 {icon || <Inbox className="w-16 h-16" />}
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">
                 {title}
             </h3>
             {description && (
-                <p className="text-gray-500 max-w-sm mb-6">
+                <p className="text-slate-500 max-w-sm mb-6">
                     {description}
                 </p>
             )}
