@@ -19,8 +19,10 @@ export const PublicLayout = () => {
 
                     {/* Desktop Nav */}
                     <nav className="hidden md:flex items-center gap-6">
-                        <Link to="/teams" className="text-sm font-medium hover:text-primary-600 transition-colors">Find Teams</Link>
-                        <Link to="/fields" className="text-sm font-medium hover:text-primary-600 transition-colors">Book Fields</Link>
+                        <Link to="/search/teams" className="text-sm font-medium hover:text-primary-600 transition-colors">Find Teams</Link>
+                        <Link to="/search/fields" className="text-sm font-medium hover:text-primary-600 transition-colors">Book Fields</Link>
+                        <Link to="/search/players" className="text-sm font-medium hover:text-primary-600 transition-colors">Find Players</Link>
+                        <Link to="/search/owners" className="text-sm font-medium hover:text-primary-600 transition-colors">Find Owners</Link>
                         <Link to="/community" className="text-sm font-medium hover:text-primary-600 transition-colors">Community</Link>
                         <div className="h-4 w-px bg-gray-200 dark:bg-gray-700 mx-2" />
                         {isAuthenticated ? (
@@ -49,8 +51,10 @@ export const PublicLayout = () => {
                 {/* Mobile Nav */}
                 {isMenuOpen && (
                     <div className="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-4 flex flex-col gap-4">
-                        <Link to="/teams" className="text-sm font-medium py-2">Find Teams</Link>
-                        <Link to="/fields" className="text-sm font-medium py-2">Book Fields</Link>
+                        <Link to="/search/teams" className="text-sm font-medium py-2">Find Teams</Link>
+                        <Link to="/search/fields" className="text-sm font-medium py-2">Book Fields</Link>
+                        <Link to="/search/players" className="text-sm font-medium py-2">Find Players</Link>
+                        <Link to="/search/owners" className="text-sm font-medium py-2">Find Owners</Link>
                         <Link to="/community" className="text-sm font-medium py-2">Community</Link>
                         <hr className="border-gray-200 dark:border-gray-800" />
                         {isAuthenticated ? (

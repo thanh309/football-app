@@ -33,6 +33,7 @@ export {
     SearchFieldsPage,
     SearchPlayersPage,
     SearchOwnersPage,
+    SearchOwnerProfilePage,
 } from './search';
 
 // Player pages

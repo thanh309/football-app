@@ -155,13 +155,13 @@ const LandingPage: React.FC = () => {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link
-                            to="/teams"
+                            to="/search/teams"
                             className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-base font-medium rounded-lg text-white hover:bg-white/10 transition-colors"
                         >
                             Browse Teams
                         </Link>
                         <Link
-                            to="/fields"
+                            to="/search/fields"
                             className="inline-flex items-center justify-center px-8 py-3 border-2 border-white text-base font-medium rounded-lg text-white hover:bg-white/10 transition-colors"
                         >
                             Find Fields

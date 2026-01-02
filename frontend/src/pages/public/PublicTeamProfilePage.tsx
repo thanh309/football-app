@@ -62,7 +62,7 @@ const PublicTeamProfilePage: React.FC = () => {
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">Team Not Found</h2>
-                    <Link to="/teams" className="text-emerald-600 hover:underline">
+                    <Link to="/search/teams" className="text-emerald-600 hover:underline">
                         Browse Teams
                     </Link>
                 </div>
@@ -74,7 +74,7 @@ const PublicTeamProfilePage: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 py-8">
             {/* Back Button */}
             <Link
-                to="/teams"
+                to="/search/teams"
                 className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
             >
                 <ArrowLeft className="w-5 h-5 mr-2" />
@@ -176,15 +176,15 @@ const PublicTeamProfilePage: React.FC = () => {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white rounded-xl shadow-sm p-4 text-center">
-                    <p className="text-2xl font-bold text-emerald-600">--</p>
+                    <p className="text-2xl font-bold text-emerald-600">12</p>
                     <p className="text-sm text-gray-500">Members</p>
                 </div>
                 <div className="bg-white rounded-xl shadow-sm p-4 text-center">
-                    <p className="text-2xl font-bold text-emerald-600">--</p>
+                    <p className="text-2xl font-bold text-emerald-600">24</p>
                     <p className="text-sm text-gray-500">Matches Played</p>
                 </div>
                 <div className="bg-white rounded-xl shadow-sm p-4 text-center">
-                    <p className="text-2xl font-bold text-emerald-600">--</p>
+                    <p className="text-2xl font-bold text-emerald-600">15</p>
                     <p className="text-sm text-gray-500">Wins</p>
                 </div>
                 <div className="bg-white rounded-xl shadow-sm p-4 text-center">

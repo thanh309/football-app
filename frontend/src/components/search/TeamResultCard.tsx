@@ -71,7 +71,7 @@ const TeamResultCard: React.FC<TeamResultCardProps> = ({ team, showJoinButton = 
 
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
                     <Link
-                        to={`/teams/${team.teamId}`}
+                        to={`/search/teams/${team.teamId}`}
                         className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
                     >
                         View Profile

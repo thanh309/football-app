@@ -59,7 +59,7 @@ const PublicFieldProfilePage: React.FC = () => {
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">Field Not Found</h2>
-                    <Link to="/fields" className="text-emerald-600 hover:underline">
+                    <Link to="/search/fields" className="text-emerald-600 hover:underline">
                         Browse Fields
                     </Link>
                 </div>
@@ -71,7 +71,7 @@ const PublicFieldProfilePage: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 py-8">
             {/* Back Button */}
             <Link
-                to="/fields"
+                to="/search/fields"
                 className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
             >
                 <ArrowLeft className="w-5 h-5 mr-2" />

@@ -67,7 +67,7 @@ const PlayerResultCard: React.FC<PlayerResultCardProps> = ({ player }) => {
 
                 <div className="flex items-center justify-end mt-4 pt-4 border-t border-gray-100">
                     <Link
-                        to={`/players/${player.playerId}`}
+                        to={`/search/players/${player.playerId}`}
                         className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
                     >
                         View Profile

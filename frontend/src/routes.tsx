@@ -15,17 +15,16 @@ export const router = createBrowserRouter([
             { index: true, element: <Pages.LandingPage /> },
             { path: "community", element: <Pages.CommunityFeedPage /> },
             { path: "community/posts/:id", element: <Pages.PostDetailsPage /> },
-            { path: "teams", element: <Pages.SearchTeamsPage /> },
-            { path: "teams/:id", element: <Pages.PublicTeamProfilePage /> },
-            { path: "fields", element: <Pages.SearchFieldsPage /> },
-            { path: "fields/:id", element: <Pages.PublicFieldProfilePage /> },
-            { path: "players/:id", element: <Pages.PublicPlayerProfilePage /> },
 
-            // Search Routes
+            // Search Routes (public pages)
             { path: "search/teams", element: <Pages.SearchTeamsPage /> },
+            { path: "search/teams/:id", element: <Pages.PublicTeamProfilePage /> },
             { path: "search/fields", element: <Pages.SearchFieldsPage /> },
+            { path: "search/fields/:id", element: <Pages.PublicFieldProfilePage /> },
             { path: "search/players", element: <Pages.SearchPlayersPage /> },
+            { path: "search/players/:id", element: <Pages.PublicPlayerProfilePage /> },
             { path: "search/owners", element: <Pages.SearchOwnersPage /> },
+            { path: "search/owners/:id", element: <Pages.SearchOwnerProfilePage /> },
         ],
     },
 

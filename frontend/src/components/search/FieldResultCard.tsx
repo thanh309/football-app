@@ -64,7 +64,7 @@ const FieldResultCard: React.FC<FieldResultCardProps> = ({ field }) => {
 
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
                     <Link
-                        to={`/fields/${field.fieldId}`}
+                        to={`/search/fields/${field.fieldId}`}
                         className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
                     >
                         View Details
@@ -72,7 +72,7 @@ const FieldResultCard: React.FC<FieldResultCardProps> = ({ field }) => {
                     </Link>
                     {isAuthenticated && (
                         <Link
-                            to={`/fields/${field.fieldId}`}
+                            to={`/search/fields/${field.fieldId}`}
                             className="text-sm bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                         >
                             Book Now

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
 import {
     OwnerSearchFilter,
     EmptySearchState,
@@ -116,12 +118,21 @@ const SearchOwnersPage: React.FC = () => {
                                     <p className="text-sm text-gray-500">{owner.location}</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                {owner.isVerified && (
-                                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                        Verified
-                                    </span>
-                                )}
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    {owner.isVerified && (
+                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                                            Verified
+                                        </span>
+                                    )}
+                                </div>
+                                <Link
+                                    to={`/search/owners/${owner.userId}`}
+                                    className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
+                                >
+                                    View Profile
+                                    <ChevronRight className="w-4 h-4" />
+                                </Link>
                             </div>
                         </div>
                     ))}

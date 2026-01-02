@@ -91,7 +91,7 @@ const DashboardPage: React.FC = () => {
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Link
-                        to="/teams"
+                        to="/search/teams"
                         className="flex flex-col items-center p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
                     >
                         <svg className="w-8 h-8 text-emerald-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,7 +100,7 @@ const DashboardPage: React.FC = () => {
                         <span className="text-sm font-medium text-gray-700">Find Teams</span>
                     </Link>
                     <Link
-                        to="/fields"
+                        to="/search/fields"
                         className="flex flex-col items-center p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
                     >
                         <svg className="w-8 h-8 text-teal-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
