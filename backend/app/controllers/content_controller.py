@@ -142,3 +142,126 @@ async def add_comment(
         createdAt=comment.created_at.isoformat(),
         updatedAt=comment.updated_at.isoformat(),
     )
+
+
+# --- Community Enhancements ---
+from sqlalchemy import select
+
+@router.post("/{post_id}/like", response_model=MessageResponse)
+async def like_post(
+    post_id: int,
+    user: UserAccount = Depends(get_current_user),
+    content_service: ContentService = Depends(get_content_service),
+    db: AsyncSession = Depends(get_db)
+):
+    """Like a post."""
+    from app.models.social import Post
+    
+    post = await content_service.get_post_by_id(post_id)
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+    
+    # Increment reaction count
+    post.reaction_count = (post.reaction_count or 0) + 1
+    await db.commit()
+    
+    return MessageResponse(message="Post liked")
+
+
+@router.delete("/{post_id}/like", response_model=MessageResponse)
+async def unlike_post(
+    post_id: int,
+    user: UserAccount = Depends(get_current_user),
+    content_service: ContentService = Depends(get_content_service),
+    db: AsyncSession = Depends(get_db)
+):
+    """Unlike a post."""
+    post = await content_service.get_post_by_id(post_id)
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+    
+    # Decrement reaction count
+    if post.reaction_count and post.reaction_count > 0:
+        post.reaction_count = post.reaction_count - 1
+    await db.commit()
+    
+    return MessageResponse(message="Post unliked")
+
+
+@router.get("/user/{user_id}", response_model=List[PostResponse])
+async def get_user_posts(
+    user_id: int,
+    limit: int = Query(20, le=100),
+    offset: int = Query(0),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get posts by a specific user."""
+    from app.models.social import Post
+    
+    result = await db.execute(
+        select(Post)
+        .where(Post.author_id == user_id, Post.is_hidden == False)
+        .order_by(Post.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+    )
+    posts = result.scalars().all()
+    
+    return [post_to_response(p) for p in posts]
+
+
+@router.get("/team/{team_id}", response_model=List[PostResponse])
+async def get_team_posts(
+    team_id: int,
+    limit: int = Query(20, le=100),
+    offset: int = Query(0),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get posts for a specific team."""
+    from app.models.social import Post
+    
+    result = await db.execute(
+        select(Post)
+        .where(Post.team_id == team_id, Post.is_hidden == False)
+        .order_by(Post.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+    )
+    posts = result.scalars().all()
+    
+    return [post_to_response(p) for p in posts]
+
+
+@router.get("/{post_id}/comments/{comment_id}/replies", response_model=List[CommentResponse])
+async def get_comment_replies(
+    post_id: int,
+    comment_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """Get replies to a specific comment."""
+    from app.models.social import Comment
+    
+    result = await db.execute(
+        select(Comment)
+        .where(
+            Comment.post_id == post_id,
+            Comment.parent_comment_id == comment_id,
+            Comment.is_hidden == False
+        )
+        .order_by(Comment.created_at)
+    )
+    replies = result.scalars().all()
+    
+    return [
+        CommentResponse(
+            commentId=c.comment_id,
+            postId=c.post_id,
+            authorId=c.author_id,
+            content=c.content,
+            parentCommentId=c.parent_comment_id,
+            isHidden=c.is_hidden,
+            createdAt=c.created_at.isoformat(),
+            updatedAt=c.updated_at.isoformat(),
+        ) for c in replies
+    ]
+

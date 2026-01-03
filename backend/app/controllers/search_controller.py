@@ -119,3 +119,64 @@ async def search_players(
             updatedAt=p.updated_at.isoformat(),
         ) for p in players
     ]
+
+
+from pydantic import BaseModel
+
+class OwnerSearchResponse(BaseModel):
+    """Owner search response."""
+    userId: int
+    email: str
+    fullName: str
+    fieldCount: int
+
+
+@router.get("/owners", response_model=List[OwnerSearchResponse])
+async def search_owners(
+    q: Optional[str] = Query(None),
+    limit: int = Query(20, le=100),
+    db: AsyncSession = Depends(get_db)
+):
+    """Search for field owners."""
+    from sqlalchemy import select, func
+    from app.models.user import UserAccount
+    from app.models.field import FieldProfile
+    from app.models.enums import UserRole
+    
+    # Find users who are owners
+    if q:
+        stmt = (
+            select(
+                UserAccount,
+                func.count(FieldProfile.field_id).label("field_count")
+            )
+            .outerjoin(FieldProfile, FieldProfile.owner_id == UserAccount.user_id)
+            .where(UserAccount.role == UserRole.OWNER)
+            .where(UserAccount.full_name.ilike(f"%{q}%"))
+            .group_by(UserAccount.user_id)
+            .limit(limit)
+        )
+    else:
+        stmt = (
+            select(
+                UserAccount,
+                func.count(FieldProfile.field_id).label("field_count")
+            )
+            .outerjoin(FieldProfile, FieldProfile.owner_id == UserAccount.user_id)
+            .where(UserAccount.role == UserRole.OWNER)
+            .group_by(UserAccount.user_id)
+            .limit(limit)
+        )
+    
+    result = await db.execute(stmt)
+    rows = result.all()
+    
+    return [
+        OwnerSearchResponse(
+            userId=row[0].user_id,
+            email=row[0].email,
+            fullName=row[0].full_name or "",
+            fieldCount=row[1] or 0,
+        ) for row in rows
+    ]
+

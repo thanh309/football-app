@@ -96,6 +96,27 @@ async def get_bookings_by_team(
     return [booking_to_response(b) for b in bookings]
 
 
+@router.get("/owner/pending", response_model=List[BookingRequestResponse])
+async def get_owner_pending_bookings(
+    user: UserAccount = Depends(get_current_user),
+    booking_service: BookingService = Depends(get_booking_service),
+    field_service: FieldService = Depends(get_field_service)
+):
+    """Get all pending bookings for owner's fields."""
+    from app.models.enums import BookingStatus
+    
+    fields = await field_service.get_fields_by_owner(user.user_id)
+    all_pending = []
+    for field in fields:
+        bookings = await booking_service.get_bookings_by_field(
+            field.field_id, 
+            BookingStatus.PENDING
+        )
+        all_pending.extend(bookings)
+    
+    return [booking_to_response(b) for b in all_pending]
+
+
 @router.put("/{booking_id}/approve", response_model=MessageResponse)
 async def approve_booking(
     booking_id: int,

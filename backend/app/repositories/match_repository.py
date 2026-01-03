@@ -79,3 +79,20 @@ class AttendanceRepository(BaseRepository[AttendanceRecord]):
             select(AttendanceRecord).where(AttendanceRecord.player_id == player_id)
         )
         return list(result.scalars().all())
+
+
+class ResultRepository(BaseRepository):
+    """Repository for MatchResult operations."""
+    
+    def __init__(self, db: AsyncSession):
+        from app.models.match import MatchResult
+        super().__init__(MatchResult, db)
+    
+    async def find_by_match(self, match_id: int):
+        """Find result for a match."""
+        from app.models.match import MatchResult
+        result = await self.db.execute(
+            select(MatchResult).where(MatchResult.match_id == match_id)
+        )
+        return result.scalar_one_or_none()
+

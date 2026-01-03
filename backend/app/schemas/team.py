@@ -65,6 +65,17 @@ class TeamRosterResponse(BaseModel):
         from_attributes = True
 
 
+class RosterAddPlayerRequest(BaseModel):
+    """Request to add player to roster."""
+    playerId: int
+    role: Optional[str] = "Member"
+
+
+class RosterUpdateRoleRequest(BaseModel):
+    """Request to update player role."""
+    role: str
+
+
 # --- Join Request ---
 class JoinRequestCreate(BaseModel):
     """Join request creation."""

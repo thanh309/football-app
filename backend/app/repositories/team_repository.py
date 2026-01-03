@@ -83,6 +83,13 @@ class RosterRepository(BaseRepository[TeamRoster]):
             )
         )
         return result.scalar_one_or_none()
+    
+    async def find_by_id(self, roster_id: int) -> Optional[TeamRoster]:
+        """Find roster entry by ID."""
+        result = await self.db.execute(
+            select(TeamRoster).where(TeamRoster.roster_id == roster_id)
+        )
+        return result.scalar_one_or_none()
 
 
 class JoinRequestRepository(BaseRepository[JoinRequest]):

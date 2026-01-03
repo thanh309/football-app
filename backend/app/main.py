@@ -58,6 +58,8 @@ from app.controllers import content_controller
 from app.controllers import notification_controller
 from app.controllers import player_controller
 from app.controllers import search_controller
+from app.controllers import media_controller
+from app.controllers import moderation_controller
 
 app.include_router(auth_controller.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(player_controller.router, prefix="/api/players", tags=["Players"])
@@ -68,6 +70,8 @@ app.include_router(match_controller.router, prefix="/api/matches", tags=["Matche
 app.include_router(content_controller.router, prefix="/api/posts", tags=["Community"])
 app.include_router(notification_controller.router, prefix="/api/notifications", tags=["Notifications"])
 app.include_router(search_controller.router, prefix="/api/search", tags=["Search"])
+app.include_router(media_controller.router, prefix="/api/media", tags=["Media"])
+app.include_router(moderation_controller.router, prefix="/api/mod", tags=["Moderation"])
 
 
 @app.get("/")
