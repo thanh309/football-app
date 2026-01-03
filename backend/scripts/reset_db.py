@@ -1,9 +1,16 @@
-import asyncio
-import os
-import sys
+#!/usr/bin/env python3
+"""
+Reset the database by dropping and recreating all tables.
 
-# Ensure the parent directory is in the path to run as a script if needed
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+Usage:
+    python scripts/reset_db.py
+"""
+import asyncio
+import sys
+from pathlib import Path
+
+# Add parent dir to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.database import engine, Base
 
@@ -12,6 +19,7 @@ from app.models import (
     booking, enums, field, match, media, moderation,
     notification, player, social, team, user
 )
+
 
 async def reset_db():
     print("Resetting database...")
@@ -25,6 +33,7 @@ async def reset_db():
     
     print("Database reset successfully.")
     await engine.dispose()
+
 
 if __name__ == "__main__":
     asyncio.run(reset_db())
