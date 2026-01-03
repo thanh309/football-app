@@ -577,6 +577,201 @@ async def seed_database(dry_run: bool = False, clear: bool = False):
             await session.flush()
         print(f"     Created {len(report_objs)} reports")
         
+        # 18. Join Requests
+        print("   - Join Requests...")
+        join_request_objs = []
+        for i in range(min(30, len(player_objs))):
+            player = random.choice(player_objs)
+            team = random.choice(team_objs)
+            status = random.choice(list(JoinRequestStatus))
+            join_request_objs.append(JoinRequest(
+                team_id=team.team_id,
+                player_id=player.player_id,
+                status=status,
+                message=fake.sentence() if random.random() > 0.3 else None,
+                processed_at=datetime.utcnow() if status != JoinRequestStatus.PENDING else None,
+            ))
+        if not dry_run:
+            session.add_all(join_request_objs)
+            await session.flush()
+        print(f"     Created {len(join_request_objs)} join requests")
+        
+        # 19. Match Invitations
+        print("   - Match Invitations...")
+        invitation_objs = []
+        for match in match_objs[:20]:  # Create invitations for first 20 matches
+            if match.opponent_team_id:
+                status = random.choice(list(InvitationStatus))
+                invitation_objs.append(MatchInvitation(
+                    match_id=match.match_id,
+                    inviting_team_id=match.host_team_id,
+                    invited_team_id=match.opponent_team_id,
+                    status=status,
+                    message=fake.sentence() if random.random() > 0.5 else None,
+                    responded_at=datetime.utcnow() if status != InvitationStatus.PENDING else None,
+                ))
+        if not dry_run:
+            session.add_all(invitation_objs)
+            await session.flush()
+        print(f"     Created {len(invitation_objs)} match invitations")
+        
+        # 20. Attendance Records
+        print("   - Attendance Records...")
+        attendance_objs = []
+        for match in match_objs[:15]:  # Create attendance for first 15 matches
+            # Get some players from host team
+            host_roster = [r for r in roster_objs if r.team_id == match.host_team_id][:5]
+            for roster in host_roster:
+                status = random.choice(list(AttendanceStatus))
+                attendance_objs.append(AttendanceRecord(
+                    match_id=match.match_id,
+                    player_id=roster.player_id,
+                    team_id=match.host_team_id,
+                    status=status,
+                    confirmed_at=datetime.utcnow() if status != AttendanceStatus.PENDING else None,
+                ))
+        if not dry_run:
+            session.add_all(attendance_objs)
+            await session.flush()
+        print(f"     Created {len(attendance_objs)} attendance records")
+        
+        # 21. Notification Preferences
+        print("   - Notification Preferences...")
+        pref_objs = []
+        notif_types = [NotificationType.MATCH_UPDATES, NotificationType.TEAM_NEWS, 
+                       NotificationType.BOOKING_ALERTS, NotificationType.SYSTEM_MESSAGES]
+        for user in user_objs[:30]:  # Create preferences for first 30 users
+            for ntype in random.sample(notif_types, random.randint(2, 4)):
+                pref_objs.append(NotificationPreference(
+                    user_id=user.user_id,
+                    notification_type=ntype,
+                    is_enabled=random.random() > 0.2,
+                    push_enabled=random.random() > 0.3,
+                    email_enabled=random.random() > 0.7,
+                ))
+        if not dry_run:
+            session.add_all(pref_objs)
+            await session.flush()
+        print(f"     Created {len(pref_objs)} notification preferences")
+        
+        # 22. Field Pricing Rules
+        print("   - Field Pricing Rules...")
+        pricing_objs = []
+        for field in field_objs:
+            # Peak hours rule
+            pricing_objs.append(FieldPricingRule(
+                field_id=field.field_id,
+                name="Peak Hours",
+                day_of_week=["Saturday", "Sunday"],
+                start_time=time(17, 0),
+                end_time=time(21, 0),
+                price_per_hour=field.default_price_per_hour * Decimal("1.5"),
+                priority=10,
+                is_active=True,
+            ))
+            # Off-peak rule
+            pricing_objs.append(FieldPricingRule(
+                field_id=field.field_id,
+                name="Off-Peak",
+                day_of_week=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                start_time=time(6, 0),
+                end_time=time(17, 0),
+                price_per_hour=field.default_price_per_hour * Decimal("0.8"),
+                priority=5,
+                is_active=True,
+            ))
+        if not dry_run:
+            session.add_all(pricing_objs)
+            await session.flush()
+        print(f"     Created {len(pricing_objs)} pricing rules")
+        
+        # 23. Cancellation Policies
+        print("   - Cancellation Policies...")
+        policy_objs = []
+        for field in field_objs:
+            policy_objs.append(CancellationPolicy(
+                field_id=field.field_id,
+                free_cancellation_hours=random.choice([12, 24, 48]),
+                late_cancellation_penalty_percent=Decimal(random.choice([25, 50, 75])),
+                no_show_penalty_percent=Decimal("100"),
+                refund_processing_days=random.choice([3, 5, 7]),
+                policy_description="Standard cancellation policy. Free cancellation up to the specified hours before booking.",
+                is_active=True,
+            ))
+        if not dry_run:
+            session.add_all(policy_objs)
+            await session.flush()
+        print(f"     Created {len(policy_objs)} cancellation policies")
+        
+        # 24. Transaction Logs
+        print("   - Transaction Logs...")
+        transaction_objs = []
+        for wallet in wallet_objs:
+            for _ in range(random.randint(3, 8)):
+                tx_type = random.choice(list(TransactionType))
+                transaction_objs.append(TransactionLog(
+                    wallet_id=wallet.wallet_id,
+                    type=tx_type,
+                    amount=Decimal(random.randint(10, 500)),
+                    description=f"{'Match fee' if tx_type == TransactionType.EXPENSE else 'Contribution'} - {fake.date_this_month()}",
+                    category=random.choice(["Match Fee", "Equipment", "Contribution", "Prize", "Refund"]),
+                    created_by=random.choice(user_objs).user_id,
+                ))
+        if not dry_run:
+            session.add_all(transaction_objs)
+            await session.flush()
+        print(f"     Created {len(transaction_objs)} transactions")
+        
+        # 25. Moderation Logs
+        print("   - Moderation Logs...")
+        mod_log_objs = []
+        moderators = [u for u in user_objs if UserRole.MODERATOR.value in u.roles]
+        if moderators:
+            for _ in range(15):
+                mod = random.choice(moderators)
+                target = random.choice([u for u in user_objs if u.user_id != mod.user_id])
+                mod_log_objs.append(ModerationLog(
+                    moderator_id=mod.user_id,
+                    target_user_id=target.user_id,
+                    action=random.choice(list(ModerationAction)),
+                    reason=random.choice(["Violation of terms", "Spam activity", "Inappropriate content", "User report"]),
+                    details=fake.sentence(),
+                ))
+        if not dry_run:
+            session.add_all(mod_log_objs)
+            await session.flush()
+        print(f"     Created {len(mod_log_objs)} moderation logs")
+        
+        # 26. Media Assets
+        print("   - Media Assets...")
+        media_objs = []
+        for i in range(30):
+            owner = random.choice(user_objs)
+            owner_type = random.choice(list(MediaOwnerType))
+            if owner_type == MediaOwnerType.TEAM and team_objs:
+                entity_id = random.choice(team_objs).team_id
+            elif owner_type == MediaOwnerType.FIELD and field_objs:
+                entity_id = random.choice(field_objs).field_id
+            elif owner_type == MediaOwnerType.POST and post_objs:
+                entity_id = random.choice(post_objs).post_id
+            else:
+                entity_id = random.choice(player_objs).player_id if player_objs else 1
+            
+            media_objs.append(MediaAsset(
+                owner_id=owner.user_id,
+                owner_type=owner_type,
+                entity_id=entity_id,
+                file_name=f"image_{i+1}.jpg",
+                storage_path=f"/uploads/{owner_type.value.lower()}/{entity_id}/image_{i+1}.jpg",
+                file_type=MediaType.IMAGE,
+                file_size=random.randint(50000, 500000),
+                mime_type="image/jpeg",
+            ))
+        if not dry_run:
+            session.add_all(media_objs)
+            await session.flush()
+        print(f"     Created {len(media_objs)} media assets")
+        
         if not dry_run:
             await session.commit()
             print("\n✅ Database seeding complete!")
@@ -600,18 +795,27 @@ async def verify_database():
             ("TeamProfile", TeamProfile),
             ("TeamWallet", TeamWallet),
             ("TeamRoster", TeamRoster),
+            ("JoinRequest", JoinRequest),
             ("FieldProfile", FieldProfile),
             ("FieldCalendar", FieldCalendar),
+            ("FieldPricingRule", FieldPricingRule),
+            ("CancellationPolicy", CancellationPolicy),
             ("Amenity", Amenity),
             ("FieldAmenity", FieldAmenity),
             ("BookingRequest", BookingRequest),
             ("MatchEvent", MatchEvent),
+            ("MatchInvitation", MatchInvitation),
+            ("AttendanceRecord", AttendanceRecord),
             ("MatchResult", MatchResult),
             ("Post", Post),
             ("Comment", Comment),
             ("Reaction", Reaction),
             ("Notification", Notification),
+            ("NotificationPreference", NotificationPreference),
             ("Report", Report),
+            ("ModerationLog", ModerationLog),
+            ("TransactionLog", TransactionLog),
+            ("MediaAsset", MediaAsset),
         ]
         
         total = 0
