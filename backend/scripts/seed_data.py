@@ -134,6 +134,7 @@ def generate_players(users: List[UserAccount]) -> List[Dict]:
 def generate_teams(users: List[UserAccount]) -> List[Dict]:
     """Generate team profiles."""
     teams = []
+    used_names = set()
     leaders = [u for u in users if UserRole.TEAM_LEADER.value in u.roles]
     
     for i in range(min(CONFIG['teams'], len(leaders))):
@@ -143,11 +144,19 @@ def generate_teams(users: List[UserAccount]) -> List[Dict]:
             weights=[60, 20, 15, 5]
         )[0]
         
-        # More realistic team names
-        if random.random() > 0.5:
-            team_name = f"{city} {random.choice(TEAM_SUFFIXES)}"
+        # Generate unique team name
+        for attempt in range(10):
+            if random.random() > 0.5:
+                team_name = f"{city} {random.choice(TEAM_SUFFIXES)}"
+            else:
+                team_name = f"{fake.last_name()} {random.choice(TEAM_SUFFIXES)}"
+            if team_name not in used_names:
+                used_names.add(team_name)
+                break
         else:
-            team_name = f"{fake.last_name()} {random.choice(TEAM_SUFFIXES)}"
+            # Fallback: append index to ensure uniqueness
+            team_name = f"{fake.last_name()} {random.choice(TEAM_SUFFIXES)} {i+1}"
+            used_names.add(team_name)
 
         teams.append({
             'team_name': team_name,
