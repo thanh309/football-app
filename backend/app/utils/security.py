@@ -1,6 +1,9 @@
 """
 Security utilities for JWT tokens and password hashing.
 """
+import logging
+logging.getLogger('passlib').setLevel(logging.ERROR)
+
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from jose import JWTError, jwt
