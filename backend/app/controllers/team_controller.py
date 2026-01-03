@@ -283,7 +283,7 @@ async def add_player_to_roster(
         player_id=data.playerId,
         role=RosterRole(data.role) if data.role else RosterRole.MEMBER,
     )
-    await roster_repo.add(roster_entry)
+    await roster_repo.save(roster_entry)
     await roster_repo.commit()
     
     return roster_to_response(roster_entry)
@@ -491,7 +491,7 @@ async def deposit_funds(
     # Log transaction
     transaction = TransactionLog(
         wallet_id=wallet.wallet_id,
-        type=TransactionType.DEPOSIT,
+        type=TransactionType.INCOME,
         amount=Decimal(str(data.amount)),
         description=data.description or "Deposit",
         category=data.category,
@@ -545,7 +545,7 @@ async def withdraw_funds(
     # Log transaction
     transaction = TransactionLog(
         wallet_id=wallet.wallet_id,
-        type=TransactionType.WITHDRAWAL,
+        type=TransactionType.EXPENSE,
         amount=Decimal(str(data.amount)),
         description=data.description or "Withdrawal",
         category=data.category,

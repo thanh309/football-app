@@ -174,7 +174,8 @@ export type PreferredFoot = typeof PreferredFoot[keyof typeof PreferredFoot];
 
 export const MediaType = {
     IMAGE: 'Image',
-    VIDEO: 'Video'
+    VIDEO: 'Video',
+    DOCUMENT: 'Document'
 } as const;
 
 export type MediaType = typeof MediaType[keyof typeof MediaType];
@@ -193,7 +194,9 @@ export const ModerationAction = {
     BAN: 'Ban',
     REACTIVATE: 'Reactivate',
     CONTENT_REMOVAL: 'ContentRemoval',
-    WARNING: 'Warning'
+    WARNING: 'Warning',
+    ROLE_CHANGE: 'RoleChange',
+    ACTIVATE: 'Activate'
 } as const;
 
 export type ModerationAction = typeof ModerationAction[keyof typeof ModerationAction];
@@ -471,11 +474,13 @@ export interface Notification {
 
 export interface NotificationPreference {
     preferenceId: number; // Primary Key
-    userId: number; // Foreign Key -> UserAccount
-    notificationType: NotificationType;
-    isEnabled: boolean;
-    pushEnabled: boolean;
-    emailEnabled: boolean;
+    userId: number; // Foreign Key -> UserAccount, Unique
+    emailNotifications: boolean;
+    pushNotifications: boolean;
+    matchReminders: boolean;
+    teamUpdates: boolean;
+    bookingUpdates: boolean;
+    communityUpdates: boolean;
     createdAt: string;
     updatedAt: string;
 }

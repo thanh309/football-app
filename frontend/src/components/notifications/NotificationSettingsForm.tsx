@@ -6,42 +6,54 @@ import {
     useUpdateNotificationPreferences,
 } from '../../api/hooks/useNotification';
 import toast from 'react-hot-toast';
-import type { NotificationPreference } from '../../types';
 
 interface NotificationSettingsFormProps {
     onSuccess?: () => void;
 }
 
+interface SettingsState {
+    emailNotifications: boolean;
+    pushNotifications: boolean;
+    matchReminders: boolean;
+    teamUpdates: boolean;
+    bookingUpdates: boolean;
+    communityUpdates: boolean;
+}
+
 const NotificationSettingsForm: React.FC<NotificationSettingsFormProps> = ({ onSuccess }) => {
     const { data: preferences, isLoading } = useNotificationPreferences();
     const updateMutation = useUpdateNotificationPreferences();
-    const [settings, setSettings] = useState<NotificationPreference[]>([]);
+    const [settings, setSettings] = useState<SettingsState>({
+        emailNotifications: true,
+        pushNotifications: true,
+        matchReminders: true,
+        teamUpdates: true,
+        bookingUpdates: true,
+        communityUpdates: true,
+    });
     const [initialized, setInitialized] = useState(false);
 
     useEffect(() => {
         if (preferences && !initialized) {
-            setSettings(preferences);
+            setSettings({
+                emailNotifications: preferences.emailNotifications,
+                pushNotifications: preferences.pushNotifications,
+                matchReminders: preferences.matchReminders,
+                teamUpdates: preferences.teamUpdates,
+                bookingUpdates: preferences.bookingUpdates,
+                communityUpdates: preferences.communityUpdates,
+            });
             setInitialized(true);
         }
     }, [preferences, initialized]);
 
-    const toggleSetting = (notificationType: string, field: 'isEnabled' | 'emailEnabled' | 'pushEnabled') => {
-        setSettings(prev => prev.map(p => {
-            if (p.notificationType !== notificationType) return p;
-            return { ...p, [field]: !p[field] };
-        }));
+    const toggleSetting = (field: keyof SettingsState) => {
+        setSettings(prev => ({ ...prev, [field]: !prev[field] }));
     };
 
     const handleSave = async () => {
         try {
-            await updateMutation.mutateAsync(
-                settings.map(s => ({
-                    notificationType: s.notificationType,
-                    isEnabled: s.isEnabled,
-                    pushEnabled: s.pushEnabled,
-                    emailEnabled: s.emailEnabled,
-                }))
-            );
+            await updateMutation.mutateAsync(settings);
             toast.success('Notification preferences saved');
             onSuccess?.();
         } catch {
@@ -52,6 +64,15 @@ const NotificationSettingsForm: React.FC<NotificationSettingsFormProps> = ({ onS
     if (isLoading) {
         return <LoadingSpinner text="Loading preferences..." />;
     }
+
+    const settingItems = [
+        { key: 'emailNotifications' as const, label: 'Email Notifications', description: 'Receive notifications via email' },
+        { key: 'pushNotifications' as const, label: 'Push Notifications', description: 'Receive push notifications in browser' },
+        { key: 'matchReminders' as const, label: 'Match Reminders', description: 'Get reminders before upcoming matches' },
+        { key: 'teamUpdates' as const, label: 'Team Updates', description: 'Stay informed about team activities' },
+        { key: 'bookingUpdates' as const, label: 'Booking Updates', description: 'Get notified about booking status changes' },
+        { key: 'communityUpdates' as const, label: 'Community Updates', description: 'Comments and reactions on your posts' },
+    ];
 
     return (
         <div className="space-y-6">
@@ -65,58 +86,24 @@ const NotificationSettingsForm: React.FC<NotificationSettingsFormProps> = ({ onS
                 </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-                <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 border-b text-sm font-medium text-gray-600">
-                    <div>Notification Type</div>
-                    <div className="text-center">Enabled</div>
-                    <div className="text-center">Email</div>
-                    <div className="text-center">Push</div>
-                </div>
-
-                {settings.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">No notification types configured</div>
-                ) : (
-                    <div className="divide-y divide-gray-100">
-                        {settings.map(pref => (
-                            <div key={pref.preferenceId} className="grid grid-cols-4 gap-4 p-4 items-center">
-                                <div className="text-sm text-gray-900">{pref.notificationType}</div>
-                                <div className="flex justify-center">
-                                    <label className="relative inline-flex items-center cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={pref.isEnabled}
-                                            onChange={() => toggleSetting(pref.notificationType, 'isEnabled')}
-                                            className="sr-only peer"
-                                        />
-                                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                                    </label>
-                                </div>
-                                <div className="flex justify-center">
-                                    <label className="relative inline-flex items-center cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={pref.emailEnabled}
-                                            onChange={() => toggleSetting(pref.notificationType, 'emailEnabled')}
-                                            className="sr-only peer"
-                                        />
-                                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                                    </label>
-                                </div>
-                                <div className="flex justify-center">
-                                    <label className="relative inline-flex items-center cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={pref.pushEnabled}
-                                            onChange={() => toggleSetting(pref.notificationType, 'pushEnabled')}
-                                            className="sr-only peer"
-                                        />
-                                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                                    </label>
-                                </div>
-                            </div>
-                        ))}
+            <div className="bg-white rounded-xl border border-gray-100 divide-y divide-gray-100">
+                {settingItems.map(item => (
+                    <div key={item.key} className="p-4 flex items-center justify-between">
+                        <div>
+                            <div className="text-sm font-medium text-gray-900">{item.label}</div>
+                            <div className="text-xs text-gray-500">{item.description}</div>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={settings[item.key]}
+                                onChange={() => toggleSetting(item.key)}
+                                className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
                     </div>
-                )}
+                ))}
             </div>
 
             <div className="flex justify-end">

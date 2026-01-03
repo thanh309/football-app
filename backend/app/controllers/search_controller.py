@@ -141,32 +141,21 @@ async def search_owners(
     from sqlalchemy import select, func
     from app.models.user import UserAccount
     from app.models.field import FieldProfile
-    from app.models.enums import UserRole
     
-    # Find users who are owners
+    # Find users who own at least one field
+    stmt = (
+        select(
+            UserAccount,
+            func.count(FieldProfile.field_id).label("field_count")
+        )
+        .join(FieldProfile, FieldProfile.owner_id == UserAccount.user_id)
+        .group_by(UserAccount.user_id)
+        .having(func.count(FieldProfile.field_id) > 0)
+        .limit(limit)
+    )
+    
     if q:
-        stmt = (
-            select(
-                UserAccount,
-                func.count(FieldProfile.field_id).label("field_count")
-            )
-            .outerjoin(FieldProfile, FieldProfile.owner_id == UserAccount.user_id)
-            .where(UserAccount.role == UserRole.OWNER)
-            .where(UserAccount.full_name.ilike(f"%{q}%"))
-            .group_by(UserAccount.user_id)
-            .limit(limit)
-        )
-    else:
-        stmt = (
-            select(
-                UserAccount,
-                func.count(FieldProfile.field_id).label("field_count")
-            )
-            .outerjoin(FieldProfile, FieldProfile.owner_id == UserAccount.user_id)
-            .where(UserAccount.role == UserRole.OWNER)
-            .group_by(UserAccount.user_id)
-            .limit(limit)
-        )
+        stmt = stmt.where(UserAccount.username.ilike(f"%{q}%"))
     
     result = await db.execute(stmt)
     rows = result.all()
@@ -175,7 +164,7 @@ async def search_owners(
         OwnerSearchResponse(
             userId=row[0].user_id,
             email=row[0].email,
-            fullName=row[0].full_name or "",
+            fullName=row[0].username,  # Use username as UserAccount doesn't have full_name
             fieldCount=row[1] or 0,
         ) for row in rows
     ]

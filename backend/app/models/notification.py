@@ -35,15 +35,22 @@ class Notification(Base):
 
 
 class NotificationPreference(Base):
-    """User preferences for notification types."""
+    """User preferences for notifications - global settings per user."""
     __tablename__ = "notification_preference"
     
     preference_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user_account.user_id"), nullable=False, index=True)
-    notification_type: Mapped[NotificationType] = mapped_column(SQLEnum(NotificationType), nullable=False)
-    is_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-    push_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-    email_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user_account.user_id"), nullable=False, unique=True, index=True)
+    
+    # Global notification settings
+    email_notifications: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    push_notifications: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    
+    # Category-specific settings
+    match_reminders: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    team_updates: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    booking_updates: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    community_updates: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, 
@@ -53,4 +60,4 @@ class NotificationPreference(Base):
     )
     
     def __repr__(self) -> str:
-        return f"<NotificationPreference(user={self.user_id}, type={self.notification_type.value})>"
+        return f"<NotificationPreference(user={self.user_id})>"

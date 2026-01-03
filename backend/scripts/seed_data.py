@@ -24,6 +24,7 @@ from faker import Faker
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.database import engine, async_session_factory, Base
+from app.utils.security import hash_password
 from app.models import *
 from app.models.enums import *
 
@@ -99,7 +100,7 @@ def generate_users(count: int) -> List[Dict]:
         users.append({
             'username': f"user_{i+1:03d}",
             'email': f"user_{i+1:03d}@example.com",
-            'password_hash': "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.VlH4pBQf7J8Kmu",  # password123
+            'password_hash': hash_password("password123"),
             'roles': selected_roles,
             'status': AccountStatus.ACTIVE,
             'is_verified': True,
@@ -635,20 +636,19 @@ async def seed_database(dry_run: bool = False, clear: bool = False):
             await session.flush()
         print(f"     Created {len(attendance_objs)} attendance records")
         
-        # 21. Notification Preferences
+        # 21. Notification Preferences (one per user with global settings)
         print("   - Notification Preferences...")
         pref_objs = []
-        notif_types = [NotificationType.MATCH_UPDATES, NotificationType.TEAM_NEWS, 
-                       NotificationType.BOOKING_ALERTS, NotificationType.SYSTEM_MESSAGES]
-        for user in user_objs[:30]:  # Create preferences for first 30 users
-            for ntype in random.sample(notif_types, random.randint(2, 4)):
-                pref_objs.append(NotificationPreference(
-                    user_id=user.user_id,
-                    notification_type=ntype,
-                    is_enabled=random.random() > 0.2,
-                    push_enabled=random.random() > 0.3,
-                    email_enabled=random.random() > 0.7,
-                ))
+        for user in user_objs[:50]:  # Create preferences for first 50 users
+            pref_objs.append(NotificationPreference(
+                user_id=user.user_id,
+                email_notifications=random.random() > 0.3,
+                push_notifications=random.random() > 0.2,
+                match_reminders=random.random() > 0.1,
+                team_updates=random.random() > 0.2,
+                booking_updates=random.random() > 0.2,
+                community_updates=random.random() > 0.4,
+            ))
         if not dry_run:
             session.add_all(pref_objs)
             await session.flush()

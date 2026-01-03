@@ -163,6 +163,7 @@ class MediaType(str, enum.Enum):
     """Media file type."""
     IMAGE = "Image"
     VIDEO = "Video"
+    DOCUMENT = "Document"
 
 
 class MediaOwnerType(str, enum.Enum):
@@ -180,6 +181,8 @@ class ModerationAction(str, enum.Enum):
     REACTIVATE = "Reactivate"
     CONTENT_REMOVAL = "ContentRemoval"
     WARNING = "Warning"
+    ROLE_CHANGE = "RoleChange"
+    ACTIVATE = "Activate"
 
 
 class DayOfWeek(str, enum.Enum):

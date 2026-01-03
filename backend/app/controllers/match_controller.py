@@ -312,7 +312,7 @@ async def confirm_attendance(
     record = existing.scalar_one_or_none()
     
     if record:
-        record.status = AttendanceStatus.CONFIRMED
+        record.status = AttendanceStatus.PRESENT
         record.confirmed_at = datetime.utcnow()
         record.confirmed_by = user.user_id
     else:
@@ -320,7 +320,7 @@ async def confirm_attendance(
             match_id=match_id,
             player_id=player.player_id,
             team_id=team_id,
-            status=AttendanceStatus.CONFIRMED,
+            status=AttendanceStatus.PRESENT,
             confirmed_at=datetime.utcnow(),
             confirmed_by=user.user_id,
         )
@@ -479,10 +479,10 @@ async def get_attendance_stats(
     records = await match_service.get_match_attendance(match_id)
     
     stats = {
-        "confirmed": 0,
-        "declined": 0,
-        "pending": 0,
+        "present": 0,
         "absent": 0,
+        "pending": 0,
+        "excused": 0,
     }
     
     for r in records:
@@ -492,10 +492,10 @@ async def get_attendance_stats(
     
     return AttendanceStatsResponse(
         totalPlayers=len(records),
-        confirmed=stats["confirmed"],
-        declined=stats["declined"],
+        confirmed=stats["present"],  # Present = confirmed
+        declined=stats["absent"],  # Absent = declined
         pending=stats["pending"],
-        absent=stats["absent"],
+        absent=stats["absent"] + stats["excused"],
     )
 
 
@@ -562,7 +562,7 @@ async def record_result(
         notes=data.notes,
         recorded_by=user.user_id,
     )
-    await result_repo.add(result)
+    await result_repo.save(result)
     await result_repo.commit()
     
     return result_to_response(result)

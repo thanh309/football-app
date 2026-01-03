@@ -1,11 +1,13 @@
 import api from '../axios';
-import type { Notification, NotificationPreference, NotificationType } from '../../types';
+import type { Notification, NotificationPreference } from '../../types';
 
 export interface UpdatePreferencesRequest {
-    notificationType: NotificationType;
-    isEnabled: boolean;
-    pushEnabled?: boolean;
-    emailEnabled?: boolean;
+    emailNotifications?: boolean;
+    pushNotifications?: boolean;
+    matchReminders?: boolean;
+    teamUpdates?: boolean;
+    bookingUpdates?: boolean;
+    communityUpdates?: boolean;
 }
 
 // Notification service functions - Real API calls
@@ -44,20 +46,18 @@ export const notificationService = {
     },
 
     /**
-     * Get notification preferences
+     * Get notification preferences (single preference object)
      */
-    getPreferences: async (): Promise<NotificationPreference[]> => {
-        const response = await api.get<NotificationPreference[]>('/notifications/preferences');
+    getPreferences: async (): Promise<NotificationPreference> => {
+        const response = await api.get<NotificationPreference>('/notifications/preferences');
         return response.data;
     },
 
     /**
      * Update notification preferences
      */
-    updatePreferences: async (preferences: UpdatePreferencesRequest[]): Promise<NotificationPreference[]> => {
-        const response = await api.put<NotificationPreference[]>('/notifications/preferences', {
-            preferences,
-        });
+    updatePreferences: async (preferences: UpdatePreferencesRequest): Promise<NotificationPreference> => {
+        const response = await api.put<NotificationPreference>('/notifications/preferences', preferences);
         return response.data;
     },
 };

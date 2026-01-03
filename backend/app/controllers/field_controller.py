@@ -196,9 +196,9 @@ async def block_calendar_slot(
         status=CalendarStatus.BLOCKED,
     )
     
-    field_repo = FieldRepository(db)
-    await field_repo.add(slot)
-    await field_repo.commit()
+    db.add(slot)
+    await db.commit()
+    await db.refresh(slot)
     
     return FieldCalendarResponse(
         calendarId=slot.calendar_id,
