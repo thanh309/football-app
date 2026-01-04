@@ -9,7 +9,8 @@ export interface SearchParams {
 
 export interface TeamSearchParams extends SearchParams {
     location?: string;
-    skillLevel?: number;
+    minSkillLevel?: number;
+    maxSkillLevel?: number;
 }
 
 export interface FieldSearchParams extends SearchParams {

@@ -19,7 +19,7 @@ export function useSearchTeams(params: TeamSearchParams) {
     return useQuery({
         queryKey: searchKeys.teams(params),
         queryFn: () => searchService.searchTeams(params),
-        enabled: !!params.query || !!params.location || !!params.skillLevel,
+        // Always enabled to show initial results
     });
 }
 
@@ -27,7 +27,7 @@ export function useSearchFields(params: FieldSearchParams) {
     return useQuery({
         queryKey: searchKeys.fields(params),
         queryFn: () => searchService.searchFields(params),
-        enabled: !!params.query || !!params.location || !!(params.amenityIds?.length),
+        // Always enabled to show initial results
     });
 }
 
@@ -35,7 +35,7 @@ export function useSearchPlayers(params: PlayerSearchParams) {
     return useQuery({
         queryKey: searchKeys.players(params),
         queryFn: () => searchService.searchPlayers(params),
-        enabled: !!params.query || !!params.position,
+        // Always enabled to show initial results
     });
 }
 
@@ -43,6 +43,6 @@ export function useSearchOwners(params: OwnerSearchParams) {
     return useQuery({
         queryKey: searchKeys.owners(params),
         queryFn: () => searchService.searchOwners(params),
-        enabled: !!params.query || !!params.location,
+        // Always enabled to show initial results
     });
 }

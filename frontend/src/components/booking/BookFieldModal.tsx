@@ -216,14 +216,22 @@ const BookFieldModal: React.FC<BookFieldModalProps> = ({
                         <Button variant="outline" onClick={onClose} className="flex-1">
                             Cancel
                         </Button>
-                        <Button
-                            onClick={handleBooking}
-                            isLoading={createBooking.isPending}
-                            disabled={!selectedSlot || !selectedTeamId || (teams && teams.length === 0)}
-                            className="flex-1"
-                        >
-                            Request Booking
-                        </Button>
+                        <div className="relative flex-1 group">
+                            <Button
+                                onClick={handleBooking}
+                                isLoading={createBooking.isPending}
+                                disabled={!selectedSlot || !selectedTeamId || (teams && teams.length === 0)}
+                                className="w-full"
+                            >
+                                Request Booking
+                            </Button>
+                            {teams && teams.length === 0 && (
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                                    You must be in a team to book a field
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800" />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

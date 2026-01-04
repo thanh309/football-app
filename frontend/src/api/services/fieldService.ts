@@ -71,10 +71,10 @@ export const fieldService = {
     },
 
     /**
-     * Get fields owned by current user
+     * Get fields owned by a specific owner
      */
-    getOwnerFields: async (_ownerId: number): Promise<FieldProfile[]> => {
-        const response = await api.get<FieldProfile[]>('/fields/my-fields');
+    getOwnerFields: async (ownerId: number): Promise<FieldProfile[]> => {
+        const response = await api.get<FieldProfile[]>(`/fields/owner/${ownerId}`);
         return response.data;
     },
 
@@ -97,7 +97,7 @@ export const fieldService = {
      */
     getAvailableSlots: async (fieldId: number, date: string): Promise<FieldCalendar[]> => {
         const response = await api.get<FieldCalendar[]>(`/fields/${fieldId}/calendar`, {
-            params: { date },
+            params: { startDate: date, endDate: date },
         });
         return response.data;
     },
@@ -122,7 +122,7 @@ export const fieldService = {
      * Get all available amenities
      */
     getAmenities: async (): Promise<Amenity[]> => {
-        const response = await api.get<Amenity[]>('/amenities');
+        const response = await api.get<Amenity[]>('/fields/amenities');
         return response.data;
     },
 

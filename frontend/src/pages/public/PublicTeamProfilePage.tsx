@@ -39,8 +39,10 @@ const PublicTeamProfilePage: React.FC = () => {
             await requestJoinTeam.mutateAsync({ teamId: team.teamId });
             setHasRequested(true);
             toast.success('Join request sent successfully!');
-        } catch {
-            toast.error('Failed to send join request');
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { detail?: string; message?: string } } };
+            const message = err.response?.data?.detail || err.response?.data?.message || 'Failed to send join request';
+            toast.error(message);
         }
     };
 

@@ -1,5 +1,5 @@
 import { ThumbsUp, Heart, PartyPopper, MessageCircle, MoreVertical, Trash2, Flag } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useToggleReaction, useDeletePost } from '../../api/hooks/useCommunity';
 import toast from 'react-hot-toast';
 import type { Post, ReactionType } from '../../types';
@@ -40,6 +40,11 @@ const PostCard: React.FC<PostCardProps> = ({ post, isOwner = false, isAuthentica
     const toggleReaction = useToggleReaction();
     const deletePost = useDeletePost();
     const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Sync userReaction prop to state when it changes (e.g., after API fetch)
+    useEffect(() => {
+        setCurrentReaction(initialReaction);
+    }, [initialReaction]);
 
     const handleReaction = async (type: ReactionType) => {
         // Optimistic update

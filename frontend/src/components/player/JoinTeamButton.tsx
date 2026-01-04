@@ -27,8 +27,8 @@ const JoinTeamButton: React.FC<JoinTeamButtonProps> = ({
                     : 'Join request sent successfully!'
             );
         } catch (error: unknown) {
-            const err = error as { response?: { data?: { message?: string } } };
-            const message = err.response?.data?.message || 'Failed to send join request';
+            const err = error as { response?: { data?: { detail?: string; message?: string } } };
+            const message = err.response?.data?.detail || err.response?.data?.message || 'Failed to send join request';
             toast.error(message);
         }
     };

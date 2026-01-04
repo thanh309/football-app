@@ -96,13 +96,20 @@ async def logout(user: UserAccount = Depends(get_current_user)):
     return MessageResponse(message="Logged out successfully")
 
 
+from pydantic import BaseModel
+
+class RefreshTokenRequest(BaseModel):
+    """Refresh token request body."""
+    refreshToken: str
+
+
 @router.post("/refresh", response_model=AuthResponse)
 async def refresh_token(
-    refresh_token: str,
+    data: RefreshTokenRequest,
     auth_service: AuthService = Depends(get_auth_service)
 ):
     """Refresh access token."""
-    payload = verify_refresh_token(refresh_token)
+    payload = verify_refresh_token(data.refreshToken)
     if not payload:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
     

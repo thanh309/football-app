@@ -70,6 +70,43 @@ async def get_my_fields(
     return [field_to_response(f) for f in fields]
 
 
+@router.get("/owner/{owner_id}", response_model=List[FieldProfileResponse])
+async def get_fields_by_owner(
+    owner_id: int,
+    field_service: FieldService = Depends(get_field_service)
+):
+    """Get fields by owner ID (public endpoint)."""
+    fields = await field_service.get_fields_by_owner(owner_id)
+    return [field_to_response(f) for f in fields]
+
+
+# --- Amenities (must be before /{field_id} routes) ---
+from app.schemas.field import AmenityResponse
+
+@router.get("/amenities", response_model=List[AmenityResponse])
+async def get_all_amenities(
+    db: AsyncSession = Depends(get_db)
+):
+    """Get all available amenities."""
+    from sqlalchemy import select
+    from app.models.field import Amenity
+    
+    result = await db.execute(
+        select(Amenity).where(Amenity.is_active == True)
+    )
+    amenities = result.scalars().all()
+    
+    return [
+        AmenityResponse(
+            amenityId=a.amenity_id,
+            name=a.name,
+            description=a.description,
+            icon=a.icon,
+            isActive=a.is_active,
+        ) for a in amenities
+    ]
+
+
 @router.get("/{field_id}", response_model=FieldProfileResponse)
 async def get_field(
     field_id: int,
@@ -137,8 +174,8 @@ async def delete_field(
 @router.get("/{field_id}/calendar", response_model=List[FieldCalendarResponse])
 async def get_calendar(
     field_id: int,
-    start_date: Optional[str] = Query(None),
-    end_date: Optional[str] = Query(None),
+    start_date: Optional[str] = Query(None, alias="startDate"),
+    end_date: Optional[str] = Query(None, alias="endDate"),
     field_service: FieldService = Depends(get_field_service)
 ):
     """Get field calendar slots."""
@@ -336,30 +373,6 @@ async def update_field_pricing(
     ]
 
 
-# --- Amenities ---
-
-@router.get("/amenities", response_model=List[AmenityResponse])
-async def get_all_amenities(
-    db: AsyncSession = Depends(get_db)
-):
-    """Get all available amenities."""
-    from sqlalchemy import select
-    from app.models.field import Amenity
-    
-    result = await db.execute(
-        select(Amenity).where(Amenity.is_active == True)
-    )
-    amenities = result.scalars().all()
-    
-    return [
-        AmenityResponse(
-            amenityId=a.amenity_id,
-            name=a.name,
-            description=a.description,
-            icon=a.icon,
-            isActive=a.is_active,
-        ) for a in amenities
-    ]
 
 
 @router.get("/{field_id}/amenities", response_model=List[AmenityResponse])

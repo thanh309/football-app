@@ -14,7 +14,8 @@ const SearchTeamsPage: React.FC = () => {
     const { data: searchResult, isLoading } = useSearchTeams({
         query: filters.query || '',
         location: filters.location,
-        skillLevel: filters.minSkillLevel,
+        minSkillLevel: filters.minSkillLevel,
+        maxSkillLevel: filters.maxSkillLevel,
     });
 
     const handleSearch = (newFilters: TeamSearchFilters) => {

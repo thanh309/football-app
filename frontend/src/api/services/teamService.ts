@@ -19,7 +19,8 @@ export interface UpdateTeamRequest extends Partial<CreateTeamRequest> {
 export interface TeamSearchParams {
     query?: string;
     location?: string;
-    skillLevel?: number;
+    minSkillLevel?: number;
+    maxSkillLevel?: number;
     status?: string;
     page?: number;
     limit?: number;

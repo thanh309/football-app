@@ -3,6 +3,7 @@ ContentController - Posts and comments HTTP endpoints.
 Thin controller that delegates to ContentService.
 """
 from typing import List, Optional
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -57,11 +58,59 @@ async def get_posts(
     team_id: Optional[int] = Query(None, alias="teamId"),
     limit: int = Query(20, le=100),
     offset: int = Query(0),
-    content_service: ContentService = Depends(get_content_service)
+    db: AsyncSession = Depends(get_db)
 ):
-    """Get posts feed."""
-    posts = await content_service.get_public_feed(limit, offset)
+    """Get posts feed (all non-hidden posts)."""
+    from app.models.social import Post
+    
+    # Get all non-hidden posts (including public, private, team-only)
+    stmt = select(Post).where(Post.is_hidden == False).order_by(Post.created_at.desc())
+    
+    if team_id:
+        stmt = stmt.where(Post.team_id == team_id)
+    
+    stmt = stmt.offset(offset).limit(limit)
+    
+    result = await db.execute(stmt)
+    posts = result.scalars().all()
+    
     return [post_to_response(p) for p in posts]
+
+
+class UserReactionResponse(BaseModel):
+    """User reaction for a post."""
+    postId: int
+    reactionType: Optional[str] = None
+
+
+@router.get("/my-reactions", response_model=List[UserReactionResponse])
+async def get_my_reactions(
+    postIds: List[int] = Query(..., alias="postIds[]"),
+    user: UserAccount = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get current user's reactions for multiple posts."""
+    from app.models.social import Reaction
+    from app.models.enums import ReactionEntityType
+    
+    result = await db.execute(
+        select(Reaction).where(
+            Reaction.entity_type == ReactionEntityType.POST,
+            Reaction.entity_id.in_(postIds),
+            Reaction.user_id == user.user_id
+        )
+    )
+    reactions = result.scalars().all()
+    
+    # Create a map of post_id -> reaction_type
+    reaction_map = {r.entity_id: r.type.value for r in reactions}
+    
+    return [
+        UserReactionResponse(
+            postId=pid,
+            reactionType=reaction_map.get(pid),
+        ) for pid in postIds
+    ]
 
 
 @router.get("/{post_id}", response_model=PostResponse)
@@ -265,3 +314,196 @@ async def get_comment_replies(
         ) for c in replies
     ]
 
+
+# --- Reactions Endpoints ---
+
+class ReactionRequest(BaseModel):
+    """Reaction request body."""
+    type: str
+
+
+class ReactionResponse(BaseModel):
+    """Reaction response."""
+    reactionId: int
+    postId: int
+    userId: int
+    type: str
+    createdAt: str
+    isRemoved: bool = False
+
+
+@router.post("/{post_id}/reactions", response_model=ReactionResponse, status_code=status.HTTP_201_CREATED)
+async def toggle_reaction(
+    post_id: int,
+    data: ReactionRequest,
+    user: UserAccount = Depends(get_current_user),
+    content_service: ContentService = Depends(get_content_service),
+    db: AsyncSession = Depends(get_db)
+):
+    """Toggle a reaction on a post - creates if not exists, removes if same type, updates if different type."""
+    from app.models.social import Post, Reaction
+    from app.models.enums import ReactionType, ReactionEntityType
+    from datetime import datetime
+    
+    post = await content_service.get_post_by_id(post_id)
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+    
+    # Parse the requested reaction type
+    try:
+        reaction_type = ReactionType(data.type)
+    except ValueError:
+        reaction_type = ReactionType.LIKE  # Default to LIKE if invalid type
+    
+    # Check if user already reacted to this post
+    existing = await db.execute(
+        select(Reaction).where(
+            Reaction.entity_type == ReactionEntityType.POST,
+            Reaction.entity_id == post_id,
+            Reaction.user_id == user.user_id
+        )
+    )
+    existing_reaction = existing.scalar_one_or_none()
+    
+    if existing_reaction:
+        if existing_reaction.type == reaction_type:
+            # Same type - remove reaction (toggle off)
+            await db.delete(existing_reaction)
+            post.reaction_count = max(0, (post.reaction_count or 0) - 1)
+            await db.commit()
+            return ReactionResponse(
+                reactionId=existing_reaction.reaction_id,
+                postId=post_id,
+                userId=user.user_id,
+                type=existing_reaction.type.value,
+                createdAt=existing_reaction.created_at.isoformat(),
+                isRemoved=True,
+            )
+        else:
+            # Different type - update reaction type (count stays same)
+            existing_reaction.type = reaction_type
+            await db.commit()
+            return ReactionResponse(
+                reactionId=existing_reaction.reaction_id,
+                postId=post_id,
+                userId=user.user_id,
+                type=existing_reaction.type.value,
+                createdAt=existing_reaction.created_at.isoformat(),
+                isRemoved=False,
+            )
+    else:
+        # No existing reaction - create new one
+        new_reaction = Reaction(
+            entity_type=ReactionEntityType.POST,
+            entity_id=post_id,
+            user_id=user.user_id,
+            type=reaction_type,
+        )
+        db.add(new_reaction)
+        post.reaction_count = (post.reaction_count or 0) + 1
+        await db.commit()
+        await db.refresh(new_reaction)
+        
+        return ReactionResponse(
+            reactionId=new_reaction.reaction_id,
+            postId=post_id,
+            userId=user.user_id,
+            type=new_reaction.type.value,
+            createdAt=new_reaction.created_at.isoformat(),
+            isRemoved=False,
+        )
+
+
+@router.get("/{post_id}/reactions", response_model=List[ReactionResponse])
+async def get_reactions(
+    post_id: int,
+    content_service: ContentService = Depends(get_content_service),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get all reactions for a post."""
+    from app.models.social import Reaction
+    from app.models.enums import ReactionEntityType
+    
+    post = await content_service.get_post_by_id(post_id)
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+    
+    result = await db.execute(
+        select(Reaction).where(
+            Reaction.entity_type == ReactionEntityType.POST,
+            Reaction.entity_id == post_id
+        ).order_by(Reaction.created_at.desc())
+    )
+    reactions = result.scalars().all()
+    
+    return [
+        ReactionResponse(
+            reactionId=r.reaction_id,
+            postId=post_id,
+            userId=r.user_id,
+            type=r.type.value,
+            createdAt=r.created_at.isoformat(),
+            isRemoved=False,
+        ) for r in reactions
+    ]
+
+
+
+# --- Reports Endpoint for Regular Users ---
+class CreateReportRequest(BaseModel):
+    """Create report request."""
+    contentId: int
+    contentType: str
+    reason: str
+    details: Optional[str] = None
+
+
+class ReportResponse(BaseModel):
+    """Report response."""
+    reportId: int
+    reporterId: int
+    contentType: str
+    contentId: int
+    reason: str
+    status: str
+    createdAt: str
+
+
+@router.post("/report", response_model=ReportResponse, status_code=status.HTTP_201_CREATED)
+async def create_report(
+    data: CreateReportRequest,
+    user: UserAccount = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Report content (post, comment, or user)."""
+    from app.models.moderation import Report
+    from app.models.enums import ReportStatus, ReportContentType
+    
+    # Map string content type to enum
+    try:
+        content_type_enum = ReportContentType(data.contentType)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid content type: {data.contentType}")
+    
+    report = Report(
+        reporter_id=user.user_id,
+        content_type=content_type_enum,
+        content_id=data.contentId,
+        reason=data.reason,
+        details=data.details,
+        status=ReportStatus.PENDING,
+    )
+    
+    db.add(report)
+    await db.commit()
+    await db.refresh(report)
+    
+    return ReportResponse(
+        reportId=report.report_id,
+        reporterId=report.reporter_id,
+        contentType=report.content_type.value,
+        contentId=report.content_id,
+        reason=report.reason,
+        status=report.status.value,
+        createdAt=report.created_at.isoformat(),
+    )

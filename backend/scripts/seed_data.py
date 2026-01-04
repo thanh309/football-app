@@ -103,7 +103,7 @@ def generate_users(count: int) -> List[Dict]:
             'password_hash': hash_password("password123"),
             'roles': selected_roles,
             'status': AccountStatus.ACTIVE,
-            'is_verified': True,
+            'is_verified': random.random() < 0.9,
             'contact_info': fake.phone_number(),
             'location': city,
             'latitude': lat + random.uniform(-0.05, 0.05),

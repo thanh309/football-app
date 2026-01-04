@@ -127,12 +127,22 @@ export const communityService = {
         reason: string,
         details?: string
     ): Promise<void> => {
-        await api.post('/reports', {
+        await api.post('/posts/report', {
             contentId,
             contentType,
             reason,
             details,
         });
+    },
+
+    /**
+     * Get current user's reactions for multiple posts
+     */
+    getMyReactions: async (postIds: number[]): Promise<{ postId: number; reactionType: string | null }[]> => {
+        const response = await api.get<{ postId: number; reactionType: string | null }[]>('/posts/my-reactions', {
+            params: { 'postIds[]': postIds },
+        });
+        return response.data;
     },
 };
 

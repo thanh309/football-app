@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { LoadingSpinner, EmptyState, Button } from '../common';
 import { useInfiniteFeed } from '../../api/hooks/useCommunity';
 import { useAuth } from '../../contexts';
+import { communityService } from '../../api/services/communityService';
 import PostCard from './PostCard';
 import CommentSection from './CommentSection';
 import CreatePostForm from './CreatePostForm';
 import ReportForm from './ReportForm';
-import type { Post } from '../../types';
+import type { Post, ReactionType } from '../../types';
 
 interface CommunityFeedViewProps {
     teamId?: number;
@@ -27,6 +28,32 @@ const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ teamId, currentUs
 
     const [expandedPostId, setExpandedPostId] = useState<number | null>(null);
     const [reportingPostId, setReportingPostId] = useState<number | null>(null);
+    const [userReactions, setUserReactions] = useState<Record<number, ReactionType | null>>({});
+
+    const posts = data?.pages.flatMap(page => page.data) || [];
+
+    // Fetch user's reactions when posts change
+    useEffect(() => {
+        if (!isAuthenticated || posts.length === 0) return;
+
+        const postIds = posts.map(p => p.postId);
+        // Only fetch for posts we haven't fetched yet
+        const newPostIds = postIds.filter(id => !(id in userReactions));
+
+        if (newPostIds.length === 0) return;
+
+        communityService.getMyReactions(newPostIds)
+            .then(reactions => {
+                const newReactionsMap: Record<number, ReactionType | null> = {};
+                reactions.forEach(r => {
+                    newReactionsMap[r.postId] = r.reactionType as ReactionType | null;
+                });
+                setUserReactions(prev => ({ ...prev, ...newReactionsMap }));
+            })
+            .catch(() => {
+                // Silently fail - reactions just won't be pre-selected
+            });
+    }, [isAuthenticated, posts.length]);
 
     if (isLoading) {
         return <LoadingSpinner text="Loading feed..." />;
@@ -35,8 +62,6 @@ const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ teamId, currentUs
     if (error) {
         return <div className="text-center py-8 text-red-500">Failed to load feed</div>;
     }
-
-    const posts = data?.pages.flatMap(page => page.data) || [];
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
@@ -57,6 +82,7 @@ const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ teamId, currentUs
                                 post={post}
                                 isOwner={currentUserId === post.authorId}
                                 isAuthenticated={isAuthenticated}
+                                userReaction={userReactions[post.postId] || null}
                                 onCommentClick={() =>
                                     setExpandedPostId(
                                         expandedPostId === post.postId ? null : post.postId

@@ -185,7 +185,7 @@ async def request_to_join(
     player_repo = PlayerRepository(db)
     player = await player_repo.find_by_user_id(user.user_id)
     if not player:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Player profile required")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You need to be a player to join a team.")
     
     try:
         request = await team_service.create_join_request(team_id, player.player_id, data.message)
