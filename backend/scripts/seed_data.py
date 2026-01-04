@@ -421,11 +421,31 @@ async def seed_database(dry_run: bool = False, clear: bool = False):
         # 6. Team Rosters
         print("   - Team Rosters...")
         roster_objs = []
+        # Create a mapping from user_id to player
+        user_to_player = {p.user_id: p for p in player_objs}
+        added_to_team = set()  # Track (team_id, player_id) pairs to avoid duplicates
+        
         for team in team_objs:
-            members = random.sample(player_objs, min(random.randint(5, 12), len(player_objs)))
-            for j, player in enumerate(members):
-                role = RosterRole.CAPTAIN if j == 0 else (RosterRole.VICE_CAPTAIN if j == 1 else RosterRole.MEMBER)
-                roster_objs.append(TeamRoster(team_id=team.team_id, player_id=player.player_id, role=role))
+            team_members = []
+            
+            # First, add the team leader as CAPTAIN if they have a player profile
+            leader_player = user_to_player.get(team.leader_id)
+            if leader_player:
+                roster_objs.append(TeamRoster(team_id=team.team_id, player_id=leader_player.player_id, role=RosterRole.CAPTAIN))
+                added_to_team.add((team.team_id, leader_player.player_id))
+                team_members.append(leader_player)
+            
+            # Then add random additional members (excluding the leader)
+            available_players = [p for p in player_objs if p.player_id != (leader_player.player_id if leader_player else -1)]
+            additional_count = random.randint(4, 10)  # Add 4-10 more members
+            additional_members = random.sample(available_players, min(additional_count, len(available_players)))
+            
+            for j, player in enumerate(additional_members):
+                if (team.team_id, player.player_id) not in added_to_team:
+                    role = RosterRole.VICE_CAPTAIN if j == 0 else RosterRole.MEMBER
+                    roster_objs.append(TeamRoster(team_id=team.team_id, player_id=player.player_id, role=role))
+                    added_to_team.add((team.team_id, player.player_id))
+        
         if not dry_run:
             session.add_all(roster_objs)
             await session.flush()

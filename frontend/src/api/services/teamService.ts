@@ -76,10 +76,10 @@ export const teamService = {
     },
 
     /**
-     * Get teams where player is a member
+     * Get teams where user is a member (by user_id)
      */
-    getPlayerTeams: async (playerId: number): Promise<TeamProfile[]> => {
-        const response = await api.get<TeamProfile[]>(`/teams/player/${playerId}`);
+    getPlayerTeams: async (userId: number): Promise<TeamProfile[]> => {
+        const response = await api.get<TeamProfile[]>(`/teams/user/${userId}`);
         return response.data;
     },
 

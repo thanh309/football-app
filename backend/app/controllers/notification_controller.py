@@ -20,9 +20,11 @@ def get_notification_service(db: AsyncSession = Depends(get_db)) -> Notification
     return NotificationService(db)
 
 
+from fastapi import Query
+
 @router.get("", response_model=List[NotificationResponse])
 async def get_notifications(
-    unread_only: bool = False,
+    unread_only: bool = Query(False, alias="unreadOnly"),
     user: UserAccount = Depends(get_current_user),
     notification_service: NotificationService = Depends(get_notification_service)
 ):
@@ -41,6 +43,23 @@ async def get_notifications(
             createdAt=n.created_at.isoformat(),
         ) for n in notifications
     ]
+
+
+from pydantic import BaseModel as PydanticBaseModel
+
+class UnreadCountResponse(PydanticBaseModel):
+    """Unread notification count response."""
+    count: int
+
+
+@router.get("/unread-count", response_model=UnreadCountResponse)
+async def get_unread_count(
+    user: UserAccount = Depends(get_current_user),
+    notification_service: NotificationService = Depends(get_notification_service)
+):
+    """Get unread notification count."""
+    notifications = await notification_service.get_notifications(user.user_id, unread_only=True)
+    return UnreadCountResponse(count=len(notifications))
 
 
 @router.put("/{notification_id}/read", response_model=MessageResponse)

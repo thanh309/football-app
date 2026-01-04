@@ -77,6 +77,34 @@ async def get_my_teams(
     return [team_to_response(t) for t in teams]
 
 
+@router.get("/user/{user_id}", response_model=List[TeamProfileResponse])
+async def get_user_teams(
+    user_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """Get teams where user is a member (by user_id, not player_id)."""
+    from app.repositories.team_repository import RosterRepository, TeamRepository
+    
+    # First, find the player profile by user_id
+    player_repo = PlayerRepository(db)
+    player = await player_repo.find_by_user_id(user_id)
+    if not player:
+        return []  # User has no player profile, so no teams
+    
+    roster_repo = RosterRepository(db)
+    team_repo = TeamRepository(db)
+    
+    roster_entries = await roster_repo.find_by_player(player.player_id)
+    teams = []
+    for entry in roster_entries:
+        if entry.is_active:
+            team = await team_repo.find_by_id(entry.team_id)
+            if team:
+                teams.append(team)
+    
+    return [team_to_response(t) for t in teams]
+
+
 @router.get("/player/{player_id}", response_model=List[TeamProfileResponse])
 async def get_player_teams(
     player_id: int,
@@ -182,10 +210,25 @@ async def request_to_join(
     db: AsyncSession = Depends(get_db)
 ):
     """Request to join a team."""
+    from app.repositories.team_repository import RosterRepository
+    
+    # Check if user is the team leader
+    team = await team_service.get_team_by_id(team_id)
+    if not team:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found")
+    if team.leader_id == user.user_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You are the leader of this team.")
+    
     player_repo = PlayerRepository(db)
     player = await player_repo.find_by_user_id(user.user_id)
     if not player:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You need to be a player to join a team.")
+    
+    # Check if already a member of this team
+    roster_repo = RosterRepository(db)
+    existing_member = await roster_repo.find_by_team_and_player(team_id, player.player_id)
+    if existing_member and existing_member.is_active:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You are already a member of this team.")
     
     try:
         request = await team_service.create_join_request(team_id, player.player_id, data.message)
