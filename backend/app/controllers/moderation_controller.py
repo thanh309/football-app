@@ -79,6 +79,10 @@ class UserStatusUpdate(BaseModel):
     reason: str
 
 
+class UserReasonRequest(BaseModel):
+    reason: str
+
+
 # --- Helper Functions ---
 
 def report_to_response(r: Report) -> ReportResponse:
@@ -361,6 +365,7 @@ async def verify_field(
 @router.get("/users", response_model=List[UserSummaryResponse])
 async def get_users(
     role: Optional[str] = Query(None),
+    status_filter: Optional[str] = Query(None, alias="status"),
     limit: int = Query(50, le=100),
     user: UserAccount = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
@@ -368,7 +373,14 @@ async def get_users(
     """Get all users (moderator only)."""
     await require_moderator(user)
     
+    from app.models.enums import AccountStatus
+    
     stmt = select(UserAccount).limit(limit)
+    
+    # Filter by status if provided
+    if status_filter:
+        stmt = stmt.where(UserAccount.status == AccountStatus(status_filter))
+    
     # Note: role filtering with JSON column is complex, skip for now
     
     result = await db.execute(stmt)
@@ -443,14 +455,14 @@ async def update_user_role(
     return {"message": f"User role updated to {data.role}"}
 
 
-@router.put("/users/{user_id}/suspend", response_model=dict)
+@router.put("/users/{user_id}/suspend", response_model=UserSummaryResponse)
 async def suspend_user(
     user_id: int,
-    data: UserStatusUpdate,
+    data: UserReasonRequest,
     user: UserAccount = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Suspend or activate a user (moderator only)."""
+    """Suspend a user (moderator only)."""
     await require_moderator(user)
     
     result = await db.execute(select(UserAccount).where(UserAccount.user_id == user_id))
@@ -460,20 +472,133 @@ async def suspend_user(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
     from app.models.enums import AccountStatus
-    target_user.status = AccountStatus.ACTIVE if data.isActive else AccountStatus.SUSPENDED
+    target_user.status = AccountStatus.SUSPENDED
     
     # Log the action
-    action = ModerationAction.ACTIVATE if data.isActive else ModerationAction.SUSPEND
     log = ModerationLog(
         moderator_id=user.user_id,
         target_user_id=user_id,
-        action=action,
+        action=ModerationAction.SUSPEND,
         reason=data.reason,
     )
     db.add(log)
     await db.commit()
     
-    return {"message": f"User {'activated' if data.isActive else 'suspended'}"}
+    return UserSummaryResponse(
+        userId=target_user.user_id,
+        email=target_user.email,
+        username=target_user.username,
+        roles=target_user.roles if target_user.roles else ["Player"],
+        status=target_user.status.value,
+        createdAt=target_user.created_at.isoformat(),
+    )
+
+
+@router.put("/users/{user_id}/ban", response_model=UserSummaryResponse)
+async def ban_user(
+    user_id: int,
+    data: UserReasonRequest,
+    user: UserAccount = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Ban a user (moderator only)."""
+    await require_moderator(user)
+    
+    result = await db.execute(select(UserAccount).where(UserAccount.user_id == user_id))
+    target_user = result.scalar_one_or_none()
+    
+    if not target_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    from app.models.enums import AccountStatus
+    target_user.status = AccountStatus.BANNED
+    
+    # Log the action
+    log = ModerationLog(
+        moderator_id=user.user_id,
+        target_user_id=user_id,
+        action=ModerationAction.BAN,
+        reason=data.reason,
+    )
+    db.add(log)
+    await db.commit()
+    
+    return UserSummaryResponse(
+        userId=target_user.user_id,
+        email=target_user.email,
+        username=target_user.username,
+        roles=target_user.roles if target_user.roles else ["Player"],
+        status=target_user.status.value,
+        createdAt=target_user.created_at.isoformat(),
+    )
+
+
+@router.put("/users/{user_id}/reactivate", response_model=UserSummaryResponse)
+async def reactivate_user(
+    user_id: int,
+    data: UserReasonRequest,
+    user: UserAccount = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Reactivate a user (moderator only)."""
+    await require_moderator(user)
+    
+    result = await db.execute(select(UserAccount).where(UserAccount.user_id == user_id))
+    target_user = result.scalar_one_or_none()
+    
+    if not target_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    from app.models.enums import AccountStatus
+    target_user.status = AccountStatus.ACTIVE
+    
+    # Log the action
+    log = ModerationLog(
+        moderator_id=user.user_id,
+        target_user_id=user_id,
+        action=ModerationAction.REACTIVATE,
+        reason=data.reason,
+    )
+    db.add(log)
+    await db.commit()
+    
+    return UserSummaryResponse(
+        userId=target_user.user_id,
+        email=target_user.email,
+        username=target_user.username,
+        roles=target_user.roles if target_user.roles else ["Player"],
+        status=target_user.status.value,
+        createdAt=target_user.created_at.isoformat(),
+    )
+
+
+@router.get("/users/{user_id}/history", response_model=List[ModerationLogResponse])
+async def get_user_history(
+    user_id: int,
+    user: UserAccount = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get moderation history for a specific user (moderator only)."""
+    await require_moderator(user)
+    
+    result = await db.execute(
+        select(ModerationLog)
+        .where(ModerationLog.target_user_id == user_id)
+        .order_by(ModerationLog.created_at.desc())
+    )
+    logs = result.scalars().all()
+    
+    return [
+        ModerationLogResponse(
+            logId=l.log_id,
+            moderatorId=l.moderator_id,
+            targetUserId=l.target_user_id,
+            action=l.action.value,
+            reason=l.reason,
+            details=l.details,
+            createdAt=l.created_at.isoformat(),
+        ) for l in logs
+    ]
 
 
 # --- Moderation Log Endpoints ---
