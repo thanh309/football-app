@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kick-off Signup Wireframe</title>
+    <style>
+        :root {
+            --stroke-width: 2px;
+            --black: #000;
+            --white: #fff;
+            --font-family: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .browser-window {
+            width: 100%;
+            max-width: 600px;
+            /* Narrower for the signup form */
+            background: var(--white);
+            border: var(--stroke-width) solid var(--black);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.2);
+            padding-bottom: 40px;
+        }
+
+        /* Window Header */
+        .window-header {
+            border-bottom: var(--stroke-width) solid var(--black);
+            padding: 10px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #fff;
+        }
+
+        .window-control {
+            width: 20px;
+            height: 20px;
+            border: var(--stroke-width) solid var(--black);
+            position: relative;
+        }
+
+        .window-control.close::before,
+        .window-control.close::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: 16px;
+            background: var(--black);
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .window-control.close::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        .window-control.min::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            width: 10px;
+            height: 2px;
+            background: var(--black);
+        }
+
+        .window-control.max::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 8px;
+            height: 8px;
+            border: 1px solid var(--black);
+        }
+
+        /* Form Container */
+        .container {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+
+
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        p.subtitle {
+            margin: 0;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: var(--stroke-width) solid var(--black);
+            font-family: inherit;
+            background: var(--white);
+            outline: none;
+        }
+
+        .icon-eye {
+            position: absolute;
+            right: 12px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Role Selection */
+        .role-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .role-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: var(--stroke-width) solid var(--black);
+            gap: 15px;
+            cursor: pointer;
+        }
+
+        .role-card.selected {
+            background-color: #e0e0e0;
+            /* In a wireframe, we represented 'active' with a fill or thicker border. 
+               Here a light grey fill works well. */
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: var(--stroke-width) solid var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--white);
+        }
+
+        .role-card.selected .checkbox::after {
+            content: "✓";
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .role-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .role-title {
+            font-weight: bold;
+        }
+
+        .role-desc {
+            font-size: 0.8rem;
+        }
+
+        /* Buttons */
+        .submit-btn {
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            padding: 15px;
+            font-family: inherit;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 10px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .submit-btn::before {
+            content: "+";
+            font-size: 1.2rem;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.8;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        .link {
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <div class="browser-window">
+        <!-- Window Controls -->
+        <div class="window-header">
+            <div class="window-control min"></div>
+            <div class="window-control max"></div>
+            <div class="window-control close"></div>
+        </div>
+
+        <div class="container">
+            <div class="header">
+                <h1>Create Account</h1>
+                <p class="subtitle">Join the Kick-off community today</p>
+            </div>
+
+            <!-- Username -->
+            <div class="form-group">
+                <label>Username *</label>
+                <input type="text" placeholder="Choose a username">
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label>Email *</label>
+                <input type="email" placeholder="Enter your email">
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label>Password *</label>
+                <div class="input-wrapper">
+                    <input type="password" placeholder="Create a password">
+                    <span class="icon-eye">👁</span>
+                </div>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="form-group">
+                <label>Confirm Password *</label>
+                <div class="input-wrapper">
+                    <input type="password" placeholder="Confirm your password">
+                    <span class="icon-eye">👁</span>
+                </div>
+            </div>
+
+            <!-- Roles -->
+            <div class="form-group">
+                <label>Select your role(s) *</label>
+                <div class="role-group">
+
+                    <!-- Player (Selected state example) -->
+                    <div class="role-card selected">
+                        <div class="checkbox"></div>
+                        <div class="role-info">
+                            <span class="role-title">Player</span>
+                            <span class="role-desc">Join teams and play matches</span>
+                        </div>
+                    </div>
+
+                    <!-- Team Leader -->
+                    <div class="role-card">
+                        <div class="checkbox"></div>
+                        <div class="role-info">
+                            <span class="role-title">Team Leader</span>
+                            <span class="role-desc">Create and manage teams</span>
+                        </div>
+                    </div>
+
+                    <!-- Field Owner -->
+                    <div class="role-card">
+                        <div class="checkbox"></div>
+                        <div class="role-info">
+                            <span class="role-title">Field Owner</span>
+                            <span class="role-desc">List and manage football fields</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <button class="submit-btn">
+                Create Account
+            </button>
+
+            <!-- Footer -->
+            <div class="footer">
+                Already have an account? <span class="link">Sign in</span>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
