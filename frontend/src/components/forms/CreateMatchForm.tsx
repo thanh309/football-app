@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Calendar, Save } from 'lucide-react';
 import { FormInput, FormSelect, FormTextarea, DateTimePicker } from './';
-import { Button } from '../common';
-import { useCreateMatch } from '../../api/hooks/useMatch';
+import { Button, LoadingSpinner } from '../common';
+import { useCreateMatch, useSendInvitation } from '../../api/hooks/useMatch';
+import { useSearchTeams } from '../../api/hooks/useTeam';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -20,6 +21,8 @@ const visibilityOptions = [
 const CreateMatchForm: React.FC<CreateMatchFormProps> = ({ teamId, onSuccess }) => {
     const navigate = useNavigate();
     const createMutation = useCreateMatch();
+    const sendInvitationMutation = useSendInvitation();
+    const { data: teamsData, isLoading: teamsLoading } = useSearchTeams({ limit: 100 });
 
     const [formData, setFormData] = useState({
         matchDate: '',
@@ -28,9 +31,18 @@ const CreateMatchForm: React.FC<CreateMatchFormProps> = ({ teamId, onSuccess }) 
         description: '',
         visibility: 'Public',
         fieldId: '',
+        opponentTeamId: '',
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    // Filter out our own team from the opponent list
+    const opponentTeamOptions = (teamsData?.data || [])
+        .filter(team => team.teamId !== teamId)
+        .map(team => ({
+            value: team.teamId.toString(),
+            label: team.teamName,
+        }));
 
     const handleChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -47,6 +59,9 @@ const CreateMatchForm: React.FC<CreateMatchFormProps> = ({ teamId, onSuccess }) 
         if (!formData.startTime) {
             newErrors.startTime = 'Start time is required';
         }
+        if (!formData.opponentTeamId) {
+            newErrors.opponentTeamId = 'Opponent team is required';
+        }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -56,7 +71,8 @@ const CreateMatchForm: React.FC<CreateMatchFormProps> = ({ teamId, onSuccess }) 
         if (!validate()) return;
 
         try {
-            await createMutation.mutateAsync({
+            // Create the match
+            const match = await createMutation.mutateAsync({
                 hostTeamId: teamId,
                 matchDate: formData.matchDate,
                 startTime: formData.startTime,
@@ -65,7 +81,17 @@ const CreateMatchForm: React.FC<CreateMatchFormProps> = ({ teamId, onSuccess }) 
                 visibility: formData.visibility as 'Public' | 'Private' | 'TeamOnly',
                 fieldId: formData.fieldId ? parseInt(formData.fieldId) : undefined,
             });
-            toast.success('Match created successfully!');
+
+            // Send invitation to opponent team
+            if (formData.opponentTeamId) {
+                await sendInvitationMutation.mutateAsync({
+                    matchId: match.matchId,
+                    invitedTeamId: parseInt(formData.opponentTeamId),
+                    message: `You have been invited to a match on ${formData.matchDate}`,
+                });
+            }
+
+            toast.success('Match created and invitation sent!');
             if (onSuccess) {
                 onSuccess();
             } else {
@@ -84,13 +110,47 @@ const CreateMatchForm: React.FC<CreateMatchFormProps> = ({ teamId, onSuccess }) 
                 <div className="w-16 h-16 bg-emerald-100 rounded-xl flex items-center justify-center">
                     <Calendar className="w-8 h-8 text-emerald-600" />
                 </div>
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Schedule New Match</h2>
-                    <p className="text-gray-500">Set up a match event for your team</p>
+                <div className="text-left">
+                    <h2 className="text-2xl font-bold text-gray-900 text-left">Schedule New Match</h2>
+                    <p className="text-gray-500 text-left">Set up a match event for your team</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Opponent Team Selection */}
+                <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Opponent Team <span className="text-red-500">*</span>
+                    </label>
+                    {teamsLoading ? (
+                        <div className="flex items-center gap-2 text-gray-500">
+                            <LoadingSpinner size="sm" />
+                            <span>Loading teams...</span>
+                        </div>
+                    ) : (
+                        <select
+                            value={formData.opponentTeamId}
+                            onChange={(e) => handleChange('opponentTeamId', e.target.value)}
+                            className={`w-full px-4 py-2.5 bg-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                                errors.opponentTeamId ? 'border-red-500' : 'border-gray-200'
+                            }`}
+                        >
+                            <option value="">Select opponent team...</option>
+                            {opponentTeamOptions.map(option => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+                    {errors.opponentTeamId && (
+                        <p className="mt-1 text-sm text-red-500">{errors.opponentTeamId}</p>
+                    )}
+                    <p className="mt-1 text-xs text-gray-500">
+                        An invitation will be sent to the selected team
+                    </p>
+                </div>
+
                 <DateTimePicker
                     label="Match Date"
                     type="date"
@@ -149,10 +209,10 @@ const CreateMatchForm: React.FC<CreateMatchFormProps> = ({ teamId, onSuccess }) 
                 </Button>
                 <Button
                     type="submit"
-                    isLoading={createMutation.isPending}
+                    isLoading={createMutation.isPending || sendInvitationMutation.isPending}
                     leftIcon={<Save className="w-4 h-4" />}
                 >
-                    Create Match
+                    Create Match & Send Invitation
                 </Button>
             </div>
         </form>
@@ -160,3 +220,4 @@ const CreateMatchForm: React.FC<CreateMatchFormProps> = ({ teamId, onSuccess }) 
 };
 
 export default CreateMatchForm;
+
