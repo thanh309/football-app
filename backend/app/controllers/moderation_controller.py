@@ -215,6 +215,35 @@ async def get_pending_teams(
     ]
 
 
+@router.get("/teams/{team_id}", response_model=dict)
+async def get_team_for_review(
+    team_id: int,
+    user: UserAccount = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get a single team by ID for moderator review."""
+    await require_moderator(user)
+    
+    result = await db.execute(
+        select(TeamProfile).where(TeamProfile.team_id == team_id)
+    )
+    team = result.scalar_one_or_none()
+    
+    if not team:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found")
+    
+    return {
+        "teamId": team.team_id,
+        "teamName": team.team_name,
+        "leaderId": team.leader_id,
+        "description": team.description,
+        "location": team.location,
+        "logoUrl": team.logo_url,
+        "status": team.status.value,
+        "createdAt": team.created_at.isoformat(),
+    }
+
+
 @router.put("/teams/{team_id}/verify", response_model=dict)
 async def verify_team(
     team_id: int,
