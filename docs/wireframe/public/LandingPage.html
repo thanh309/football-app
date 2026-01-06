@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,8 @@
             --stroke-width: 2px;
             --black: #000;
             --white: #fff;
-            --font-family: 'Courier New', Courier, monospace; /* Monospace for wireframe feel */
+            --font-family: 'Courier New', Courier, monospace;
+            /* Monospace for wireframe feel */
         }
 
         * {
@@ -34,7 +36,7 @@
             border: var(--stroke-width) solid var(--black);
             display: flex;
             flex-direction: column;
-            box-shadow: 8px 8px 0px rgba(0,0,0,0.2);
+            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.2);
         }
 
         /* Window Header */
@@ -54,17 +56,25 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         /* X inside the close button */
-        .window-control.close::before, .window-control.close::after {
+        .window-control.close::before,
+        .window-control.close::after {
             content: '';
             position: absolute;
             width: 1px;
             height: 16px;
             background: var(--black);
         }
-        .window-control.close::before { transform: rotate(45deg); }
-        .window-control.close::after { transform: rotate(-45deg); }
+
+        .window-control.close::before {
+            transform: rotate(45deg);
+        }
+
+        .window-control.close::after {
+            transform: rotate(-45deg);
+        }
+
         /* Line inside minimize */
         .window-control.min::after {
             content: '';
@@ -73,6 +83,7 @@
             background: var(--black);
             margin-top: 8px;
         }
+
         /* Box inside maximize */
         .window-control.max::after {
             content: '';
@@ -106,9 +117,10 @@
 
         .nav-item {
             cursor: pointer;
-            text-decoration: underline; /* Standard wireframe link style */
+            text-decoration: underline;
+            /* Standard wireframe link style */
         }
-        
+
         .nav-icons {
             display: flex;
             align-items: center;
@@ -117,13 +129,14 @@
             padding-left: 20px;
             border-left: var(--stroke-width) solid var(--black);
         }
-        
+
         .icon-box {
             width: 30px;
             height: 30px;
             border: var(--stroke-width) solid var(--black);
             border-radius: 50%;
-            display: flex;            align-items: center;
+            display: flex;
+            align-items: center;
             justify-content: center;
             font-size: 0.8rem;
         }
@@ -136,7 +149,8 @@
             flex-direction: column;
             align-items: center;
             gap: 30px;
-            border-bottom: 2px dashed var(--black); /* Dashed to indicate section end */
+            border-bottom: 2px solid var(--black);
+            /* Dashed to indicate section end */
             position: relative;
         }
 
@@ -144,7 +158,10 @@
         .hero-section::before {
             content: "";
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background-image: linear-gradient(45deg, #000000 1px, transparent 1px);
             background-size: 20px 20px;
             opacity: 0.05;
@@ -188,13 +205,13 @@
             text-transform: uppercase;
             margin-top: 20px;
         }
-        
+
         .cta-button:hover {
             opacity: 0.8;
         }
-
     </style>
 </head>
+
 <body>
 
     <div class="browser-window">
@@ -210,14 +227,14 @@
             <div class="logo-box">
                 KICK-OFF
             </div>
-            
+
             <div class="nav-links">
                 <span class="nav-item">Find Teams</span>
                 <span class="nav-item">Book Fields</span>
                 <span class="nav-item">Find Players</span>
                 <span class="nav-item">Find Owners</span>
                 <span class="nav-item">Community</span>
-                
+
                 <div class="nav-icons">
                     <span class="nav-item">Dashboard</span>
                     <div class="icon-box">US</div>
@@ -231,17 +248,19 @@
                 <h1 class="hero-title">KICK-OFF</h1>
                 <h2 class="hero-title" style="font-size: 2rem;">AMATEUR FOOTBALL PLATFORM</h2>
             </div>
-            
+
             <p class="hero-subtitle">
-                Connect with teams, discover fields, organize matches, and manage your football journey all in one place.
+                Connect with teams, discover fields, organize matches, and manage your football journey all in one
+                place.
             </p>
 
             <button class="cta-button">
                 GO TO DASHBOARD
             </button>
         </section>
-        
+
     </div>
 
 </body>
+
 </html>
