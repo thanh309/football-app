@@ -60,6 +60,14 @@ export function useMatchResult(matchId: number) {
     });
 }
 
+export function useMatchResultsForMatches(matchIds: number[]) {
+    return useQuery({
+        queryKey: [...matchKeys.all, 'results', matchIds.sort().join(',')],
+        queryFn: () => matchService.getMatchResultsForMatches(matchIds),
+        enabled: matchIds.length > 0,
+    });
+}
+
 export function useCreateMatch() {
     const queryClient = useQueryClient();
 

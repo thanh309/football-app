@@ -4,7 +4,7 @@ import { LoadingSpinner, PageContainer, PageHeader, ContentCard } from '../../co
 import { LeaveTeamButton } from '../../components/player';
 import { useAuth } from '../../contexts';
 import { useTeam, useTeamRoster } from '../../api/hooks/useTeam';
-import { useTeamMatches } from '../../api/hooks/useMatch';
+import { useTeamMatches, useMatchResultsForMatches } from '../../api/hooks/useMatch';
 import { MatchStatus } from '../../types';
 
 const TeamDetailsPage: React.FC = () => {
@@ -17,7 +17,20 @@ const TeamDetailsPage: React.FC = () => {
     const { data: roster } = useTeamRoster(teamId);
     const { data: matches, isLoading: matchesLoading } = useTeamMatches(teamId);
 
-    // Calculate match stats
+    // Get completed match IDs for fetching results
+    const completedMatchIds = useMemo(() => {
+        const matchData = matches?.data;
+        if (!matchData || matchData.length === 0) return [];
+
+        return matchData
+            .filter(m => m.status === MatchStatus.COMPLETED)
+            .map(m => m.matchId);
+    }, [matches]);
+
+    // Fetch match results for completed matches
+    const { data: matchResults, isLoading: resultsLoading } = useMatchResultsForMatches(completedMatchIds);
+
+    // Calculate match stats with real wins from match results
     const matchStats = useMemo(() => {
         const matchData = matches?.data;
         if (!matchData || matchData.length === 0) return { played: 0, wins: 0 };
@@ -25,13 +38,19 @@ const TeamDetailsPage: React.FC = () => {
         const completedMatches = matchData.filter(m => m.status === MatchStatus.COMPLETED);
         const played = completedMatches.length;
 
-        // Count wins where this team is hostTeamId and won, or opponentTeamId and won
-        // Note: Without detailed match results, we count matches where the team participated
-        // In a real app, you'd fetch match results to determine wins
-        const wins = 0; // Would need MatchResult data to calculate
+        // Count wins where this team's ID matches the winner_id in match results
+        let wins = 0;
+        if (matchResults) {
+            for (const match of completedMatches) {
+                const result = matchResults.get(match.matchId);
+                if (result && result.winnerId === teamId) {
+                    wins++;
+                }
+            }
+        }
 
         return { played, wins };
-    }, [matches]);
+    }, [matches, matchResults, teamId]);
 
     if (isLoading) {
         return (
@@ -109,7 +128,7 @@ const TeamDetailsPage: React.FC = () => {
                 </ContentCard>
                 <ContentCard>
                     <div className="text-center">
-                        {matchesLoading ? (
+                        {matchesLoading || resultsLoading ? (
                             <LoadingSpinner size="sm" />
                         ) : (
                             <p className="text-2xl font-bold text-primary-600">{matchStats.wins}</p>

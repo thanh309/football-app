@@ -147,6 +147,32 @@ export const matchService = {
             return null;
         }
     },
+
+    /**
+     * Get match results for multiple matches (for calculating wins)
+     */
+    getMatchResultsForMatches: async (matchIds: number[]): Promise<Map<number, MatchResult>> => {
+        const results = new Map<number, MatchResult>();
+
+        // Fetch results in parallel
+        const promises = matchIds.map(async (matchId) => {
+            try {
+                const response = await api.get<MatchResult>(`/matches/${matchId}/result`);
+                return { matchId, result: response.data };
+            } catch {
+                return { matchId, result: null };
+            }
+        });
+
+        const responses = await Promise.all(promises);
+        for (const { matchId, result } of responses) {
+            if (result) {
+                results.set(matchId, result);
+            }
+        }
+
+        return results;
+    },
 };
 
 export default matchService;
