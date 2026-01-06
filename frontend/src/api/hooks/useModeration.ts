@@ -9,6 +9,7 @@ import {
 
 export const moderationKeys = {
     all: ['moderation'] as const,
+    stats: () => [...moderationKeys.all, 'stats'] as const,
     pendingTeams: () => [...moderationKeys.all, 'teams', 'pending'] as const,
     teamReview: (teamId: number) => [...moderationKeys.all, 'teams', teamId] as const,
     pendingFields: () => [...moderationKeys.all, 'fields', 'pending'] as const,
@@ -20,6 +21,15 @@ export const moderationKeys = {
     report: (reportId: number) => [...moderationKeys.all, 'reports', reportId] as const,
     history: (params?: object) => [...moderationKeys.all, 'history', params] as const,
 };
+
+// --- Stats ---
+
+export function useModerationStats() {
+    return useQuery({
+        queryKey: moderationKeys.stats(),
+        queryFn: () => moderationService.getModerationStats(),
+    });
+}
 
 // --- Team Verification ---
 

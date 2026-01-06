@@ -201,6 +201,26 @@ export const moderationService = {
         return response.data;
     },
 
+    // --- Stats ---
+
+    /**
+     * Get moderation dashboard stats
+     */
+    getModerationStats: async (): Promise<{
+        pendingTeams: number;
+        pendingFields: number;
+        pendingReports: number;
+        totalUsers: number;
+    }> => {
+        const response = await api.get<{
+            pendingTeams: number;
+            pendingFields: number;
+            pendingReports: number;
+            totalUsers: number;
+        }>('/mod/stats');
+        return response.data;
+    },
+
     // --- History ---
 
     /**

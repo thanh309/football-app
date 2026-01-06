@@ -2,12 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Users, MapPin, Flag, Clock } from 'lucide-react';
 import { PageContainer, PageHeader, ContentCard } from '../../components/common';
+import { useModerationStats } from '../../api/hooks/useModeration';
 
 const ModDashboardPage: React.FC = () => {
+    const { data: statsData } = useModerationStats();
+
     const stats = {
-        pendingTeams: 0,
-        pendingFields: 0,
-        reportedContent: 0,
+        pendingTeams: statsData?.pendingTeams ?? 0,
+        pendingFields: statsData?.pendingFields ?? 0,
+        reportedContent: statsData?.pendingReports ?? 0,
     };
 
     const pendingItems = [
