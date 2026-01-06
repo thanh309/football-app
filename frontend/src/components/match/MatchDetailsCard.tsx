@@ -74,8 +74,8 @@ const MatchDetailsCard: React.FC<MatchDetailsCardProps> = ({ matchId }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex items-center gap-3 text-gray-600">
                         <Calendar className="w-5 h-5 text-emerald-500" />
-                        <div>
-                            <p className="font-medium text-gray-900">
+                        <div className="text-left">
+                            <p className="font-medium text-gray-900 text-left">
                                 {matchDate.toLocaleDateString('en-US', {
                                     weekday: 'long',
                                     year: 'numeric',
@@ -89,8 +89,8 @@ const MatchDetailsCard: React.FC<MatchDetailsCardProps> = ({ matchId }) => {
 
                     <div className="flex items-center gap-3 text-gray-600">
                         <Clock className="w-5 h-5 text-emerald-500" />
-                        <div>
-                            <p className="font-medium text-gray-900">
+                        <div className="text-left">
+                            <p className="font-medium text-gray-900 text-left">
                                 {match.startTime}
                                 {match.endTime && ` - ${match.endTime}`}
                             </p>
@@ -122,16 +122,16 @@ const MatchDetailsCard: React.FC<MatchDetailsCardProps> = ({ matchId }) => {
 
                 {match.description && (
                     <div className="pt-4 border-t border-gray-100">
-                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2 text-left">
                             Description
                         </h3>
-                        <p className="text-gray-700">{match.description}</p>
+                        <p className="text-gray-700 text-left">{match.description}</p>
                     </div>
                 )}
 
                 {/* Attendance Status */}
-                <div className="pt-4 border-t border-gray-100">
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                <div className="pt-4 border-t border-gray-100 text-left">
+                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 text-left">
                         Your Attendance
                     </h3>
                     {hasConfirmed ? (

@@ -102,8 +102,8 @@ const PublicTeamProfilePage: React.FC = () => {
                             )}
                         </div>
                     </div>
-                    <div className="flex-1">
-                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">{team.teamName}</h1>
+                    <div className="flex-1 text-left">
+                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2 text-left">{team.teamName}</h1>
                         {team.skillLevel && (
                             <div className="flex items-center gap-2 mb-4">
                                 <span className="text-sm text-slate-500">Skill Level:</span>
@@ -137,7 +137,7 @@ const PublicTeamProfilePage: React.FC = () => {
 
             {/* Description */}
             <ContentCard title="About" className="mb-6">
-                <p className="text-slate-600 whitespace-pre-wrap">
+                <p className="text-slate-600 whitespace-pre-wrap text-left">
                     {team.description || 'No description provided.'}
                 </p>
             </ContentCard>

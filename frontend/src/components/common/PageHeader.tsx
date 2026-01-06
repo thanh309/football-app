@@ -38,7 +38,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                 </Link>
             )}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
+                <div className="text-left">
                     <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
                         {title}
                     </h1>

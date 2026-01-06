@@ -83,8 +83,8 @@ const TeamDetailsPage: React.FC = () => {
                             </div>
                         )}
                     </div>
-                    <div className="flex-1">
-                        <p className="text-slate-600">{team.description || 'No description provided.'}</p>
+                    <div className="flex-1 text-left">
+                        <p className="text-slate-600 text-left">{team.description || 'No description provided.'}</p>
                     </div>
                 </div>
             </ContentCard>
@@ -132,17 +132,17 @@ const TeamDetailsPage: React.FC = () => {
                         {matches.data.slice(0, 3).map((match) => (
                             <div key={match.matchId} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
                                 <div className="w-2 h-2 rounded-full bg-primary-500"></div>
-                                <div className="flex-1">
-                                    <p className="text-sm font-medium text-slate-900">
+                                <div className="flex-1 text-left">
+                                    <p className="text-sm font-medium text-slate-900 text-left">
                                         Match on {new Date(match.matchDate).toLocaleDateString()}
                                     </p>
-                                    <p className="text-xs text-slate-500">{match.status}</p>
+                                    <p className="text-xs text-slate-500 text-left">{match.status}</p>
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-8 text-slate-500">
+                    <div className="py-8 text-slate-500 text-left">
                         <p>No recent activity to show.</p>
                     </div>
                 )}

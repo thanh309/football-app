@@ -18,9 +18,9 @@ const PublicFieldProfilePage: React.FC = () => {
     const { data: amenities } = useFieldAmenities(fieldId);
 
     const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('vi-VN', {
+        return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: 'VND',
+            currency: 'USD',
         }).format(price);
     };
 
@@ -79,12 +79,12 @@ const PublicFieldProfilePage: React.FC = () => {
             {/* Pricing and Actions */}
             <ContentCard className="mb-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <p className="text-sm text-slate-500">Starting from</p>
-                        <p className="text-2xl font-bold text-primary-600">
+                    <div className="text-left">
+                        <p className="text-sm text-slate-500 text-left">Starting from</p>
+                        <p className="text-2xl font-bold text-primary-600 text-left">
                             {formatPrice(field.defaultPricePerHour)}
                         </p>
-                        <p className="text-sm text-slate-500">per hour</p>
+                        <p className="text-sm text-slate-500 text-left">per hour</p>
                     </div>
                     <div className="flex flex-wrap gap-4">
                         {isAuthenticated ? (
@@ -107,7 +107,7 @@ const PublicFieldProfilePage: React.FC = () => {
 
             {/* Description */}
             <ContentCard title="About This Field" className="mb-6">
-                <p className="text-slate-600 whitespace-pre-wrap">
+                <p className="text-slate-600 whitespace-pre-wrap text-left">
                     {field.description || 'No description provided.'}
                 </p>
             </ContentCard>
@@ -151,7 +151,7 @@ const PublicFieldProfilePage: React.FC = () => {
 
             {/* Operating Hours - Note: This would need to come from API in a real implementation */}
             <ContentCard title="Operating Hours">
-                <p className="text-slate-500 text-center py-4">Contact owner for operating hours.</p>
+                <p className="text-slate-500 py-4 text-left">Contact owner for operating hours.</p>
             </ContentCard>
 
             {/* Modals */}

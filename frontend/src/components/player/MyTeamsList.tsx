@@ -30,8 +30,8 @@ const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
                         <Users className="w-8 h-8 text-emerald-600" />
                     )}
                 </div>
-                <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 truncate">{team.teamName}</h3>
+                <div className="flex-1 min-w-0 text-left">
+                    <h3 className="font-semibold text-gray-900 truncate text-left">{team.teamName}</h3>
                     {team.location && (
                         <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
                             <MapPin className="w-3 h-3" />
@@ -87,7 +87,7 @@ const MyTeamsList: React.FC<MyTeamsListProps> = ({ playerId }) => {
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900">My Teams</h2>
+                <h2 className="text-xl font-bold text-gray-900 text-left">My Teams</h2>
                 <span className="text-sm text-gray-500">{teams.length} team(s)</span>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
