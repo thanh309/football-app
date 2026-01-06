@@ -44,6 +44,10 @@ class AuthService:
         if existing:
             raise ValueError("Email already registered")
         
+        # Team Leader must also be a Player
+        if UserRole.TEAM_LEADER.value in roles and UserRole.PLAYER.value not in roles:
+            roles.append(UserRole.PLAYER.value)
+        
         # Create user
         user = UserAccount(
             username=username,

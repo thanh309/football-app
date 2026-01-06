@@ -101,6 +101,16 @@ export const authService = {
         localStorage.setItem('accessToken', response.data.accessToken);
         return response.data;
     },
+
+    /**
+     * Delete user account (soft delete)
+     */
+    deleteAccount: async (): Promise<void> => {
+        await api.delete('/auth/account');
+        // Clear localStorage after deletion
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+    },
 };
 
 export default authService;

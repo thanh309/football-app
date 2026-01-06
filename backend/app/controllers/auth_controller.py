@@ -147,3 +147,22 @@ async def change_password(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
     return MessageResponse(message="Password changed successfully")
+
+
+@router.delete("/account", response_model=MessageResponse)
+async def delete_account(
+    user: UserAccount = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Delete user account (soft delete - sets status to DELETED)."""
+    from app.models.enums import AccountStatus
+    from app.repositories.user_repository import UserRepository
+    
+    user_repo = UserRepository(db)
+    
+    # Set account status to DELETED
+    user.status = AccountStatus.DELETED
+    await user_repo.update(user)
+    await user_repo.commit()
+    
+    return MessageResponse(message="Account deleted successfully")

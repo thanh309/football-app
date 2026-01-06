@@ -91,9 +91,19 @@ const RegistrationForm: React.FC = () => {
 
     const handleRoleChange = (role: string) => {
         setFormData(prev => {
-            const newRoles = prev.roles.includes(role)
+            let newRoles = prev.roles.includes(role)
                 ? prev.roles.filter(r => r !== role)
                 : [...prev.roles, role];
+
+            // Team Leader requires Player role
+            if (newRoles.includes(UserRole.TEAM_LEADER) && !newRoles.includes(UserRole.PLAYER)) {
+                newRoles.push(UserRole.PLAYER);
+            }
+            // Prevent removing Player if Team Leader is selected
+            if (role === UserRole.PLAYER && !newRoles.includes(UserRole.PLAYER) && prev.roles.includes(UserRole.TEAM_LEADER)) {
+                return prev; // Don't allow removing Player when Team Leader is selected
+            }
+
             return { ...prev, roles: newRoles };
         });
         if (errors.roles) {
@@ -116,8 +126,8 @@ const RegistrationForm: React.FC = () => {
             toast.success('Account created successfully!');
             navigate('/dashboard');
         } catch (error: unknown) {
-            const err = error as { response?: { data?: { message?: string } } };
-            const message = err.response?.data?.message || 'Registration failed. Please try again.';
+            const err = error as { response?: { data?: { detail?: string; message?: string } } };
+            const message = err.response?.data?.detail || err.response?.data?.message || 'Registration failed. Please try again.';
             toast.error(message);
         }
     };
@@ -206,8 +216,8 @@ const RegistrationForm: React.FC = () => {
                         <label
                             key={role.value}
                             className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all ${formData.roles.includes(role.value)
-                                    ? 'border-emerald-500 bg-emerald-50'
-                                    : 'border-gray-200 hover:border-gray-300'
+                                ? 'border-emerald-500 bg-emerald-50'
+                                : 'border-gray-200 hover:border-gray-300'
                                 }`}
                         >
                             <input

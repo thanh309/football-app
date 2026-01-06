@@ -15,11 +15,21 @@ const AccountSettingsPage: React.FC = () => {
     const handleDeleteAccount = async () => {
         setIsDeleting(true);
         try {
-            await logout();
-            toast.success('Account deletion initiated. You have been logged out.');
+            // Import authService and call delete API
+            const { authService } = await import('../../api/services/authService');
+            await authService.deleteAccount();
+
+            // deleteAccount already clears tokens, so logout may fail with 401 - that's OK
+            try {
+                await logout();
+            } catch {
+                // Ignore logout errors - account was already deleted and tokens cleared
+            }
+
+            toast.success('Account deleted successfully.');
             navigate('/');
         } catch {
-            toast.error('Failed to process account deletion');
+            toast.error('Failed to delete account');
         } finally {
             setIsDeleting(false);
             setShowDeleteModal(false);

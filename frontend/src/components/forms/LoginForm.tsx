@@ -61,8 +61,8 @@ const LoginForm: React.FC = () => {
             toast.success('Welcome back!');
             navigate('/dashboard');
         } catch (error: unknown) {
-            const err = error as { response?: { data?: { message?: string } } };
-            const message = err.response?.data?.message || 'Invalid username or password';
+            const err = error as { response?: { data?: { detail?: string; message?: string } } };
+            const message = err.response?.data?.detail || err.response?.data?.message || 'Invalid username or password';
             toast.error(message);
         }
     };
