@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kick-off Search Field Owners Wireframe</title>
+    <style>
+        :root {
+            --stroke-width: 2px;
+            --black: #000;
+            --white: #fff;
+            --font-family: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .browser-window {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--white);
+            border: var(--stroke-width) solid var(--black);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.2);
+            min-height: 900px;
+        }
+
+        /* Window Header */
+        .window-header {
+            border-bottom: var(--stroke-width) solid var(--black);
+            padding: 10px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #fff;
+        }
+
+        .window-control {
+            width: 20px;
+            height: 20px;
+            border: var(--stroke-width) solid var(--black);
+            position: relative;
+        }
+
+        .window-control.close::before,
+        .window-control.close::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: 16px;
+            background: var(--black);
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .window-control.close::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        .window-control.min::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            width: 10px;
+            height: 2px;
+            background: var(--black);
+        }
+
+        .window-control.max::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 8px;
+            height: 8px;
+            border: 1px solid var(--black);
+        }
+
+        /* Navigation */
+        .navbar {
+            padding: 20px;
+            border-bottom: var(--stroke-width) solid var(--black);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-box {
+            border: var(--stroke-width) solid var(--black);
+            padding: 10px 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-item {
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-left: 20px;
+            padding-left: 20px;
+            border-left: var(--stroke-width) solid var(--black);
+        }
+
+        .user-circle {
+            width: 30px;
+            height: 30px;
+            border: var(--stroke-width) solid var(--black);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        /* Main Content */
+        .content-container {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 10px;
+        }
+
+        .page-title h1 {
+            font-size: 2rem;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        .page-title p {
+            margin: 0;
+            color: #555;
+        }
+
+        /* Search Form */
+        .search-form {
+            border: var(--stroke-width) solid var(--black);
+            padding: 25px;
+            background: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .form-group input {
+            padding: 12px;
+            border: 1px solid var(--black);
+            font-family: inherit;
+            background: var(--white);
+        }
+
+        .search-btn-row {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .search-btn {
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            padding: 12px 25px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* Results Grid */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        /* Owner Card */
+        .owner-card {
+            border: var(--stroke-width) solid var(--black);
+            background: var(--white);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .owner-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .owner-avatar {
+            width: 50px;
+            height: 50px;
+            border: var(--stroke-width) solid var(--black);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background: #eee;
+        }
+
+        .owner-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .owner-name {
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .owner-location {
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .owner-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .verified-badge {
+            border: 1px solid var(--black);
+            padding: 3px 10px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .view-link {
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="browser-window">
+        <!-- Window Controls -->
+        <div class="window-header">
+            <div class="window-control min"></div>
+            <div class="window-control max"></div>
+            <div class="window-control close"></div>
+        </div>
+
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="logo-box">
+                KICK-OFF
+            </div>
+
+            <div class="nav-links">
+                <span class="nav-item">Find Teams</span>
+                <span class="nav-item">Book Fields</span>
+                <span class="nav-item">Find Players</span>
+                <span class="nav-item" style="font-weight: bold;">Find Owners</span>
+                <span class="nav-item">Community</span>
+
+                <div class="nav-right">
+                    <span class="nav-item">Dashboard</span>
+                    <div class="user-circle">US</div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="content-container">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-title">
+                    <h1>Search Field Owners</h1>
+                    <p>Find football field owners and venues.</p>
+                </div>
+            </div>
+
+            <!-- Search Form -->
+            <div class="search-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Search Field Owners</label>
+                        <input type="text" placeholder="Owner name or business...">
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" placeholder="City or area...">
+                    </div>
+                </div>
+
+                <div class="search-btn-row">
+                    <button class="search-btn">Search</button>
+                </div>
+            </div>
+
+            <!-- Results Grid -->
+            <div class="results-grid">
+
+                <!-- Owner Card 1 -->
+                <div class="owner-card">
+                    <div class="owner-header">
+                        <div class="owner-avatar">U</div>
+                        <div class="owner-info">
+                            <span class="owner-name">[Username]</span>
+                            <span class="owner-location">[Location]</span>
+                        </div>
+                    </div>
+                    <div class="owner-footer">
+                        <span class="verified-badge">Verified</span>
+                        <span class="view-link">View Profile &gt;</span>
+                    </div>
+                </div>
+
+                <!-- Owner Card 2 -->
+                <div class="owner-card">
+                    <div class="owner-header">
+                        <div class="owner-avatar">U</div>
+                        <div class="owner-info">
+                            <span class="owner-name">[Username]</span>
+                            <span class="owner-location">[Location]</span>
+                        </div>
+                    </div>
+                    <div class="owner-footer">
+                        <span class="verified-badge">Verified</span>
+                        <span class="view-link">View Profile &gt;</span>
+                    </div>
+                </div>
+
+                <!-- Owner Card 3 -->
+                <div class="owner-card">
+                    <div class="owner-header">
+                        <div class="owner-avatar">U</div>
+                        <div class="owner-info">
+                            <span class="owner-name">[Username]</span>
+                            <span class="owner-location">[Location]</span>
+                        </div>
+                    </div>
+                    <div class="owner-footer">
+                        <span class="verified-badge">Verified</span>
+                        <span class="view-link">View Profile &gt;</span>
+                    </div>
+                </div>
+
+                <!-- Owner Card 4 -->
+                <div class="owner-card">
+                    <div class="owner-header">
+                        <div class="owner-avatar">U</div>
+                        <div class="owner-info">
+                            <span class="owner-name">[Username]</span>
+                            <span class="owner-location">[Location]</span>
+                        </div>
+                    </div>
+                    <div class="owner-footer">
+                        <span class="verified-badge">Verified</span>
+                        <span class="view-link">View Profile &gt;</span>
+                    </div>
+                </div>
+
+                <!-- Owner Card 5 -->
+                <div class="owner-card">
+                    <div class="owner-header">
+                        <div class="owner-avatar">U</div>
+                        <div class="owner-info">
+                            <span class="owner-name">[Username]</span>
+                            <span class="owner-location">[Location]</span>
+                        </div>
+                    </div>
+                    <div class="owner-footer">
+                        <span class="verified-badge">Verified</span>
+                        <span class="view-link">View Profile &gt;</span>
+                    </div>
+                </div>
+
+                <!-- Owner Card 6 -->
+                <div class="owner-card">
+                    <div class="owner-header">
+                        <div class="owner-avatar">U</div>
+                        <div class="owner-info">
+                            <span class="owner-name">[Username]</span>
+                            <span class="owner-location">[Location]</span>
+                        </div>
+                    </div>
+                    <div class="owner-footer">
+                        <span class="verified-badge">Verified</span>
+                        <span class="view-link">View Profile &gt;</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
