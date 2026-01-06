@@ -91,9 +91,9 @@ const CreateFieldForm: React.FC<CreateFieldFormProps> = ({ onSuccess }) => {
                 <div className="w-16 h-16 bg-emerald-100 rounded-xl flex items-center justify-center">
                     <MapPin className="w-8 h-8 text-emerald-600" />
                 </div>
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Register New Field</h2>
-                    <p className="text-gray-500">Add your football field to the platform</p>
+                <div className="text-left">
+                    <h2 className="text-2xl font-bold text-gray-900 text-left">Register New Field</h2>
+                    <p className="text-gray-500 text-left">Add your football field to the platform</p>
                 </div>
             </div>
 
@@ -165,7 +165,7 @@ const CreateFieldForm: React.FC<CreateFieldFormProps> = ({ onSuccess }) => {
 
             {amenities && amenities.length > 0 && (
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">Amenities</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-3 text-left">Amenities</label>
                     <div className="flex flex-wrap gap-2">
                         {amenities.map(amenity => (
                             <button
@@ -184,8 +184,8 @@ const CreateFieldForm: React.FC<CreateFieldFormProps> = ({ onSuccess }) => {
                 </div>
             )}
 
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <p className="text-sm text-amber-800">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-left">
+                <p className="text-sm text-amber-800 text-left">
                     <strong>Note:</strong> Your field will be reviewed by a moderator before it becomes visible. This usually takes 1-2 business days.
                 </p>
             </div>

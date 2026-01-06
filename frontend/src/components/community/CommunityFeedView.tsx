@@ -93,7 +93,7 @@ const CommunityFeedView: React.FC<CommunityFeedViewProps> = ({ teamId, currentUs
 
                             {/* Comments Section - Always visible but toggle-able */}
                             {expandedPostId === post.postId && (
-                                <div className="ml-4 p-4 bg-gray-50 rounded-xl">
+                                <div className="ml-4 p-4 bg-gray-50 rounded-xl text-left">
                                     <CommentSection
                                         postId={post.postId}
                                         currentUserId={currentUserId}

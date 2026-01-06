@@ -22,10 +22,10 @@ interface CommentItemProps {
 const CommentItem: React.FC<CommentItemProps> = ({ comment, isOwner, onDelete, isDeleting }) => {
     return (
         <div className="flex gap-3">
-            <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                 <User className="w-4 h-4 text-emerald-600" />
             </div>
-            <div className="flex-1 bg-gray-50 rounded-lg p-3">
+            <div className="flex-1 bg-gray-50 rounded-lg px-3 py-2">
                 <div className="flex items-center justify-between mb-1">
                     <Link
                         to={`/users/${comment.authorId}`}
@@ -48,7 +48,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, isOwner, onDelete, i
                         )}
                     </div>
                 </div>
-                <p className="text-gray-700 text-sm">{comment.content}</p>
+                <p className="text-gray-700 text-sm text-left">{comment.content}</p>
             </div>
         </div>
     );
@@ -90,8 +90,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, currentUserId, 
         <div className="space-y-4">
             {/* Comment Input - Only show for authenticated users */}
             {isAuthenticated && (
-                <form onSubmit={handleSubmit} className="flex gap-3">
-                    <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <form onSubmit={handleSubmit} className="flex gap-3 items-start">
+                    <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                         <User className="w-4 h-4 text-emerald-600" />
                     </div>
                     <div className="flex-1 flex gap-2">
@@ -116,7 +116,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, currentUserId, 
 
             {/* Comments List */}
             {comments && comments.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-3 text-left">
                     {comments.map((comment: Comment) => (
                         <CommentItem
                             key={comment.commentId}

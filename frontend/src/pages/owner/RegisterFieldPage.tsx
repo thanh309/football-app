@@ -9,6 +9,7 @@ const RegisterFieldPage: React.FC = () => {
                 title="Register New Field"
                 subtitle="Fill in the details below to register your football field. After submission, your field will be reviewed by our moderators before it becomes visible to users."
                 backLink={{ label: 'Back to My Fields', to: '/owner/fields' }}
+                className="text-left"
             />
             <ContentCard>
                 <CreateFieldForm />

@@ -32,7 +32,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
             {hasHeader && (
                 <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
                     {title && (
-                        <h2 className="text-lg font-semibold text-slate-900">
+                        <h2 className="text-lg font-semibold text-slate-900 text-left">
                             {title}
                         </h2>
                     )}

@@ -118,11 +118,11 @@ const PostCard: React.FC<PostCardProps> = ({ post, isOwner = false, isAuthentica
                     <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center font-semibold text-emerald-600">
                         {post.authorId.toString().charAt(0)}
                     </div>
-                    <div>
-                        <Link to={`/users/${post.authorId}`} className="font-medium text-gray-900 hover:text-emerald-600">
+                    <div className="text-left">
+                        <Link to={`/users/${post.authorId}`} className="font-medium text-gray-900 hover:text-emerald-600 block text-left">
                             User #{post.authorId}
                         </Link>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 text-left">
                             {new Date(post.createdAt).toLocaleDateString()}
                         </p>
                     </div>
@@ -172,8 +172,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, isOwner = false, isAuthentica
             </div>
 
             {/* Content */}
-            <div className="p-4">
-                <p className="text-gray-800 whitespace-pre-wrap">{post.content}</p>
+            <div className="p-4 text-left">
+                <p className="text-gray-800 whitespace-pre-wrap text-left">{post.content}</p>
             </div>
 
             {/* Stats */}

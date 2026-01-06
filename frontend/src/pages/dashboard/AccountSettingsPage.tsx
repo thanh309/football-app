@@ -45,19 +45,19 @@ const AccountSettingsPage: React.FC = () => {
 
             {/* Account Info */}
             <ContentCard title="Account Information" className="mb-6">
-                <div className="space-y-4">
+                <div className="space-y-4 text-left">
                     <div className="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Username</label>
-                            <p className="text-slate-900 bg-slate-50 rounded-lg px-4 py-2">{user?.username || '-'}</p>
+                            <label className="block text-sm font-medium text-slate-700 mb-1 text-left">Username</label>
+                            <p className="text-slate-900 bg-slate-50 rounded-lg px-4 py-2 text-left">{user?.username || '-'}</p>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                            <p className="text-slate-900 bg-slate-50 rounded-lg px-4 py-2">{user?.email || '-'}</p>
+                            <label className="block text-sm font-medium text-slate-700 mb-1 text-left">Email</label>
+                            <p className="text-slate-900 bg-slate-50 rounded-lg px-4 py-2 text-left">{user?.email || '-'}</p>
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Account Status</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-1 text-left">Account Status</label>
                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${user?.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'
                             }`}>
                             {user?.status || 'Active'}
@@ -71,13 +71,13 @@ const AccountSettingsPage: React.FC = () => {
                 to="/settings/notifications"
                 className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 mb-6 flex items-center justify-between hover:bg-slate-50 transition-colors group block"
             >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 text-left">
                     <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
                         <Bell className="w-6 h-6 text-primary-600" />
                     </div>
                     <div>
-                        <h2 className="text-lg font-semibold text-slate-900">Notification Settings</h2>
-                        <p className="text-slate-600 text-sm">Manage how you receive notifications</p>
+                        <h2 className="text-lg font-semibold text-slate-900 text-left">Notification Settings</h2>
+                        <p className="text-slate-600 text-sm text-left">Manage how you receive notifications</p>
                     </div>
                 </div>
                 <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600 transition-colors" />
@@ -89,9 +89,9 @@ const AccountSettingsPage: React.FC = () => {
             </ContentCard>
 
             {/* Danger Zone */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 border-l-4 border-l-red-500">
-                <h2 className="text-lg font-semibold text-red-600 mb-4">Danger Zone</h2>
-                <p className="text-slate-600 mb-4">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 border-l-4 border-l-red-500 text-left">
+                <h2 className="text-lg font-semibold text-red-600 mb-4 text-left">Danger Zone</h2>
+                <p className="text-slate-600 mb-4 text-left">
                     Once you delete your account, there is no going back. Please be certain.
                 </p>
                 <button

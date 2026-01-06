@@ -80,18 +80,18 @@ const NotificationSettingsForm: React.FC<NotificationSettingsFormProps> = ({ onS
                 <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
                     <Bell className="w-5 h-5 text-emerald-600" />
                 </div>
-                <div>
-                    <h2 className="text-xl font-bold text-gray-900">Notification Preferences</h2>
-                    <p className="text-sm text-gray-500">Choose how you want to receive notifications</p>
+                <div className="text-left">
+                    <h2 className="text-xl font-bold text-gray-900 text-left">Notification Preferences</h2>
+                    <p className="text-sm text-gray-500 text-left">Choose how you want to receive notifications</p>
                 </div>
             </div>
 
             <div className="bg-white rounded-xl border border-gray-100 divide-y divide-gray-100">
                 {settingItems.map(item => (
                     <div key={item.key} className="p-4 flex items-center justify-between">
-                        <div>
-                            <div className="text-sm font-medium text-gray-900">{item.label}</div>
-                            <div className="text-xs text-gray-500">{item.description}</div>
+                        <div className="text-left">
+                            <div className="text-sm font-medium text-gray-900 text-left">{item.label}</div>
+                            <div className="text-xs text-gray-500 text-left">{item.description}</div>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
                             <input

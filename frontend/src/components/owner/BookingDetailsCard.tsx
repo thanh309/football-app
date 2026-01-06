@@ -41,11 +41,11 @@ const BookingDetailsCard: React.FC<BookingDetailsCardProps> = ({ bookingId, book
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-6 border-b border-gray-100">
                 <div className="flex items-start justify-between">
-                    <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
+                    <div className="text-left">
+                        <h3 className="text-lg font-semibold text-gray-900 text-left">
                             Booking #{booking.bookingId}
                         </h3>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-gray-500 mt-1 text-left">
                             Created {new Date(booking.createdAt).toLocaleDateString()}
                         </p>
                     </div>
@@ -61,9 +61,9 @@ const BookingDetailsCard: React.FC<BookingDetailsCardProps> = ({ bookingId, book
                         <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
                             <Calendar className="w-5 h-5 text-emerald-600" />
                         </div>
-                        <div>
-                            <p className="text-sm text-gray-500">Date</p>
-                            <p className="font-medium text-gray-900">{bookingDate.toLocaleDateString()}</p>
+                        <div className="text-left">
+                            <p className="text-sm text-gray-500 text-left">Date</p>
+                            <p className="font-medium text-gray-900 text-left">{bookingDate.toLocaleDateString()}</p>
                         </div>
                     </div>
 
@@ -71,9 +71,9 @@ const BookingDetailsCard: React.FC<BookingDetailsCardProps> = ({ bookingId, book
                         <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                             <Clock className="w-5 h-5 text-blue-600" />
                         </div>
-                        <div>
-                            <p className="text-sm text-gray-500">Time</p>
-                            <p className="font-medium text-gray-900">{booking.startTime} - {booking.endTime}</p>
+                        <div className="text-left">
+                            <p className="text-sm text-gray-500 text-left">Time</p>
+                            <p className="font-medium text-gray-900 text-left">{booking.startTime} - {booking.endTime}</p>
                         </div>
                     </div>
 
@@ -81,9 +81,9 @@ const BookingDetailsCard: React.FC<BookingDetailsCardProps> = ({ bookingId, book
                         <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                             <MapPin className="w-5 h-5 text-purple-600" />
                         </div>
-                        <div>
-                            <p className="text-sm text-gray-500">Field</p>
-                            <p className="font-medium text-gray-900">Field #{booking.fieldId}</p>
+                        <div className="text-left">
+                            <p className="text-sm text-gray-500 text-left">Field</p>
+                            <p className="font-medium text-gray-900 text-left">Field #{booking.fieldId}</p>
                         </div>
                     </div>
 
@@ -91,17 +91,17 @@ const BookingDetailsCard: React.FC<BookingDetailsCardProps> = ({ bookingId, book
                         <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
                             <User className="w-5 h-5 text-amber-600" />
                         </div>
-                        <div>
-                            <p className="text-sm text-gray-500">Team</p>
-                            <p className="font-medium text-gray-900">Team #{booking.teamId}</p>
+                        <div className="text-left">
+                            <p className="text-sm text-gray-500 text-left">Team</p>
+                            <p className="font-medium text-gray-900 text-left">Team #{booking.teamId}</p>
                         </div>
                     </div>
                 </div>
 
                 {booking.notes && (
-                    <div className="pt-4 border-t border-gray-100">
-                        <p className="text-sm text-gray-500 mb-1">Notes</p>
-                        <p className="text-gray-700">{booking.notes}</p>
+                    <div className="pt-4 border-t border-gray-100 text-left">
+                        <p className="text-sm text-gray-500 mb-1 text-left">Notes</p>
+                        <p className="text-gray-700 text-left">{booking.notes}</p>
                     </div>
                 )}
 

@@ -85,9 +85,9 @@ const PlayerProfileForm: React.FC<PlayerProfileFormProps> = ({ player, onSuccess
                 <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center">
                     <User className="w-10 h-10 text-emerald-600" />
                 </div>
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Edit Profile</h2>
-                    <p className="text-gray-500">Update your player information</p>
+                <div className="text-left">
+                    <h2 className="text-2xl font-bold text-gray-900 text-left">Edit Profile</h2>
+                    <p className="text-gray-500 text-left">Update your player information</p>
                 </div>
             </div>
 

@@ -28,10 +28,10 @@ const BookingCard: React.FC<BookingCardProps> = ({
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 h-full flex flex-col">
             <div className="flex-1">
                 <div className="flex items-start justify-between mb-4">
-                    <div>
-                        <h3 className="font-semibold text-gray-900">Booking Request</h3>
-                        <p className="text-sm text-gray-500">Team #{booking.teamId}</p>
-                    </div>
+                <div className="text-left">
+                    <h3 className="font-semibold text-gray-900 text-left">Booking Request</h3>
+                    <p className="text-sm text-gray-500 text-left">Team #{booking.teamId}</p>
+                </div>
                     <span className="text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full">
                         {booking.status}
                     </span>

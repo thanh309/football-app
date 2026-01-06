@@ -52,8 +52,8 @@ const OwnerFieldsPage: React.FC = () => {
                             </div>
                             <div className="p-4">
                                 <div className="flex items-start justify-between mb-2">
-                                    <h3 className="font-semibold text-slate-900">{field.fieldName}</h3>
-                                    <span className={`text-xs px-2 py-1 rounded-full ${field.status === FieldStatus.VERIFIED
+                                    <h3 className="font-semibold text-slate-900 text-left whitespace-pre-wrap text-left">{field.fieldName}</h3>
+                                    <span className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ml-2 ${field.status === FieldStatus.VERIFIED
                                             ? 'bg-emerald-100 text-emerald-700'
                                             : field.status === FieldStatus.PENDING
                                                 ? 'bg-yellow-100 text-yellow-700'
@@ -62,7 +62,7 @@ const OwnerFieldsPage: React.FC = () => {
                                         {field.status}
                                     </span>
                                 </div>
-                                <p className="text-sm text-slate-500 line-clamp-2">{field.location}</p>
+                                <p className="text-sm text-slate-500 line-clamp-2 text-left">{field.location}</p>
                                 <div className="mt-3 flex items-center gap-2 text-sm text-slate-600">
                                     <span>${field.defaultPricePerHour?.toLocaleString() || 0}/hr</span>
                                     {field.capacity && (
