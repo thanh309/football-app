@@ -25,41 +25,43 @@ const BookingCard: React.FC<BookingCardProps> = ({
     const bookingDate = new Date(booking.date);
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-            <div className="flex items-start justify-between mb-4">
-                <div>
-                    <h3 className="font-semibold text-gray-900">Booking Request</h3>
-                    <p className="text-sm text-gray-500">Team #{booking.teamId}</p>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 h-full flex flex-col">
+            <div className="flex-1">
+                <div className="flex items-start justify-between mb-4">
+                    <div>
+                        <h3 className="font-semibold text-gray-900">Booking Request</h3>
+                        <p className="text-sm text-gray-500">Team #{booking.teamId}</p>
+                    </div>
+                    <span className="text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full">
+                        {booking.status}
+                    </span>
                 </div>
-                <span className="text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full">
-                    {booking.status}
-                </span>
+
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Calendar className="w-4 h-4 text-emerald-500" />
+                        {bookingDate.toLocaleDateString()}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Clock className="w-4 h-4 text-emerald-500" />
+                        {booking.startTime} - {booking.endTime}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <MapPin className="w-4 h-4 text-emerald-500" />
+                        Field #{booking.fieldId}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <User className="w-4 h-4 text-emerald-500" />
+                        Requester #{booking.requesterId}
+                    </div>
+                </div>
+
+                {booking.notes && (
+                    <p className="text-sm text-gray-600 mb-4 italic break-words">"{booking.notes}"</p>
+                )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Calendar className="w-4 h-4 text-emerald-500" />
-                    {bookingDate.toLocaleDateString()}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Clock className="w-4 h-4 text-emerald-500" />
-                    {booking.startTime} - {booking.endTime}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <MapPin className="w-4 h-4 text-emerald-500" />
-                    Field #{booking.fieldId}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <User className="w-4 h-4 text-emerald-500" />
-                    Requester #{booking.requesterId}
-                </div>
-            </div>
-
-            {booking.notes && (
-                <p className="text-sm text-gray-600 mb-4 italic">"{booking.notes}"</p>
-            )}
-
-            <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
+            <div className="flex justify-end gap-2 pt-4 border-t border-gray-100 mt-auto">
                 <Link to={`/owner/bookings/${booking.bookingId}`}>
                     <Button
                         variant="secondary"

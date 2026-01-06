@@ -64,19 +64,42 @@ class BookingService:
     
     async def approve_booking(self, booking: BookingRequest) -> bool:
         """Approve a booking request."""
+        from sqlalchemy import select, and_
+        
         booking.status = BookingStatus.CONFIRMED
         booking.processed_at = datetime.utcnow()
         
-        # Create calendar slot as booked
-        calendar_slot = FieldCalendar(
-            field_id=booking.field_id,
-            date=booking.date,
-            start_time=booking.start_time,
-            end_time=booking.end_time,
-            status=CalendarStatus.BOOKED,
-            booking_id=booking.booking_id,
+        # Check if an existing calendar slot overlaps with the booking time
+        # First, look for any slot on this date that overlaps with the booking time
+        result = await self.booking_repo.db.execute(
+            select(FieldCalendar).where(
+                and_(
+                    FieldCalendar.field_id == booking.field_id,
+                    FieldCalendar.date == booking.date,
+                    FieldCalendar.start_time < booking.end_time,
+                    FieldCalendar.end_time > booking.start_time
+                )
+            )
         )
-        await self.calendar_repo.save(calendar_slot)
+        existing_slot = result.scalar_one_or_none()
+        
+        if existing_slot:
+            # Update existing slot to BOOKED
+            existing_slot.status = CalendarStatus.BOOKED
+            existing_slot.booking_id = booking.booking_id
+            existing_slot.start_time = booking.start_time
+            existing_slot.end_time = booking.end_time
+        else:
+            # Create new calendar slot as booked
+            calendar_slot = FieldCalendar(
+                field_id=booking.field_id,
+                date=booking.date,
+                start_time=booking.start_time,
+                end_time=booking.end_time,
+                status=CalendarStatus.BOOKED,
+                booking_id=booking.booking_id,
+            )
+            await self.calendar_repo.save(calendar_slot)
         
         await self.booking_repo.update(booking)
         await self.booking_repo.commit()

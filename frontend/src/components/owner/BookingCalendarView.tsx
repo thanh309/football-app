@@ -84,7 +84,7 @@ const BookingCalendarView: React.FC<BookingCalendarViewProps> = ({ fieldId, onSl
         switch (slot.status) {
             case CalendarStatus.BOOKED:
             case 'Booked':
-                return slot.bookingId ? `#${slot.bookingId}` : 'Booked';
+                return 'Booked';
             case CalendarStatus.BLOCKED:
             case 'Blocked':
                 return 'Blocked';

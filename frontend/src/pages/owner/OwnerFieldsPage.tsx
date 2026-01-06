@@ -64,7 +64,7 @@ const OwnerFieldsPage: React.FC = () => {
                                 </div>
                                 <p className="text-sm text-slate-500 line-clamp-2">{field.location}</p>
                                 <div className="mt-3 flex items-center gap-2 text-sm text-slate-600">
-                                    <span>{field.defaultPricePerHour?.toLocaleString() || 0} VND/hr</span>
+                                    <span>${field.defaultPricePerHour?.toLocaleString() || 0}/hr</span>
                                     {field.capacity && (
                                         <>
                                             <span>•</span>

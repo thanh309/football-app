@@ -3,14 +3,14 @@ import { useParams, Link } from 'react-router-dom';
 import { Calendar, Edit, Image, DollarSign, MapPin, Clock, CheckCircle, Users } from 'lucide-react';
 import { LoadingSpinner, PageContainer, PageHeader, ContentCard } from '../../components/common';
 import { useField } from '../../api/hooks/useField';
-import { usePendingBookings, useFieldCalendar } from '../../api/hooks/useBooking';
+import { useOwnerPendingBookings, useFieldCalendar } from '../../api/hooks/useBooking';
 import { FieldStatus, CalendarStatus } from '../../types';
 
 const FieldDashboardPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const fieldId = Number(id);
     const { data: field, isLoading: fieldLoading } = useField(fieldId);
-    const { data: pendingBookings, isLoading: bookingsLoading } = usePendingBookings(fieldId);
+    const { data: pendingBookings, isLoading: bookingsLoading } = useOwnerPendingBookings();
 
     // Get calendar for current month to calculate stats
     const today = new Date();
@@ -89,7 +89,7 @@ const FieldDashboardPage: React.FC = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
                         <p className="text-sm text-slate-500">Price/Hour</p>
-                        <p className="font-semibold text-slate-900">{field.defaultPricePerHour?.toLocaleString() || 'Not set'} VND</p>
+                        <p className="font-semibold text-slate-900">${field.defaultPricePerHour?.toLocaleString() || 'Not set'}</p>
                     </div>
                     <div>
                         <p className="text-sm text-slate-500">Capacity</p>
