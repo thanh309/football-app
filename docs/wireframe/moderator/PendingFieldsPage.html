@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kick-off Pending Fields Wireframe</title>
+    <style>
+        :root {
+            --stroke-width: 2px;
+            --black: #000;
+            --white: #fff;
+            --font-family: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .browser-window {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--white);
+            border: var(--stroke-width) solid var(--black);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.2);
+            min-height: 900px;
+        }
+
+        /* Window Header */
+        .window-header {
+            border-bottom: var(--stroke-width) solid var(--black);
+            padding: 10px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #fff;
+        }
+
+        .window-control {
+            width: 20px;
+            height: 20px;
+            border: var(--stroke-width) solid var(--black);
+            position: relative;
+        }
+
+        .window-control.close::before,
+        .window-control.close::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: 16px;
+            background: var(--black);
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .window-control.close::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        .window-control.min::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            width: 10px;
+            height: 2px;
+            background: var(--black);
+        }
+
+        .window-control.max::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 8px;
+            height: 8px;
+            border: 1px solid var(--black);
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            border-right: var(--stroke-width) solid var(--black);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-box {
+            padding-bottom: 20px;
+            border-bottom: var(--stroke-width) solid var(--black);
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .nav-item {
+            cursor: pointer;
+            padding: 10px;
+            text-decoration: none;
+            color: var(--black);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item.active {
+            background: #eee;
+            border: var(--stroke-width) solid var(--black);
+            font-weight: bold;
+        }
+
+        .nav-item.logout {
+            margin-top: auto;
+            color: black;
+            border-top: 1px dashed var(--black);
+            padding-top: 20px;
+        }
+
+        /* Main Content Area */
+        .main-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            height: 60px;
+            border-bottom: var(--stroke-width) solid var(--black);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 20px;
+            gap: 20px;
+        }
+
+        .user-circle {
+            width: 30px;
+            height: 30px;
+            border: var(--stroke-width) solid var(--black);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        /* Content Body */
+        .content-body {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .back-link {
+            display: inline-block;
+            text-decoration: underline;
+            cursor: pointer;
+            color: #555;
+            text-align: center;
+            width: 100%;
+        }
+
+        .page-header {
+            margin-bottom: 10px;
+        }
+
+        .page-title h1 {
+            font-size: 2rem;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        .page-title p {
+            margin: 0;
+            color: #555;
+        }
+
+        /* Pending List Content */
+        .pending-content {
+            border: var(--stroke-width) solid var(--black);
+            background: var(--white);
+            padding: 20px;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .list-title-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .list-icon {
+            width: 40px;
+            height: 40px;
+            border: var(--stroke-width) solid var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #eee;
+        }
+
+        .list-info h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+        }
+
+        .list-info p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .count-badge {
+            background-color: white;
+            border: 1px solid var(--black);
+            /* Wireframe style adjustment from orange border */
+            padding: 5px 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .pending-card {
+            border: var(--stroke-width) solid var(--black);
+            padding: 20px;
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 10px;
+        }
+
+        .field-name {
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .field-owner {
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .field-location {
+            font-size: 0.85rem;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .field-price {
+            font-weight: bold;
+            color: green;
+            /* Keep green for price? Or convert to black for strict wireframe? User removed colors last time. Let's stick to green per image but be ready to change */
+            font-size: 1rem;
+            margin: 5px 0;
+        }
+
+        /* Override to black for wireframe consistency if needed, but image shows green */
+        .field-price {
+            color: var(--black);
+        }
+
+        .card-footer {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .created-date {
+            font-size: 0.75rem;
+            color: #999;
+        }
+
+        .review-btn {
+            background: var(--white);
+            border: 1px solid var(--black);
+            padding: 5px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .review-btn:hover {
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="browser-window">
+        <!-- Window Controls -->
+        <div class="window-header">
+            <div class="window-control min"></div>
+            <div class="window-control max"></div>
+            <div class="window-control close"></div>
+        </div>
+
+        <div class="app-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="logo-box">
+                    KICK-OFF
+                </div>
+
+                <nav class="nav-menu">
+                    <div class="nav-item">
+                        Dashboard
+                    </div>
+                    <div class="nav-item">
+                        Community
+                    </div>
+                    <div class="nav-item active">
+                        Mod Dashboard
+                    </div>
+
+                    <div class="nav-item" style="margin-top: auto;">
+                        Settings
+                    </div>
+                    <div class="nav-item logout">
+                        Logout
+                    </div>
+                </nav>
+            </aside>
+
+            <!-- Main Column -->
+            <main class="main-col">
+                <!-- Top Bar -->
+                <header class="top-bar">
+                    <div class="user-circle">U</div>
+                </header>
+
+                <!-- Page Content -->
+                <div class="content-body">
+
+                    <div style="text-align: center;">
+                        <span class="back-link">← Back to Dashboard</span>
+                    </div>
+
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Pending Fields</h1>
+                            <p>Review and verify new field registration requests.</p>
+                        </div>
+                    </div>
+
+                    <div class="pending-content">
+                        <div class="list-header">
+                            <div class="list-title-box">
+                                <div class="list-icon"></div>
+                                <div class="list-info">
+                                    <h3>Pending Fields</h3>
+                                    <p>Review and verify new field registrations</p>
+                                </div>
+                            </div>
+                            <span class="count-badge">[#] pending</span>
+                        </div>
+
+                        <div class="card-grid">
+                            <!-- Card 1 -->
+                            <div class="pending-card">
+                                <div class="field-name">[Field Name]</div>
+                                <div class="field-owner">Owner #[ID]</div>
+                                <div class="field-location">[Field Address]</div>
+                                <div class="field-price">$[Price]/hour</div>
+                                <div class="card-footer">
+                                    <span class="created-date">Created [Date]</span>
+                                    <button class="review-btn">👁 Review</button>
+                                </div>
+                            </div>
+
+                            <!-- Card 2 -->
+                            <div class="pending-card">
+                                <div class="field-name">[Field Name]</div>
+                                <div class="field-owner">Owner #[ID]</div>
+                                <div class="field-location">[Field Address]</div>
+                                <div class="field-price">$[Price]/hour</div>
+                                <div class="card-footer">
+                                    <span class="created-date">Created [Date]</span>
+                                    <button class="review-btn">👁 Review</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

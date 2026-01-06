@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kick-off Report Details Wireframe</title>
+    <style>
+        :root {
+            --stroke-width: 2px;
+            --black: #000;
+            --white: #fff;
+            --font-family: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .browser-window {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--white);
+            border: var(--stroke-width) solid var(--black);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.2);
+            min-height: 800px;
+        }
+
+        /* Window Header */
+        .window-header {
+            border-bottom: var(--stroke-width) solid var(--black);
+            padding: 10px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #fff;
+        }
+
+        .window-control {
+            width: 20px;
+            height: 20px;
+            border: var(--stroke-width) solid var(--black);
+            position: relative;
+        }
+
+        .window-control.close::before,
+        .window-control.close::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: 16px;
+            background: var(--black);
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .window-control.close::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        .window-control.min::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            width: 10px;
+            height: 2px;
+            background: var(--black);
+        }
+
+        .window-control.max::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 8px;
+            height: 8px;
+            border: 1px solid var(--black);
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            border-right: var(--stroke-width) solid var(--black);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-box {
+            padding-bottom: 20px;
+            border-bottom: var(--stroke-width) solid var(--black);
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .nav-item {
+            cursor: pointer;
+            padding: 10px;
+            text-decoration: none;
+            color: var(--black);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item.active {
+            background: #eee;
+            border: var(--stroke-width) solid var(--black);
+            font-weight: bold;
+        }
+
+        .nav-item.logout {
+            margin-top: auto;
+            color: black;
+            border-top: 1px dashed var(--black);
+            padding-top: 20px;
+        }
+
+        /* Main Content Area */
+        .main-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            height: 60px;
+            border-bottom: var(--stroke-width) solid var(--black);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 20px;
+            gap: 20px;
+        }
+
+        .user-circle {
+            width: 30px;
+            height: 30px;
+            border: var(--stroke-width) solid var(--black);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        /* Content Body */
+        .content-body {
+            padding: 40px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: underline;
+            cursor: pointer;
+            color: #555;
+            text-align: center;
+            width: 100%;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-title h1 {
+            font-size: 2rem;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        .page-title p {
+            margin: 0;
+            color: #555;
+        }
+
+        /* Report Details Card */
+        .report-card {
+            border: var(--stroke-width) solid var(--black);
+            background: var(--white);
+            overflow: hidden;
+        }
+
+        .report-header-bg {
+            background-color: #ffebee;
+            /* Light pinkish bg from image */
+            padding: 20px;
+            /* Reduced from 30px to match image look */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .report-id-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .flag-icon {
+            width: 40px;
+            height: 40px;
+            border: var(--stroke-width) solid var(--black);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .report-id-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            background: #fff8e1;
+            border: 1px solid #ccc;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #fbc02d;
+            /* Or black for wireframe strictness, but image has yellow text/bg */
+        }
+
+        .target-type {
+            font-size: 1rem;
+            color: #555;
+        }
+
+        .report-body {
+            padding: 30px;
+        }
+
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .info-item {
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 5px;
+        }
+
+        .info-item.full-width {
+            grid-column: span 2;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: #999;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        /* Override specific for this page if needed */
+        .status-badge {
+            color: black;
+            border-color: black;
+            background: white;
+        }
+
+        .report-header-bg {
+            background: #fff;
+            /* Reset to white for pure wireframe if desired, or keep light grey */
+            background: #fdfdfd;
+            border-bottom: var(--stroke-width) solid var(--black);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="browser-window">
+        <!-- Window Controls -->
+        <div class="window-header">
+            <div class="window-control min"></div>
+            <div class="window-control max"></div>
+            <div class="window-control close"></div>
+        </div>
+
+        <div class="app-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="logo-box">
+                    KICK-OFF
+                </div>
+
+                <nav class="nav-menu">
+                    <div class="nav-item">
+                        Dashboard
+                    </div>
+                    <div class="nav-item">
+                        Community
+                    </div>
+                    <div class="nav-item active">
+                        Mod Dashboard
+                    </div>
+
+                    <div class="nav-item" style="margin-top: auto;">
+                        Settings
+                    </div>
+                    <div class="nav-item logout">
+                        Logout
+                    </div>
+                </nav>
+            </aside>
+
+            <!-- Main Column -->
+            <main class="main-col">
+                <!-- Top Bar -->
+                <header class="top-bar">
+                    <div class="user-circle">U</div>
+                </header>
+
+                <!-- Page Content -->
+                <div class="content-body">
+
+                    <div style="text-align: center;">
+                        <span class="back-link">← Back to Reported Content</span>
+                    </div>
+
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>Report Details</h1>
+                            <p>Review the report and take appropriate moderation action.</p>
+                        </div>
+                    </div>
+
+                    <div class="report-card">
+                        <div class="report-header-bg">
+                            <div class="report-id-group">
+                                <div class="flag-icon">⚑</div>
+                                <span class="report-id-text">Report #[ID]</span>
+                                <span class="status-badge">Pending</span>
+                            </div>
+                            <span class="target-type">User</span>
+                        </div>
+
+                        <div class="report-body">
+                            <div class="section-label">
+                                <span>⚠</span> Report Information
+                            </div>
+
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Reason</span>
+                                    <span class="info-value">[Reason]</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Content Type</span>
+                                    <span class="info-value">[Content Type]</span>
+                                </div>
+                                <div class="info-item full-width">
+                                    <span class="info-label">Details</span>
+                                    <span class="info-value">[Details text...]</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Reported By</span>
+                                    <span class="info-value">User #[ID]</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Reported At</span>
+                                    <span class="info-value">[Date/Time]</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
