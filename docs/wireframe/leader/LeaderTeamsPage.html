@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leader Teams Wireframe</title>
+    <style>
+        :root {
+            --stroke-width: 2px;
+            --black: #000;
+            --white: #fff;
+            --gray-light: #eee;
+            --font-family: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .browser-window {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--white);
+            border: var(--stroke-width) solid var(--black);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.2);
+            min-height: 800px;
+        }
+
+        /* Window Header */
+        .window-header {
+            border-bottom: var(--stroke-width) solid var(--black);
+            padding: 10px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #fff;
+        }
+
+        .window-control {
+            width: 20px;
+            height: 20px;
+            border: var(--stroke-width) solid var(--black);
+            position: relative;
+        }
+
+        .window-control.close::before,
+        .window-control.close::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: 16px;
+            background: var(--black);
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .window-control.close::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        .window-control.min::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            width: 10px;
+            height: 2px;
+            background: var(--black);
+        }
+
+        .window-control.max::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 8px;
+            height: 8px;
+            border: 1px solid var(--black);
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            border-right: var(--stroke-width) solid var(--black);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-box {
+            padding-bottom: 20px;
+            border-bottom: var(--stroke-width) solid var(--black);
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .nav-item {
+            cursor: pointer;
+            padding: 10px;
+            text-decoration: none;
+            color: var(--black);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item.active {
+            background: #eee;
+            border: var(--stroke-width) solid var(--black);
+            font-weight: bold;
+        }
+
+        .nav-item.logout {
+            margin-top: auto;
+            color: red;
+            border-top: 1px dashed var(--black);
+            padding-top: 20px;
+        }
+
+        .icon-placeholder {
+            width: 20px;
+            height: 20px;
+            border: 1px solid var(--black);
+            display: inline-block;
+        }
+
+        /* Main Content Area */
+        .main-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            height: 60px;
+            border-bottom: var(--stroke-width) solid var(--black);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 20px;
+            gap: 20px;
+        }
+
+        .user-circle {
+            width: 30px;
+            height: 30px;
+            border: var(--stroke-width) solid var(--black);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        /* Content Body */
+        .content-body {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* Page Top */
+        .page-header {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .page-title h1 {
+            font-size: 2rem;
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+        }
+
+        .page-title p {
+            margin: 0;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .btn-create {
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            font-family: inherit;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-create:hover {
+            opacity: 0.8;
+        }
+
+        /* Teams Grid */
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .team-card {
+            border: var(--stroke-width) solid var(--black);
+            background: var(--white);
+            padding: 20px;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .team-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+        }
+
+        .card-top {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .team-logo {
+            width: 60px;
+            height: 60px;
+            border: 1px solid var(--black);
+            background: var(--gray-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .team-info h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+        }
+
+        .team-info p {
+            margin: 0;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px dashed var(--black);
+            padding-top: 15px;
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border: 1px solid var(--black);
+            border-radius: 12px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .created-date {
+            font-size: 0.8rem;
+            color: #555;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="browser-window">
+        <!-- Window Controls -->
+        <div class="window-header">
+            <div class="window-control min"></div>
+            <div class="window-control max"></div>
+            <div class="window-control close"></div>
+        </div>
+
+        <div class="app-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="logo-box">
+                    KICK-OFF
+                </div>
+
+                <nav class="nav-menu">
+                    <div class="nav-item">
+                        Dashboard
+                    </div>
+                    <div class="nav-item">
+                        Community
+                    </div>
+                    <div class="nav-item">
+                        My Profile
+                    </div>
+                    <div class="nav-item">
+                        My Teams
+                    </div>
+                    <div class="nav-item">
+                        My Schedule
+                    </div>
+                    <!-- Leader/Manager Item -->
+                    <div class="nav-item active">
+                        Manage Teams
+                    </div>
+
+                    <div class="nav-item" style="margin-top: 30px;">
+                        Settings
+                    </div>
+                    <div class="nav-item logout">
+                        <span class="icon-placeholder"></span> Logout
+                    </div>
+                </nav>
+            </aside>
+
+            <!-- Main Column -->
+            <main class="main-col">
+                <!-- Top Header -->
+                <header class="top-bar">
+                    <div class="user-circle">U</div>
+                </header>
+
+                <div class="content-body">
+                    
+                    <!-- Page Header -->
+                    <div class="page-header">
+                        <div class="page-title">
+                            <h1>My Teams</h1>
+                            <p>Teams you manage as a leader.</p>
+                        </div>
+                        <button class="btn-create">
+                            <div class="icon-placeholder" style="border-color: white; width: 14px; height: 14px;"></div>
+                            Create Team
+                        </button>
+                    </div>
+
+                    <!-- Teams List -->
+                    <div class="teams-grid">
+                        <!-- Card 1 -->
+                        <div class="team-card">
+                            <div class="card-top">
+                                <div class="team-logo">
+                                    <div class="icon-placeholder"></div>
+                                </div>
+                                <div class="team-info">
+                                    <h3>[Team Name]</h3>
+                                    <p>[City/Area]</p>
+                                </div>
+                            </div>
+                            <div class="card-bottom">
+                                <span class="status-pill">Verified</span>
+                                <span class="created-date">[Date]</span>
+                            </div>
+                        </div>
+
+                         <!-- Card 2 -->
+                         <div class="team-card">
+                            <div class="card-top">
+                                <div class="team-logo">
+                                    <div class="icon-placeholder"></div>
+                                </div>
+                                <div class="team-info">
+                                    <h3>[Team Name]</h3>
+                                    <p>[City/Area]</p>
+                                </div>
+                            </div>
+                            <div class="card-bottom">
+                                <span class="status-pill">Pending</span>
+                                <span class="created-date">[Date]</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
