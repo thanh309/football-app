@@ -1,0 +1,140 @@
+================================================================================
+WIREFRAME SCREENSHOT CANDIDATES - KICK-OFF FOOTBALL APP
+================================================================================
+
+Total wireframe files: 56 HTML files across 9 categories
+Recommendation: Capture 10-15 key wireframes that represent all major user flows
+
+================================================================================
+TOP PRIORITY - ESSENTIAL SCREENSHOTS (Must Have)
+================================================================================
+
+1. public/LandingPage.html (LandingPage)
+   - First impression, shows app branding and navigation
+   - Demonstrates overall visual style and wireframe conventions
+
+2. auth/LoginPage.html (LoginPage)
+   - Entry point for all users
+   - Shows authentication flow
+
+3. dashboard/DashboardPage.html (DashboardPage)
+   - Central hub showing sidebar navigation pattern
+   - Displays stats cards and quick actions layout
+
+4. search/SearchTeamsPage.html (SearchTeamsPage)
+   - Shows search/filtering UI patterns
+   - Demonstrates list/grid view of results
+
+5. player/MyTeamsPage.html (MyTeamsPage)
+   - Shows player's team membership view
+   - Represents core player functionality
+
+================================================================================
+ROLE-SPECIFIC PAGES (Choose 1-2 per role)
+================================================================================
+
+LEADER ROLE (Team Management):
+6. leader/TeamDashboardPage.html (TeamDashboardPage)
+   - Comprehensive team management dashboard
+   - Shows stats, quick actions, and recent activity
+
+7. leader/CreateMatchPage.html (CreateMatchPage)
+   - Form pattern for creating content
+   - Booking/scheduling workflow
+
+OWNER ROLE (Field Management):
+8. owner/FieldDashboardPage.html (FieldDashboardPage)
+   - Field owner's primary interface
+   - Shows field management capabilities
+
+9. owner/BookingCalendarPage.html (BookingCalendarPage) - Largest file 19KB
+   - Complex calendar UI component
+   - Shows booking management system
+
+MODERATOR ROLE (Admin Functions):
+10. moderator/ModDashboardPage.html (ModDashboardPage)
+    - Admin overview with pending items
+    - Shows moderation workflow
+
+11. moderator/PendingFieldsPage.html (PendingFieldsPage) OR moderator/PendingTeamsPage.html (PendingTeamsPage)
+    - Shows review/approval queue pattern
+
+================================================================================
+COMMUNITY & SOCIAL FEATURES
+================================================================================
+
+12. community/CommunityFeedPage.html (CommunityFeedPage)
+    - Social feed pattern
+    - Shows post cards and interaction UI
+
+13. community/CreatePostPage.html (CreatePostPage)
+    - Content creation form pattern
+
+================================================================================
+SUPPORTING PAGES (Nice to Have)
+================================================================================
+
+14. dashboard/NotificationsPage.html (NotificationsPage)
+    - Notification list pattern
+
+15. public/PublicTeamProfilePage.html (PublicTeamProfilePage) OR public/PublicFieldProfilePage.html (PublicFieldProfilePage)
+    - Public profile view pattern
+    - Shows how entities appear to non-members
+
+================================================================================
+SUMMARY: RECOMMENDED 12 WIREFRAMES
+================================================================================
+
+CATEGORY          FILE                                                    PRIORITY
+-----------------------------------------------------------------------------------
+Landing/Auth      public/LandingPage.html (LandingPage)                   ★★★
+                  auth/LoginPage.html (LoginPage)                          ★★★
+
+Dashboard         dashboard/DashboardPage.html (DashboardPage)             ★★★
+
+Search            search/SearchTeamsPage.html (SearchTeamsPage)            ★★★
+
+Player            player/MyTeamsPage.html (MyTeamsPage)                    ★★☆
+
+Leader            leader/TeamDashboardPage.html (TeamDashboardPage)        ★★★
+                  leader/CreateMatchPage.html (CreateMatchPage)            ★★☆
+
+Owner             owner/FieldDashboardPage.html (FieldDashboardPage)       ★★★
+                  owner/BookingCalendarPage.html (BookingCalendarPage)     ★★★
+
+Moderator         moderator/ModDashboardPage.html (ModDashboardPage)       ★★☆
+
+Community         community/CommunityFeedPage.html (CommunityFeedPage)     ★★☆
+
+Public Profile    public/PublicTeamProfilePage.html (PublicTeamProfilePage) ★☆☆
+
+================================================================================
+WHY THESE SELECTIONS?
+================================================================================
+
+1. COVERAGE: Covers all 4 user roles (Player, Leader, Owner, Moderator)
+2. UNIQUE UI PATTERNS: Each selection shows a different UI pattern:
+   - Hero section (LandingPage)
+   - Forms (LoginPage, CreateMatchPage)
+   - Dashboards (DashboardPage, TeamDashboardPage, FieldDashboardPage, ModDashboardPage)
+   - Lists/Search (SearchTeamsPage, PendingFieldsPage)
+   - Calendar (BookingCalendarPage)
+   - Feed/Cards (CommunityFeedPage)
+   - Profile (PublicTeamProfilePage)
+
+3. COMPLEXITY: Includes simple (LoginPage) to complex (BookingCalendarPage) pages
+4. FLOW: Together they tell the story of the app's complete functionality
+
+================================================================================
+FILES TO SKIP
+================================================================================
+
+These are detail/edit pages that duplicate patterns already shown:
+- auth/RegisterPage.html (RegisterPage) - similar to LoginPage
+- dashboard/AccountSettingsPage.html (AccountSettingsPage) - settings form
+- dashboard/NotificationSettingsPage.html (NotificationSettingsPage) - settings form
+- leader/EditTeamPage.html (EditTeamPage) - similar to CreateTeamPage
+- owner/EditFieldPage.html (EditFieldPage) - similar to RegisterFieldPage
+- Various detail pages (*DetailsPage.html) - similar patterns
+
+================================================================================
