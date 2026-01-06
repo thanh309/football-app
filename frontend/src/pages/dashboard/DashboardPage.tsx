@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, Bell, Search, MapPin, MessageCircle, User } from 'lucide-react';
+import { Calendar, Users, Bell, Search, MapPin, MessageCircle, Settings } from 'lucide-react';
 import { PageContainer, PageHeader, ContentCard, LoadingSpinner } from '../../components/common';
 import { useAuth } from '../../contexts';
 import { usePlayerTeams } from '../../api/hooks/useTeam';
@@ -17,7 +17,7 @@ const DashboardPage: React.FC = () => {
         { to: '/search/teams', icon: Search, label: 'Find Teams' },
         { to: '/search/fields', icon: MapPin, label: 'Find Fields' },
         { to: '/community', icon: MessageCircle, label: 'Community' },
-        { to: '/profile', icon: User, label: 'My Profile' },
+        { to: '/settings/account', icon: Settings, label: 'Settings' },
     ];
 
     const isLoading = teamsLoading || scheduleLoading || notificationsLoading;
@@ -100,34 +100,7 @@ const DashboardPage: React.FC = () => {
                         </Link>
                     ))}
                 </div>
-            </ContentCard>
-
-            {/* Recent Activity */}
-            <ContentCard title="Recent Activity">
-                {schedule && schedule.length > 0 ? (
-                    <div className="space-y-4">
-                        {schedule.slice(0, 3).map((match) => (
-                            <div key={match.matchId} className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl">
-                                <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <Calendar className="w-5 h-5 text-primary-600" />
-                                </div>
-                                <div>
-                                    <p className="font-medium text-slate-900">
-                                        Match on {new Date(match.matchDate).toLocaleDateString()}
-                                    </p>
-                                    <p className="text-sm text-slate-500">
-                                        {match.startTime?.slice(0, 5)} - {match.description || 'Scheduled match'}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-8 text-slate-500">
-                        <p>No recent activity to show.</p>
-                    </div>
-                )}
-            </ContentCard>
+        </ContentCard>
         </PageContainer>
     );
 };
