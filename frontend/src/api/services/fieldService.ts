@@ -114,7 +114,7 @@ export const fieldService = {
      * Update field pricing rules
      */
     updateFieldPricing: async (fieldId: number, rules: Partial<FieldPricingRule>[]): Promise<FieldPricingRule[]> => {
-        const response = await api.put<FieldPricingRule[]>(`/fields/${fieldId}/pricing`, { rules });
+        const response = await api.put<FieldPricingRule[]>(`/fields/${fieldId}/pricing`, rules);
         return response.data;
     },
 

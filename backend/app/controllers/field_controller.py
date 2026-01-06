@@ -304,7 +304,7 @@ async def get_field_pricing(
             pricingRuleId=r.pricing_rule_id,
             fieldId=r.field_id,
             name=r.name,
-            dayOfWeek=r.day_of_week.split(",") if r.day_of_week else None,
+            dayOfWeek=r.day_of_week,  # Already a list (JSON type)
             startTime=r.start_time.isoformat(),
             endTime=r.end_time.isoformat(),
             pricePerHour=float(r.price_per_hour),
@@ -344,7 +344,7 @@ async def update_field_pricing(
         rule = FieldPricingRule(
             field_id=field_id,
             name=rule_data.name,
-            day_of_week=",".join(rule_data.dayOfWeek) if rule_data.dayOfWeek else None,
+            day_of_week=rule_data.dayOfWeek,  # Pass list directly (JSON type)
             start_time=datetime_time.fromisoformat(rule_data.startTime),
             end_time=datetime_time.fromisoformat(rule_data.endTime),
             price_per_hour=rule_data.pricePerHour,
@@ -361,7 +361,7 @@ async def update_field_pricing(
             pricingRuleId=r.pricing_rule_id,
             fieldId=r.field_id,
             name=r.name,
-            dayOfWeek=r.day_of_week.split(",") if r.day_of_week else None,
+            dayOfWeek=r.day_of_week,  # Already a list (JSON type)
             startTime=r.start_time.isoformat(),
             endTime=r.end_time.isoformat(),
             pricePerHour=float(r.price_per_hour),
