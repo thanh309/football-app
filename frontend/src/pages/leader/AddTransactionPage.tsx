@@ -24,7 +24,7 @@ const AddTransactionPage: React.FC = () => {
             />
             <ContentCard>
                 <AddTransactionForm
-                    walletId={Number(id)}
+                    teamId={Number(id)}
                     onSuccess={handleSuccess}
                     onCancel={handleCancel}
                 />

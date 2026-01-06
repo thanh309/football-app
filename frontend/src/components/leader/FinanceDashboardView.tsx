@@ -9,8 +9,7 @@ interface FinanceDashboardViewProps {
 
 const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ teamId }) => {
     const { data: wallet, isLoading: walletLoading } = useTeamWallet(teamId);
-    const walletId = wallet?.walletId || 0;
-    const { data: transactionsData } = useTransactionHistory(walletId);
+    const { data: transactionsData } = useTransactionHistory(teamId);
 
     if (walletLoading) {
         return <LoadingSpinner text="Loading finances..." />;
@@ -27,8 +26,18 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ teamId }) =
 
     const transactions = transactionsData?.data || [];
     const recentTransactions = transactions.slice(0, 5);
-    const incomeTotal = transactions.filter((t: TransactionLog) => t.type === 'Income').reduce((sum: number, t: TransactionLog) => sum + t.amount, 0);
-    const expenseTotal = transactions.filter((t: TransactionLog) => t.type === 'Expense').reduce((sum: number, t: TransactionLog) => sum + t.amount, 0);
+    
+    // Calculate income/expense for the past week
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+    const weeklyTransactions = transactions.filter((t: TransactionLog) => {
+        const txDate = new Date(t.createdAt);
+        return txDate >= oneWeekAgo;
+    });
+    
+    const incomeTotal = weeklyTransactions.filter((t: TransactionLog) => t.type === 'Income').reduce((sum: number, t: TransactionLog) => sum + t.amount, 0);
+    const expenseTotal = weeklyTransactions.filter((t: TransactionLog) => t.type === 'Expense').reduce((sum: number, t: TransactionLog) => sum + t.amount, 0);
 
     return (
         <div className="space-y-6">
@@ -46,18 +55,24 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ teamId }) =
             {/* Summary Cards */}
             <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white rounded-xl p-5 border border-gray-100">
-                    <div className="flex items-center gap-2 text-green-600 mb-2">
-                        <TrendingUp className="w-5 h-5" />
-                        <span className="font-medium">Income</span>
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 text-green-600">
+                            <TrendingUp className="w-5 h-5" />
+                            <span className="font-medium">Income</span>
+                        </div>
+                        <span className="text-xs text-gray-400">This Week</span>
                     </div>
                     <p className="text-2xl font-bold text-gray-900">
                         +{incomeTotal.toLocaleString()}
                     </p>
                 </div>
                 <div className="bg-white rounded-xl p-5 border border-gray-100">
-                    <div className="flex items-center gap-2 text-red-600 mb-2">
-                        <TrendingDown className="w-5 h-5" />
-                        <span className="font-medium">Expenses</span>
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 text-red-600">
+                            <TrendingDown className="w-5 h-5" />
+                            <span className="font-medium">Expenses</span>
+                        </div>
+                        <span className="text-xs text-gray-400">This Week</span>
                     </div>
                     <p className="text-2xl font-bold text-gray-900">
                         -{expenseTotal.toLocaleString()}

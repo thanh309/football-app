@@ -22,11 +22,11 @@ export function useTeamWallet(teamId: number) {
     });
 }
 
-export function useTransactionHistory(walletId: number, filters?: TransactionFilters) {
+export function useTransactionHistory(teamId: number, filters?: TransactionFilters) {
     return useQuery({
-        queryKey: financeKeys.transactions(walletId, filters),
-        queryFn: () => financeService.getTransactionHistory(walletId, filters),
-        enabled: !!walletId,
+        queryKey: financeKeys.transactions(teamId, filters),
+        queryFn: () => financeService.getTransactionHistory(teamId, filters),
+        enabled: !!teamId,
     });
 }
 
@@ -52,7 +52,7 @@ export function useAddTransaction() {
         mutationFn: (data: AddTransactionRequest) => financeService.addTransaction(data),
         onSuccess: (_, data) => {
             queryClient.invalidateQueries({ queryKey: financeKeys.all });
-            queryClient.invalidateQueries({ queryKey: financeKeys.transactions(data.walletId) });
+            queryClient.invalidateQueries({ queryKey: financeKeys.wallet(data.teamId) });
         },
     });
 }

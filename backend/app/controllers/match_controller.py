@@ -445,6 +445,13 @@ async def batch_update_attendance(
     if not is_authorized:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
     
+    # Determine which team the leader is managing
+    leader_team_id = None
+    if host_team and host_team.leader_id == user.user_id:
+        leader_team_id = host_team.team_id
+    elif opponent_team and opponent_team.leader_id == user.user_id:
+        leader_team_id = opponent_team.team_id
+    
     updated_records = []
     for item in data.records:
         result = await db.execute(
@@ -456,10 +463,23 @@ async def batch_update_attendance(
         record = result.scalar_one_or_none()
         
         if record:
+            # Update existing record
             record.status = AttendanceStatus(item.status)
             record.confirmed_at = datetime.utcnow()
             record.confirmed_by = user.user_id
             updated_records.append(record)
+        else:
+            # Create new attendance record
+            new_record = AttendanceRecord(
+                match_id=match_id,
+                player_id=item.playerId,
+                team_id=leader_team_id,
+                status=AttendanceStatus(item.status),
+                confirmed_at=datetime.utcnow(),
+                confirmed_by=user.user_id,
+            )
+            db.add(new_record)
+            updated_records.append(new_record)
     
     await db.commit()
     

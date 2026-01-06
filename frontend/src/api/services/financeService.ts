@@ -2,7 +2,7 @@ import api from '../axios';
 import type { TeamWallet, TransactionLog, TransactionType } from '../../types';
 
 export interface AddTransactionRequest {
-    walletId: number;
+    teamId: number;
     type: TransactionType;
     amount: number;
     description?: string;
@@ -47,7 +47,16 @@ export const financeService = {
      * Add a transaction
      */
     addTransaction: async (data: AddTransactionRequest): Promise<TransactionLog> => {
-        const response = await api.post<TransactionLog>('/transactions', data);
+        // Backend has separate endpoints for income (deposit) and expense
+        const endpoint = data.type === 'Income' 
+            ? `/teams/${data.teamId}/wallet/deposit`
+            : `/teams/${data.teamId}/wallet/expense`;
+        const response = await api.post<TransactionLog>(endpoint, {
+            type: data.type,
+            amount: data.amount,
+            description: data.description,
+            category: data.category,
+        });
         return response.data;
     },
 
@@ -55,11 +64,11 @@ export const financeService = {
      * Get transaction history
      */
     getTransactionHistory: async (
-        walletId: number,
+        teamId: number,
         filters?: TransactionFilters
     ): Promise<PaginatedResponse<TransactionLog>> => {
         const response = await api.get<TransactionLog[]>(
-            `/wallets/${walletId}/transactions`,
+            `/teams/${teamId}/wallet/transactions`,
             { params: filters }
         );
         return {

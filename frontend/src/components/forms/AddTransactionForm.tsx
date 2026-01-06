@@ -6,7 +6,7 @@ import { useAddTransaction } from '../../api/hooks/useFinance';
 import toast from 'react-hot-toast';
 
 interface AddTransactionFormProps {
-    walletId: number;
+    teamId: number;
     onSuccess?: () => void;
     onCancel?: () => void;
 }
@@ -26,7 +26,7 @@ const typeOptions = [
 ];
 
 const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
-    walletId,
+    teamId,
     onSuccess,
     onCancel,
 }) => {
@@ -66,7 +66,7 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
 
         try {
             await addMutation.mutateAsync({
-                walletId,
+                teamId,
                 type: formData.type as 'Income' | 'Expense',
                 amount: parseFloat(formData.amount),
                 category: formData.category,

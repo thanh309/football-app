@@ -163,12 +163,28 @@ const TeamDashboardPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Recent Activity placeholder */}
+            {/* Recent Activity */}
             <div className="bg-white rounded-xl shadow-sm p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
-                <div className="text-center py-8 text-gray-500">
-                    <p>Activity feed coming soon...</p>
-                </div>
+                {matchesData?.data && matchesData.data.length > 0 ? (
+                    <div className="space-y-3">
+                        {matchesData.data.slice(0, 3).map((match) => (
+                            <div key={match.matchId} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                <div className="flex-1 text-left">
+                                    <p className="text-sm font-medium text-gray-900 text-left">
+                                        Match on {new Date(match.matchDate).toLocaleDateString()}
+                                    </p>
+                                    <p className="text-xs text-gray-500 text-left">{match.status}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="py-8 text-gray-500 text-left">
+                        <p>No recent activity to show.</p>
+                    </div>
+                )}
             </div>
         </div>
     );

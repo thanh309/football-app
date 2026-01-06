@@ -44,7 +44,7 @@ export const rosterService = {
      * Update player role in team
      */
     updatePlayerRole: async (data: UpdateRoleRequest): Promise<TeamRoster> => {
-        const response = await api.put<TeamRoster>(`/roster/${data.rosterId}`, {
+        const response = await api.put<TeamRoster>(`/teams/roster/${data.rosterId}`, {
             role: data.role,
         });
         return response.data;

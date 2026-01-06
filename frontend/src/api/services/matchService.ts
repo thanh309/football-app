@@ -111,7 +111,7 @@ export const matchService = {
      * Get pending invitations for a team
      */
     getPendingInvitations: async (teamId: number): Promise<MatchInvitation[]> => {
-        const response = await api.get<MatchInvitation[]>(`/teams/${teamId}/match-invitations`);
+        const response = await api.get<MatchInvitation[]>(`/matches/team/${teamId}/invitations`);
         return response.data;
     },
 
