@@ -16,16 +16,20 @@ const statusOptions = [
 const UserSearchView: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
-    const [searching, setSearching] = useState(false);
+    const [submittedParams, setSubmittedParams] = useState<{ query?: string; status?: string }>({});
 
-    const { data: usersResponse, isLoading, refetch } = useSearchUsers(
-        searching ? { query: searchQuery || undefined, status: statusFilter || undefined } : undefined
-    );
+    const { data: usersResponse, isLoading } = useSearchUsers(submittedParams);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        setSearching(true);
-        refetch();
+        const params: { query?: string; status?: string } = {};
+        if (searchQuery.trim()) {
+            params.query = searchQuery.trim();
+        }
+        if (statusFilter) {
+            params.status = statusFilter;
+        }
+        setSubmittedParams(params);
     };
 
     const getStatusColor = (status: string) => {
@@ -81,10 +85,6 @@ const UserSearchView: React.FC = () => {
 
             {isLoading ? (
                 <LoadingSpinner text="Searching users..." />
-            ) : !searching ? (
-                <div className="text-center py-12 text-gray-500">
-                    Enter search criteria above to find users
-                </div>
             ) : users.length === 0 ? (
                 <EmptyState
                     title="No Users Found"

@@ -364,6 +364,7 @@ async def verify_field(
 
 @router.get("/users", response_model=List[UserSummaryResponse])
 async def get_users(
+    query: Optional[str] = Query(None),
     role: Optional[str] = Query(None),
     status_filter: Optional[str] = Query(None, alias="status"),
     limit: int = Query(50, le=100),
@@ -374,14 +375,27 @@ async def get_users(
     await require_moderator(user)
     
     from app.models.enums import AccountStatus
+    from sqlalchemy import or_
     
-    stmt = select(UserAccount).limit(limit)
+    stmt = select(UserAccount)
+    
+    # Filter by query (username or email) if provided
+    if query:
+        search_pattern = f"%{query}%"
+        stmt = stmt.where(
+            or_(
+                UserAccount.username.ilike(search_pattern),
+                UserAccount.email.ilike(search_pattern)
+            )
+        )
     
     # Filter by status if provided
     if status_filter:
         stmt = stmt.where(UserAccount.status == AccountStatus(status_filter))
     
     # Note: role filtering with JSON column is complex, skip for now
+    
+    stmt = stmt.limit(limit)
     
     result = await db.execute(stmt)
     users = result.scalars().all()
