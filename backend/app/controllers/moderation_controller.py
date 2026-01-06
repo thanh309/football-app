@@ -505,6 +505,37 @@ async def get_moderation_logs(
     ]
 
 
+@router.get("/history", response_model=List[ModerationLogResponse])
+async def get_moderation_history(
+    action: Optional[str] = Query(None),
+    limit: int = Query(50, le=100),
+    user: UserAccount = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get moderation history (alias for /logs, moderator only)."""
+    await require_moderator(user)
+    
+    stmt = select(ModerationLog).order_by(ModerationLog.created_at.desc()).limit(limit)
+    
+    if action:
+        stmt = stmt.where(ModerationLog.action == ModerationAction(action))
+    
+    result = await db.execute(stmt)
+    logs = result.scalars().all()
+    
+    return [
+        ModerationLogResponse(
+            logId=l.log_id,
+            moderatorId=l.moderator_id,
+            targetUserId=l.target_user_id,
+            action=l.action.value,
+            reason=l.reason,
+            details=l.details,
+            createdAt=l.created_at.isoformat(),
+        ) for l in logs
+    ]
+
+
 @router.get("/logs/user/{user_id}", response_model=List[ModerationLogResponse])
 async def get_user_moderation_logs(
     user_id: int,
