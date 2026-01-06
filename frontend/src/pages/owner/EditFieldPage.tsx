@@ -12,6 +12,7 @@ const EditFieldPage: React.FC = () => {
                 title="Edit Field"
                 subtitle="Update your field information below."
                 backLink={{ label: 'Back to Field Dashboard', to: `/owner/fields/${id}` }}
+                className="text-left"
             />
             <ContentCard>
                 <EditFieldForm fieldId={Number(id)} />

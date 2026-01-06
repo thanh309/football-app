@@ -129,9 +129,9 @@ const FieldPricingEditor: React.FC<FieldPricingEditorProps> = ({ fieldId }) => {
                     <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
                         <DollarSign className="w-5 h-5 text-emerald-600" />
                     </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-900">Pricing Rules</h2>
-                        <p className="text-sm text-gray-500">Set custom prices for different times</p>
+                    <div className="text-left">
+                        <h2 className="text-xl font-bold text-gray-900 text-left">Pricing Rules</h2>
+                        <p className="text-sm text-gray-500 text-left">Set custom prices for different times</p>
                     </div>
                 </div>
                 <Button onClick={addRule} leftIcon={<Plus className="w-4 h-4" />}>

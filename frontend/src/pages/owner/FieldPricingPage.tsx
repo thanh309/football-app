@@ -12,6 +12,7 @@ const FieldPricingPage: React.FC = () => {
                 title="Field Pricing"
                 subtitle="Set different prices for different time slots and days."
                 backLink={{ label: 'Back to Field Dashboard', to: `/owner/fields/${id}` }}
+                className="text-left"
             />
             <FieldPricingEditor fieldId={Number(id)} />
         </PageContainer>
