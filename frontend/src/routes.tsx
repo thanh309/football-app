@@ -30,7 +30,7 @@ const AccountSettingsPage = lazy(() => import("./pages/dashboard/AccountSettings
 // Community pages
 const CommunityFeedPage = lazy(() => import("./pages/community/CommunityFeedPage"));
 const CreatePostPage = lazy(() => import("./pages/community/CreatePostPage"));
-const PostDetailsPage = lazy(() => import("./pages/community/PostDetailsPage"));
+
 
 // Search pages
 const SearchTeamsPage = lazy(() => import("./pages/search/SearchTeamsPage"));
@@ -100,7 +100,7 @@ export const router = createBrowserRouter([
         children: [
             { index: true, element: <LazyComponent><LandingPage /></LazyComponent> },
             { path: "community", element: <LazyComponent><CommunityFeedPage /></LazyComponent> },
-            { path: "community/posts/:id", element: <LazyComponent><PostDetailsPage /></LazyComponent> },
+
 
             // Search Routes (public pages)
             { path: "search/teams", element: <LazyComponent><SearchTeamsPage /></LazyComponent> },

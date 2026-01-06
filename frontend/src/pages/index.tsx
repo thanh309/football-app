@@ -24,7 +24,7 @@ export {
 export {
     CommunityFeedPage,
     CreatePostPage,
-    PostDetailsPage,
+
 } from './community';
 
 // Search pages
