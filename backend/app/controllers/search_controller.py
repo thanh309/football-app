@@ -55,7 +55,7 @@ async def search_teams(
             teamId=t.team_id,
             teamName=t.team_name,
             description=t.description,
-            logoUrl=t.logo_url,
+            logoUrl=t.logo.storage_path if t.logo else None,
             leaderId=t.leader_id,
             status=t.status.value,
             rejectionReason=t.rejection_reason,

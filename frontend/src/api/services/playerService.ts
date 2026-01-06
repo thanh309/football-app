@@ -7,6 +7,8 @@ export interface UpdatePlayerProfileRequest {
     skillLevel?: number;
     bio?: string;
     profileImage?: string;
+    profileImageUrl?: string;  // URL for new profile image
+    removeProfileImage?: boolean; // Flag to remove current profile image
     dateOfBirth?: string;
     height?: number;
     weight?: number;

@@ -1,18 +1,50 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Upload, Image as ImageIcon, Trash2, Link as LinkIcon, Plus } from 'lucide-react';
-import { Button, PageContainer, PageHeader, ContentCard } from '../../components/common';
+import { Upload, Image as ImageIcon, Trash2, Link as LinkIcon, Plus, Star } from 'lucide-react';
+import { Button, PageContainer, PageHeader, ContentCard, LoadingSpinner } from '../../components/common';
+import { mediaService } from '../../api/services/mediaService';
+import { fieldService } from '../../api/services/fieldService';
+import type { MediaAsset } from '../../types';
 import toast from 'react-hot-toast';
+
+import { getMediaUrl } from '../../utils/mediaUtils';
 
 const FieldPhotosPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
+    const fieldId = parseInt(id || '0', 10);
+
     const [isDragging, setIsDragging] = useState(false);
     const [urlInput, setUrlInput] = useState('');
     const [showUrlInput, setShowUrlInput] = useState(false);
+    const [photos, setPhotos] = useState<MediaAsset[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isUploading, setIsUploading] = useState(false);
+    const [coverImage, setCoverImage] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Start with empty photos - in real app, this would be fetched from API
-    const [photos, setPhotos] = useState<string[]>([]);
+    // Fetch existing photos and field cover on mount
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [photosData, fieldData] = await Promise.all([
+                    mediaService.getFieldPhotos(fieldId),
+                    fieldService.getFieldById(fieldId)
+                ]);
+                setPhotos(photosData);
+                if (fieldData && fieldData.coverImage) {
+                    setCoverImage(fieldData.coverImage);
+                }
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (fieldId) {
+            fetchData();
+        }
+    }, [fieldId]);
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
@@ -30,15 +62,27 @@ const FieldPhotosPage: React.FC = () => {
         handleFiles(files);
     };
 
-    const handleFiles = (files: File[]) => {
+    const handleFiles = async (files: File[]) => {
         const imageFiles = files.filter(file => file.type.startsWith('image/'));
         if (imageFiles.length === 0) {
             toast.error('Please select image files only');
             return;
         }
-        const newPhotos = imageFiles.map(file => URL.createObjectURL(file));
-        setPhotos(prev => [...prev, ...newPhotos]);
-        toast.success(`${imageFiles.length} photo(s) added!`);
+
+        setIsUploading(true);
+        try {
+            const uploadPromises = imageFiles.map(file =>
+                mediaService.uploadFieldPhoto(fieldId, file)
+            );
+            const uploadedAssets = await Promise.all(uploadPromises);
+            setPhotos(prev => [...prev, ...uploadedAssets]);
+            toast.success(`${imageFiles.length} photo(s) uploaded!`);
+        } catch (error) {
+            console.error('Upload failed:', error);
+            toast.error('Failed to upload photos');
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     const handleFileSelect = () => {
@@ -51,26 +95,54 @@ const FieldPhotosPage: React.FC = () => {
         }
     };
 
-    const handleAddUrl = () => {
+    const handleAddUrl = async () => {
         if (!urlInput.trim()) {
             toast.error('Please enter a valid URL');
             return;
         }
         try {
             new URL(urlInput);
-            setPhotos(prev => [...prev, urlInput.trim()]);
+            // Call API to add photo by URL
+            const asset = await mediaService.addFieldPhotoByUrl(fieldId, urlInput.trim());
+            setPhotos(prev => [...prev, asset]);
             setUrlInput('');
             setShowUrlInput(false);
             toast.success('Photo added from URL!');
-        } catch {
-            toast.error('Please enter a valid URL');
+        } catch (error) {
+            console.error('Add URL failed:', error);
+            toast.error('Failed to add photo from URL');
         }
     };
 
-    const handleDeletePhoto = (index: number) => {
-        setPhotos(prev => prev.filter((_, i) => i !== index));
-        toast.success('Photo removed');
+    const handleDeletePhoto = async (assetId: number) => {
+        try {
+            await mediaService.deleteMedia(assetId);
+            setPhotos(prev => prev.filter(p => p.assetId !== assetId));
+            toast.success('Photo deleted');
+        } catch (error) {
+            console.error('Delete failed:', error);
+            toast.error('Failed to delete photo');
+        }
     };
+
+    const handleSetCover = async (assetId: number, storagePath: string) => {
+        try {
+            await fieldService.setCoverImage(fieldId, assetId);
+            setCoverImage(storagePath);
+            toast.success('Cover image set!');
+        } catch (error) {
+            console.error('Set cover failed:', error);
+            toast.error('Failed to set cover image');
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <PageContainer maxWidth="md">
+                <LoadingSpinner text="Loading photos..." />
+            </PageContainer>
+        );
+    }
 
     return (
         <PageContainer maxWidth="md">
@@ -100,11 +172,13 @@ const FieldPhotosPage: React.FC = () => {
                 <div className="text-center">
                     <Upload className={`w-12 h-12 mx-auto mb-4 ${isDragging ? 'text-primary-500' : 'text-slate-400'}`} />
                     <h3 className="text-lg font-medium text-slate-900 mb-2">
-                        {isDragging ? 'Drop photos here' : 'Upload Photos'}
+                        {isDragging ? 'Drop photos here' : isUploading ? 'Uploading...' : 'Upload Photos'}
                     </h3>
                     <p className="text-slate-500 mb-4">Drag and drop photos here, or click to browse</p>
                     <div className="flex justify-center gap-3">
-                        <Button onClick={handleFileSelect} variant="secondary">Select Files</Button>
+                        <Button onClick={handleFileSelect} variant="secondary" disabled={isUploading} isLoading={isUploading}>
+                            Select Files
+                        </Button>
                         <Button onClick={() => setShowUrlInput(!showUrlInput)} variant="outline" leftIcon={<LinkIcon className="w-4 h-4" />}>
                             Add from URL
                         </Button>
@@ -140,23 +214,41 @@ const FieldPhotosPage: React.FC = () => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {photos.map((photo, index) => (
-                            <div key={index} className="relative group aspect-video rounded-lg overflow-hidden bg-slate-100">
-                                <img
-                                    src={photo}
-                                    alt={`Field photo ${index + 1}`}
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Image+Error';
-                                    }}
-                                />
-                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <button onClick={() => handleDeletePhoto(index)} className="p-2 bg-white rounded-full hover:bg-slate-100">
-                                        <Trash2 className="w-5 h-5 text-red-500" />
-                                    </button>
+                        {photos.map((photo) => {
+                            const isCover = coverImage === photo.storagePath;
+                            return (
+                                <div key={photo.assetId} className={`relative group aspect-video rounded-lg overflow-hidden bg-slate-100 ${isCover ? 'ring-2 ring-primary-500' : ''}`}>
+                                    <img
+                                        src={getMediaUrl(photo.storagePath)}
+                                        alt={photo.fileName}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Image+Error';
+                                        }}
+                                    />
+                                    {isCover && (
+                                        <div className="absolute top-2 left-2 bg-primary-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                            <Star className="w-3 h-3 fill-current" />
+                                            Cover
+                                        </div>
+                                    )}
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        {!isCover && (
+                                            <button
+                                                onClick={() => handleSetCover(photo.assetId, photo.storagePath)}
+                                                className="p-2 bg-white rounded-full hover:bg-slate-100"
+                                                title="Set as cover"
+                                            >
+                                                <Star className="w-5 h-5 text-primary-500" />
+                                            </button>
+                                        )}
+                                        <button onClick={() => handleDeletePhoto(photo.assetId)} className="p-2 bg-white rounded-full hover:bg-slate-100">
+                                            <Trash2 className="w-5 h-5 text-red-500" />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </ContentCard>

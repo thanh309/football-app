@@ -41,6 +41,7 @@ class FieldProfileResponse(BaseModel):
     capacity: Optional[int] = None
     status: str
     rejectionReason: Optional[str] = None
+    coverImage: Optional[str] = None
     createdAt: str
     updatedAt: str
     

@@ -12,6 +12,7 @@ from app.models.enums import Visibility, ReactionType, ReactionEntityType
 if TYPE_CHECKING:
     from app.models.user import UserAccount
     from app.models.team import TeamProfile
+    from app.models.media import MediaAsset
 
 
 class Post(Base):
@@ -21,6 +22,7 @@ class Post(Base):
     post_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     author_id: Mapped[int] = mapped_column(ForeignKey("user_account.user_id"), nullable=False, index=True)
     team_id: Mapped[Optional[int]] = mapped_column(ForeignKey("team_profile.team_id"), nullable=True, index=True)
+    image_id: Mapped[Optional[int]] = mapped_column(ForeignKey("media_asset.asset_id", ondelete="SET NULL"), nullable=True)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     visibility: Mapped[Visibility] = mapped_column(
         SQLEnum(Visibility), 
@@ -41,6 +43,7 @@ class Post(Base):
     # Relationships
     author: Mapped["UserAccount"] = relationship("UserAccount", back_populates="posts")
     team: Mapped[Optional["TeamProfile"]] = relationship("TeamProfile", back_populates="posts")
+    image: Mapped[Optional["MediaAsset"]] = relationship("MediaAsset", foreign_keys=[image_id], lazy="joined")
     comments: Mapped[List["Comment"]] = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
     reactions: Mapped[List["Reaction"]] = relationship(
         "Reaction", 

@@ -303,6 +303,7 @@ export interface FieldProfile {
     capacity?: number;
     status: FieldStatus;
     rejectionReason?: string;
+    coverImage?: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -419,6 +420,7 @@ export interface Post {
     postId: number; // Primary Key
     authorId: number; // Foreign Key -> UserAccount
     teamId?: number; // Foreign Key -> TeamProfile
+    imageUrl?: string; // Resolved from media_asset.storage_path via image_id FK
     content: string;
     visibility: Visibility;
     reactionCount: number;

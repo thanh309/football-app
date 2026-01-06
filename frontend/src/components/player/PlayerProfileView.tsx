@@ -1,5 +1,6 @@
 import { User, Calendar, Target, Ruler, Weight, Trophy, Footprints } from 'lucide-react';
 import type { PlayerProfile } from '../../types';
+import { getMediaUrl } from '../../utils/mediaUtils';
 
 interface PlayerProfileViewProps {
     player: PlayerProfile;
@@ -25,7 +26,6 @@ const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
         if (level <= 8) return 'bg-orange-100 text-orange-700';
         return 'bg-emerald-100 text-emerald-700';
     };
-
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             {/* Header */}
@@ -34,7 +34,7 @@ const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
                     <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
                         {player.profileImage ? (
                             <img
-                                src={player.profileImage}
+                                src={getMediaUrl(player.profileImage)}
                                 alt={player.displayName}
                                 className="w-full h-full object-cover rounded-full"
                             />

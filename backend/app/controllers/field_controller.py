@@ -6,6 +6,7 @@ from typing import List, Optional
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel
 
 from app.database import get_db
 from app.services.field_service import FieldService
@@ -35,6 +36,7 @@ def field_to_response(f) -> FieldProfileResponse:
         capacity=f.capacity,
         status=f.status.value,
         rejectionReason=f.rejection_reason,
+        coverImage=f.cover_image.storage_path if f.cover_image else None,
         createdAt=f.created_at.isoformat(),
         updatedAt=f.updated_at.isoformat(),
     )
@@ -169,6 +171,46 @@ async def delete_field(
     await db.commit()
     
     return MessageResponse(message="Field deleted")
+
+
+class SetCoverImageRequest(BaseModel):
+    """Request to set field cover image."""
+    mediaAssetId: int
+
+
+@router.put("/{field_id}/cover", response_model=FieldProfileResponse)
+async def set_cover_image(
+    field_id: int,
+    data: SetCoverImageRequest,
+    user: UserAccount = Depends(get_current_user),
+    field_service: FieldService = Depends(get_field_service),
+    db: AsyncSession = Depends(get_db)
+):
+    """Set field cover image (owner only). Takes a media asset ID."""
+    field = await field_service.get_field_by_id(field_id)
+    if not field:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Field not found")
+    if field.owner_id != user.user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
+    
+    # Verify the media asset exists and belongs to this field
+    from app.models.media import MediaAsset
+    from app.models.enums import MediaOwnerType
+    from sqlalchemy import select
+    
+    result = await db.execute(
+        select(MediaAsset).where(
+            MediaAsset.asset_id == data.mediaAssetId,
+            MediaAsset.owner_type == MediaOwnerType.FIELD,
+            MediaAsset.entity_id == field_id
+        )
+    )
+    asset = result.scalar_one_or_none()
+    if not asset:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Media asset not found or does not belong to this field")
+    
+    updated = await field_service.update_field(field, cover_image_id=data.mediaAssetId)
+    return field_to_response(updated)
 
 
 @router.get("/{field_id}/calendar", response_model=List[FieldCalendarResponse])

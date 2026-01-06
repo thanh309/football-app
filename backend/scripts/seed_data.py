@@ -162,7 +162,7 @@ def generate_teams(users: List[UserAccount]) -> List[Dict]:
         teams.append({
             'team_name': team_name,
             'description': fake.paragraph(nb_sentences=2),
-            'logo_url': f"https://picsum.photos/seed/team{i}/200",
+            # logo_id will be set after media assets are created
             'leader_id': leaders[i].user_id,
             'status': status,
             'rejection_reason': fake.sentence() if status == TeamStatus.REJECTED else None,
@@ -196,10 +196,11 @@ def generate_fields(users: List[UserAccount]) -> List[Dict]:
             'location': f"{fake.building_number()} {street}, {city}",
             'latitude': lat + random.uniform(-0.05, 0.05),
             'longitude': lng + random.uniform(-0.05, 0.05),
-            'default_price_per_hour': Decimal(random.choice([20, 30, 40, 50])), # More realistic GBP-like prices (though unit is not user-facing here)
+            'default_price_per_hour': Decimal(random.choice([20, 30, 40, 50])),
             'capacity': capacity,
             'status': status,
             'rejection_reason': fake.sentence() if status == FieldStatus.REJECTED else None,
+            # cover_image_id will be set after media assets are created
         })
     return fields
 
@@ -339,6 +340,118 @@ def generate_notifications(users: List[UserAccount]) -> List[Dict]:
             'is_read': random.random() > 0.6,
         })
     return notifications
+
+
+def generate_media_assets(users: List[UserAccount], fields: List[FieldProfile], teams: List[TeamProfile], players: List, posts: List) -> Dict:
+    """Generate media assets with real URLs and return mapping for FK assignment."""
+    from app.models.enums import MediaType, MediaOwnerType
+    
+    media_assets = []
+    field_cover_map = {}  # field_id -> media index
+    team_logo_map = {}    # team_id -> media index
+    player_image_map = {} # player_id -> media index
+    post_image_map = {}   # post_id -> media index
+    
+    # Real Unsplash URLs for football-related images
+    field_images = [
+        "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=800",
+        "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800",
+        "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=800",
+        "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800",
+        "https://images.unsplash.com/photo-1556056504-5c7696c4c28d?w=800",
+    ]
+    
+    team_images = [
+        "https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=800",
+        "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=800",
+        "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800",
+        "https://images.unsplash.com/photo-1600679472829-3044539ce8ed?w=800",
+    ]
+    
+    player_images = [
+        "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400",
+        "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400",
+        "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400",
+    ]
+    
+    post_images = [
+        "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600",
+        "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=600",
+        "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=600",
+    ]
+    
+    field_owners = [u for u in users if UserRole.FIELD_OWNER.value in u.roles]
+    
+    # Create cover images for each field
+    for field in fields:
+        owner = next((u for u in field_owners if u.user_id == field.owner_id), field_owners[0] if field_owners else users[0])
+        idx = len(media_assets)
+        field_cover_map[field.field_id] = idx
+        media_assets.append({
+            'owner_id': owner.user_id,
+            'owner_type': MediaOwnerType.FIELD,
+            'entity_id': field.field_id,
+            'file_name': f"field_{field.field_id}_cover.jpg",
+            'storage_path': random.choice(field_images),
+            'file_type': MediaType.IMAGE,
+            'file_size': 0,
+            'mime_type': 'image/jpeg',
+        })
+    
+    # Create logo for each team
+    for team in teams:
+        idx = len(media_assets)
+        team_logo_map[team.team_id] = idx
+        media_assets.append({
+            'owner_id': team.leader_id,
+            'owner_type': MediaOwnerType.TEAM,
+            'entity_id': team.team_id,
+            'file_name': f"team_{team.team_id}_logo.jpg",
+            'storage_path': random.choice(team_images),
+            'file_type': MediaType.IMAGE,
+            'file_size': 0,
+            'mime_type': 'image/jpeg',
+        })
+    
+    # Create profile images for some players (70%)
+    for player in players:
+        if random.random() < 0.7:
+            idx = len(media_assets)
+            player_image_map[player.player_id] = idx
+            media_assets.append({
+                'owner_id': player.user_id,
+                'owner_type': MediaOwnerType.PLAYER,
+                'entity_id': player.player_id,
+                'file_name': f"player_{player.player_id}_avatar.jpg",
+                'storage_path': random.choice(player_images),
+                'file_type': MediaType.IMAGE,
+                'file_size': 0,
+                'mime_type': 'image/jpeg',
+            })
+    
+    # Create images for some posts (40%)
+    for post in posts:
+        if random.random() < 0.4:
+            idx = len(media_assets)
+            post_image_map[post.post_id] = idx
+            media_assets.append({
+                'owner_id': post.author_id,
+                'owner_type': MediaOwnerType.POST,
+                'entity_id': post.post_id,
+                'file_name': f"post_{post.post_id}_image.jpg",
+                'storage_path': random.choice(post_images),
+                'file_type': MediaType.IMAGE,
+                'file_size': 0,
+                'mime_type': 'image/jpeg',
+            })
+    
+    return {
+        'assets': media_assets,
+        'field_covers': field_cover_map,
+        'team_logos': team_logo_map,
+        'player_images': player_image_map,
+        'post_images': post_image_map,
+    }
 
 
 # ============================================================================
@@ -762,35 +875,41 @@ async def seed_database(dry_run: bool = False, clear: bool = False):
             await session.flush()
         print(f"     Created {len(mod_log_objs)} moderation logs")
         
-        # 26. Media Assets
+        # 26. Media Assets (using real URLs)
         print("   - Media Assets...")
-        media_objs = []
-        for i in range(30):
-            owner = random.choice(user_objs)
-            owner_type = random.choice(list(MediaOwnerType))
-            if owner_type == MediaOwnerType.TEAM and team_objs:
-                entity_id = random.choice(team_objs).team_id
-            elif owner_type == MediaOwnerType.FIELD and field_objs:
-                entity_id = random.choice(field_objs).field_id
-            elif owner_type == MediaOwnerType.POST and post_objs:
-                entity_id = random.choice(post_objs).post_id
-            else:
-                entity_id = random.choice(player_objs).player_id if player_objs else 1
-            
-            media_objs.append(MediaAsset(
-                owner_id=owner.user_id,
-                owner_type=owner_type,
-                entity_id=entity_id,
-                file_name=f"image_{i+1}.jpg",
-                storage_path=f"/uploads/{owner_type.value.lower()}/{entity_id}/image_{i+1}.jpg",
-                file_type=MediaType.IMAGE,
-                file_size=random.randint(50000, 500000),
-                mime_type="image/jpeg",
-            ))
+        media_result = generate_media_assets(user_objs, field_objs, team_objs, player_objs, post_objs)
+        media_objs = [MediaAsset(**m) for m in media_result['assets']]
         if not dry_run:
             session.add_all(media_objs)
             await session.flush()
-        print(f"     Created {len(media_objs)} media assets")
+            
+            # Link media assets to entities via FK
+            # Fields: cover_image_id
+            for field_id, media_idx in media_result['field_covers'].items():
+                field = next((f for f in field_objs if f.field_id == field_id), None)
+                if field and media_idx < len(media_objs):
+                    field.cover_image_id = media_objs[media_idx].asset_id
+            
+            # Teams: logo_id
+            for team_id, media_idx in media_result['team_logos'].items():
+                team = next((t for t in team_objs if t.team_id == team_id), None)
+                if team and media_idx < len(media_objs):
+                    team.logo_id = media_objs[media_idx].asset_id
+            
+            # Players: profile_image_id
+            for player_id, media_idx in media_result['player_images'].items():
+                player = next((p for p in player_objs if p.player_id == player_id), None)
+                if player and media_idx < len(media_objs):
+                    player.profile_image_id = media_objs[media_idx].asset_id
+            
+            # Posts: image_id
+            for post_id, media_idx in media_result['post_images'].items():
+                post = next((p for p in post_objs if p.post_id == post_id), None)
+                if post and media_idx < len(media_objs):
+                    post.image_id = media_objs[media_idx].asset_id
+            
+            await session.flush()
+        print(f"     Created {len(media_objs)} media assets and linked to entities")
         
         if not dry_run:
             await session.commit()

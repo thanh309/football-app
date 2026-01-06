@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from app.models.user import UserAccount
     from app.models.booking import BookingRequest
     from app.models.match import MatchEvent
+    from app.models.media import MediaAsset
 
 
 class FieldProfile(Base):
@@ -42,9 +43,11 @@ class FieldProfile(Base):
         default=datetime.utcnow, 
         onupdate=datetime.utcnow
     )
+    cover_image_id: Mapped[Optional[int]] = mapped_column(ForeignKey("media_asset.asset_id", ondelete="SET NULL"), nullable=True)
     
     # Relationships
     owner: Mapped["UserAccount"] = relationship("UserAccount", back_populates="owned_fields")
+    cover_image: Mapped[Optional["MediaAsset"]] = relationship("MediaAsset", foreign_keys=[cover_image_id], lazy="joined")
     calendar_slots: Mapped[List["FieldCalendar"]] = relationship("FieldCalendar", back_populates="field", cascade="all, delete-orphan")
     pricing_rules: Mapped[List["FieldPricingRule"]] = relationship("FieldPricingRule", back_populates="field", cascade="all, delete-orphan")
     cancellation_policy: Mapped[Optional["CancellationPolicy"]] = relationship("CancellationPolicy", back_populates="field", uselist=False, cascade="all, delete-orphan")

@@ -27,7 +27,6 @@ class TeamService:
         leader_id: int,
         team_name: str,
         description: str = None,
-        logo_url: str = None,
         location: str = None,
         latitude: float = None,
         longitude: float = None,
@@ -41,7 +40,6 @@ class TeamService:
         team = TeamProfile(
             team_name=team_name,
             description=description,
-            logo_url=logo_url,
             leader_id=leader_id,
             status=TeamStatus.PENDING,
             location=location,

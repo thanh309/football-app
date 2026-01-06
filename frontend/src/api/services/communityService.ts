@@ -5,6 +5,7 @@ export interface CreatePostRequest {
     content: string;
     visibility?: Visibility;
     teamId?: number;
+    imageUrl?: string;
 }
 
 export interface AddCommentRequest {

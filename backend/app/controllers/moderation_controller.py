@@ -242,7 +242,7 @@ async def get_team_for_review(
         "leaderId": team.leader_id,
         "description": team.description,
         "location": team.location,
-        "logoUrl": team.logo_url,
+        "logoUrl": team.logo.storage_path if team.logo else None,
         "status": team.status.value,
         "createdAt": team.created_at.isoformat(),
     }

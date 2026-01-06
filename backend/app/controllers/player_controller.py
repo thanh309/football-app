@@ -21,7 +21,7 @@ def player_to_response(p) -> PlayerProfileResponse:
         position=p.position,
         skillLevel=p.skill_level,
         bio=p.bio,
-        profileImage=p.profile_image,
+        profileImage=p.profile_image.storage_path if p.profile_image else None,
         dateOfBirth=p.date_of_birth.isoformat() if p.date_of_birth else None,
         height=p.height,
         weight=p.weight,
@@ -60,13 +60,39 @@ async def update_profile(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Player profile not found")
     
     update_data = data.model_dump(exclude_unset=True)
+    
+    # Handle profileImageUrl specially
+    profile_image_url = update_data.pop('profileImageUrl', None)
+    remove_profile_image = update_data.pop('removeProfileImage', False)
+    
+    if remove_profile_image:
+        profile.profile_image_id = None
+    elif profile_image_url:
+        from app.models.media import MediaAsset
+        from app.models.enums import MediaType, MediaOwnerType
+        
+        media = MediaAsset(
+            owner_id=user.user_id,
+            owner_type=MediaOwnerType.PLAYER,
+            entity_id=profile.player_id,
+            file_name=f"player_{profile.player_id}_avatar.jpg",
+            storage_path=profile_image_url,
+            file_type=MediaType.IMAGE,
+            file_size=0,
+            mime_type="image/jpeg",
+        )
+        db.add(media)
+        await db.flush()
+        profile.profile_image_id = media.asset_id
+    
     for key, value in update_data.items():
         snake_key = ''.join(['_' + c.lower() if c.isupper() else c for c in key]).lstrip('_')
         if hasattr(profile, snake_key):
             setattr(profile, snake_key, value)
     
     await player_repo.update(profile)
-    await player_repo.commit()
+    await db.commit()
+    await db.refresh(profile)
     
     return player_to_response(profile)
 

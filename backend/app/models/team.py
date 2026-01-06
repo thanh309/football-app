@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from app.models.match import MatchEvent, MatchInvitation
     from app.models.booking import BookingRequest
     from app.models.social import Post
+    from app.models.media import MediaAsset
 
 
 class TeamProfile(Base):
@@ -25,7 +26,7 @@ class TeamProfile(Base):
     team_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     team_name: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    logo_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    logo_id: Mapped[Optional[int]] = mapped_column(ForeignKey("media_asset.asset_id", ondelete="SET NULL"), nullable=True)
     leader_id: Mapped[int] = mapped_column(ForeignKey("user_account.user_id"), nullable=False, index=True)
     status: Mapped[TeamStatus] = mapped_column(
         SQLEnum(TeamStatus), 
@@ -47,6 +48,7 @@ class TeamProfile(Base):
     
     # Relationships
     leader: Mapped["UserAccount"] = relationship("UserAccount", back_populates="led_teams", foreign_keys=[leader_id])
+    logo: Mapped[Optional["MediaAsset"]] = relationship("MediaAsset", foreign_keys=[logo_id], lazy="joined")
     roster: Mapped[List["TeamRoster"]] = relationship("TeamRoster", back_populates="team", cascade="all, delete-orphan")
     join_requests: Mapped[List["JoinRequest"]] = relationship("JoinRequest", back_populates="team", cascade="all, delete-orphan")
     wallet: Mapped[Optional["TeamWallet"]] = relationship("TeamWallet", back_populates="team", uselist=False, cascade="all, delete-orphan")

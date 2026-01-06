@@ -4,6 +4,7 @@ import { useToggleReaction, useDeletePost } from '../../api/hooks/useCommunity';
 import toast from 'react-hot-toast';
 import type { Post, ReactionType } from '../../types';
 import { Link } from 'react-router-dom';
+import { getMediaUrl } from '../../utils/mediaUtils';
 
 interface PostCardProps {
     post: Post;
@@ -175,6 +176,20 @@ const PostCard: React.FC<PostCardProps> = ({ post, isOwner = false, isAuthentica
             <div className="p-4 text-left">
                 <p className="text-gray-800 whitespace-pre-wrap text-left">{post.content}</p>
             </div>
+
+            {/* Post Image */}
+            {post.imageUrl && (
+                <div className="px-4 pb-4">
+                    <img
+                        src={getMediaUrl(post.imageUrl)}
+                        alt="Post image"
+                        className="w-full rounded-lg object-cover max-h-96"
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                    />
+                </div>
+            )}
 
             {/* Stats */}
             <div className="px-4 py-2 flex items-center justify-between text-sm text-gray-500 border-t border-gray-100">

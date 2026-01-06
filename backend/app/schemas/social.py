@@ -11,6 +11,7 @@ class PostCreate(BaseModel):
     content: str
     teamId: Optional[int] = None
     visibility: str = "Public"
+    imageUrl: Optional[str] = None
 
 
 class PostResponse(BaseModel):
@@ -18,6 +19,7 @@ class PostResponse(BaseModel):
     postId: int
     authorId: int
     teamId: Optional[int] = None
+    imageUrl: Optional[str] = None
     content: str
     visibility: str
     reactionCount: int

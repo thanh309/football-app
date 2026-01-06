@@ -16,8 +16,8 @@ export const mediaService = {
     uploadMedia: async (data: UploadMediaRequest): Promise<MediaAsset> => {
         const formData = new FormData();
         formData.append('file', data.file);
-        formData.append('ownerType', data.ownerType);
-        formData.append('entityId', data.entityId.toString());
+        formData.append('owner_type', data.ownerType);  // Backend expects snake_case
+        formData.append('entity_id', data.entityId.toString());  // Backend expects snake_case
 
         const response = await api.post<MediaAsset>('/media/upload', formData, {
             headers: {
@@ -31,9 +31,8 @@ export const mediaService = {
      * Get media for entity
      */
     getEntityMedia: async (ownerType: MediaOwnerType, entityId: number): Promise<MediaAsset[]> => {
-        const response = await api.get<MediaAsset[]>('/media', {
-            params: { ownerType, entityId },
-        });
+        // Backend endpoint is /media/entity/{owner_type}/{entity_id}
+        const response = await api.get<MediaAsset[]>(`/media/entity/${ownerType}/${entityId}`);
         return response.data;
     },
 
@@ -60,6 +59,25 @@ export const mediaService = {
             ownerType: MediaOwnerTypeEnum.FIELD,
             entityId: fieldId,
         });
+    },
+
+    /**
+     * Add media by URL
+     */
+    addMediaByUrl: async (url: string, ownerType: MediaOwnerType, entityId: number): Promise<MediaAsset> => {
+        const response = await api.post<MediaAsset>('/media/url', {
+            url,
+            ownerType,
+            entityId,
+        });
+        return response.data;
+    },
+
+    /**
+     * Add field photo by URL (convenience method)
+     */
+    addFieldPhotoByUrl: async (fieldId: number, url: string): Promise<MediaAsset> => {
+        return mediaService.addMediaByUrl(url, MediaOwnerTypeEnum.FIELD, fieldId);
     },
 };
 

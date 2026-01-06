@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from app.models.user import UserAccount
     from app.models.team import TeamRoster, JoinRequest
     from app.models.match import AttendanceRecord
+    from app.models.media import MediaAsset
 
 
 class PlayerProfile(Base):
@@ -25,7 +26,7 @@ class PlayerProfile(Base):
     position: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     skill_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # 1-10
     bio: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    profile_image: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    profile_image_id: Mapped[Optional[int]] = mapped_column(ForeignKey("media_asset.asset_id", ondelete="SET NULL"), nullable=True)
     date_of_birth: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     height: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # cm
     weight: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # kg
@@ -43,6 +44,7 @@ class PlayerProfile(Base):
     
     # Relationships
     user: Mapped["UserAccount"] = relationship("UserAccount", back_populates="player_profile")
+    profile_image: Mapped[Optional["MediaAsset"]] = relationship("MediaAsset", foreign_keys=[profile_image_id], lazy="joined")
     team_memberships: Mapped[List["TeamRoster"]] = relationship("TeamRoster", back_populates="player")
     join_requests: Mapped[List["JoinRequest"]] = relationship("JoinRequest", back_populates="player")
     attendance_records: Mapped[List["AttendanceRecord"]] = relationship("AttendanceRecord", back_populates="player")

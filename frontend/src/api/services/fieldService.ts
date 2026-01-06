@@ -71,6 +71,14 @@ export const fieldService = {
     },
 
     /**
+     * Set field cover image by media asset ID
+     */
+    setCoverImage: async (fieldId: number, mediaAssetId: number): Promise<FieldProfile> => {
+        const response = await api.put<FieldProfile>(`/fields/${fieldId}/cover`, { mediaAssetId });
+        return response.data;
+    },
+
+    /**
      * Get fields owned by a specific owner
      */
     getOwnerFields: async (ownerId: number): Promise<FieldProfile[]> => {

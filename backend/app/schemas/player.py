@@ -31,6 +31,8 @@ class PlayerProfileUpdate(BaseModel):
     skillLevel: Optional[int] = None
     bio: Optional[str] = None
     profileImage: Optional[str] = None
+    profileImageUrl: Optional[str] = None  # URL for new profile image
+    removeProfileImage: Optional[bool] = False  # Flag to remove current profile image
     dateOfBirth: Optional[str] = None
     height: Optional[float] = None
     weight: Optional[float] = None

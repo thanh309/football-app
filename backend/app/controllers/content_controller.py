@@ -27,6 +27,7 @@ def post_to_response(p) -> PostResponse:
         postId=p.post_id,
         authorId=p.author_id,
         teamId=p.team_id,
+        imageUrl=p.image.storage_path if p.image else None,
         content=p.content,
         visibility=p.visibility.value,
         reactionCount=p.reaction_count,
@@ -41,7 +42,8 @@ def post_to_response(p) -> PostResponse:
 async def create_post(
     data: PostCreate,
     user: UserAccount = Depends(get_current_user),
-    content_service: ContentService = Depends(get_content_service)
+    content_service: ContentService = Depends(get_content_service),
+    db: AsyncSession = Depends(get_db)
 ):
     """Create a new post."""
     post = await content_service.create_post(
@@ -50,6 +52,28 @@ async def create_post(
         team_id=data.teamId,
         visibility=Visibility(data.visibility),
     )
+    
+    # If imageUrl is provided, create a media asset and link it
+    if data.imageUrl:
+        from app.models.media import MediaAsset
+        from app.models.enums import MediaType, MediaOwnerType
+        
+        media = MediaAsset(
+            owner_id=user.user_id,
+            owner_type=MediaOwnerType.POST,
+            entity_id=post.post_id,
+            file_name=f"post_{post.post_id}_image.jpg",
+            storage_path=data.imageUrl,
+            file_type=MediaType.IMAGE,
+            file_size=0,
+            mime_type="image/jpeg",
+        )
+        db.add(media)
+        await db.flush()
+        post.image_id = media.asset_id
+        await db.commit()
+        await db.refresh(post)
+    
     return post_to_response(post)
 
 

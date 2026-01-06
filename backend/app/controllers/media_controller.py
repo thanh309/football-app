@@ -172,15 +172,85 @@ async def delete_media(
     if not asset:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Media asset not found")
     
-    if asset.owner_id != user.user_id:
+    # Check authorization: uploader can always delete
+    is_authorized = (asset.owner_id == user.user_id)
+    
+    # Also allow entity owner to delete (e.g., field owner can delete field photos)
+    if not is_authorized and asset.owner_type == MediaOwnerType.FIELD:
+        from app.repositories.field_repository import FieldRepository
+        field_repo = FieldRepository(db)
+        field = await field_repo.find_by_id(asset.entity_id)
+        if field and field.owner_id == user.user_id:
+            is_authorized = True
+    
+    if not is_authorized:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
     
-    # Delete file from disk
-    full_path = os.path.join(os.path.dirname(__file__), "..", "..", asset.storage_path.lstrip("/"))
-    if os.path.exists(full_path):
-        os.remove(full_path)
+    # Delete file from disk (only if it's a local file)
+    if asset.storage_path.startswith("/uploads/"):
+        full_path = os.path.join(os.path.dirname(__file__), "..", "..", asset.storage_path.lstrip("/"))
+        if os.path.exists(full_path):
+            os.remove(full_path)
     
     await db.delete(asset)
     await db.commit()
     
     return {"message": "Media asset deleted"}
+
+
+class AddUrlRequest(BaseModel):
+    """Request to add a photo by URL."""
+    url: str
+    ownerType: str
+    entityId: int
+
+
+@router.post("/url", response_model=MediaAssetResponse, status_code=status.HTTP_201_CREATED)
+async def add_media_by_url(
+    data: AddUrlRequest,
+    user: UserAccount = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Add a media asset by URL (external image)."""
+    # Validate URL
+    from urllib.parse import urlparse
+    parsed = urlparse(data.url)
+    if not parsed.scheme in ('http', 'https'):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid URL scheme")
+    
+    # Validate owner type
+    try:
+        owner_type_enum = MediaOwnerType(data.ownerType)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid owner type")
+    
+    # Extract filename from URL
+    file_name = os.path.basename(parsed.path) or "external_image"
+    
+    # Determine file type from extension
+    ext = os.path.splitext(file_name)[1].lower()
+    if ext in ('.jpg', '.jpeg', '.png', '.gif', '.webp'):
+        file_type = MediaType.IMAGE
+        mime_type = f"image/{ext.lstrip('.')}"
+        if ext == '.jpg':
+            mime_type = "image/jpeg"
+    else:
+        file_type = MediaType.IMAGE
+        mime_type = "image/jpeg"  # Default for external images
+    
+    # Create database record with URL as storage_path
+    asset = MediaAsset(
+        owner_id=user.user_id,
+        owner_type=owner_type_enum,
+        entity_id=data.entityId,
+        file_name=file_name,
+        storage_path=data.url,  # Store the URL directly
+        file_type=file_type,
+        file_size=0,  # Unknown for external URLs
+        mime_type=mime_type,
+    )
+    
+    db.add(asset)
+    await db.commit()
+    
+    return asset_to_response(asset)
