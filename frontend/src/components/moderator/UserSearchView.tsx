@@ -53,9 +53,9 @@ const UserSearchView: React.FC = () => {
                 <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
                     <User className="w-5 h-5 text-indigo-600" />
                 </div>
-                <div>
-                    <h2 className="text-xl font-bold text-gray-900">User Management</h2>
-                    <p className="text-sm text-gray-500">Search and manage user accounts</p>
+                <div className="text-left">
+                    <h2 className="text-xl font-bold text-gray-900 text-left">User Management</h2>
+                    <p className="text-sm text-gray-500 text-left">Search and manage user accounts</p>
                 </div>
             </div>
 
