@@ -61,7 +61,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose }) => {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden max-h-[80vh] flex flex-col w-full max-w-md">
+        <div className="bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden max-h-[80vh] flex flex-col w-full">
             {/* Header */}
             <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -133,7 +133,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose }) => {
                                     : 'bg-white opacity-75'
                                     }`}
                             >
-                                <div className="flex gap-3">
+                                <div className="flex gap-3 items-start">
                                     <div className="text-2xl">{getNotificationIcon(notification.type)}</div>
                                     <div className="flex-1 min-w-0">
                                         <p className={`text-sm font-medium ${!notification.isRead
@@ -152,19 +152,20 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ onClose }) => {
                                             {new Date(notification.createdAt).toLocaleString()}
                                         </p>
                                     </div>
-                                    {!notification.isRead ? (
-                                        <button
-                                            onClick={() => handleMarkAsRead(notification.notificationId)}
-                                            className="p-1 text-emerald-600 hover:bg-emerald-100 rounded transition-colors"
-                                            title="Mark as read"
-                                        >
-                                            <Check className="w-4 h-4" />
-                                        </button>
-                                    ) : (
-                                        <span className="p-1 text-gray-400" title="Read">
-                                            <Check className="w-4 h-4" />
-                                        </span>
-                                    )}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (!notification.isRead) handleMarkAsRead(notification.notificationId);
+                                        }}
+                                        disabled={notification.isRead}
+                                        className={`p-1 rounded transition-colors flex-shrink-0 mt-0.5 ${!notification.isRead
+                                            ? 'text-emerald-600 hover:bg-emerald-100 cursor-pointer'
+                                            : 'text-gray-400 cursor-default'
+                                            }`}
+                                        title={!notification.isRead ? "Mark as read" : "Read"}
+                                    >
+                                        <Check className="w-4 h-4" />
+                                    </button>
                                 </div>
                             </div>
                         ))}

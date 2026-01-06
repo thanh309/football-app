@@ -4,7 +4,7 @@ import { NotificationCenter } from '../../components/notifications';
 
 const NotificationsPage: React.FC = () => {
     return (
-        <PageContainer maxWidth="md">
+        <PageContainer maxWidth="lg">
             <PageHeader
                 title="Notifications"
                 subtitle="Stay updated with your latest activities."
