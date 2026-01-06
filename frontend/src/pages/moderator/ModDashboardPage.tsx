@@ -59,9 +59,9 @@ const ModDashboardPage: React.FC = () => {
                             <div className={`${item.color} p-3 rounded-lg`}>
                                 <item.icon className="w-6 h-6 text-white" />
                             </div>
-                            <div>
-                                <p className="text-sm text-slate-500">{item.label}</p>
-                                <p className="text-3xl font-bold text-slate-900">{item.value}</p>
+                            <div className="w-full">
+                                <p className="text-sm text-slate-500 text-left">{item.label}</p>
+                                <p className="text-3xl font-bold text-slate-900 text-center">{item.value}</p>
                             </div>
                         </div>
                     </Link>
@@ -80,9 +80,9 @@ const ModDashboardPage: React.FC = () => {
                             <div className="bg-primary-100 p-3 rounded-lg">
                                 <action.icon className="w-5 h-5 text-primary-600" />
                             </div>
-                            <div>
-                                <h3 className="font-medium text-slate-900">{action.label}</h3>
-                                <p className="text-sm text-slate-500">{action.description}</p>
+                            <div className="text-left">
+                                <h3 className="font-medium text-slate-900 text-left">{action.label}</h3>
+                                <p className="text-sm text-slate-500 text-left">{action.description}</p>
                             </div>
                         </Link>
                     ))}
