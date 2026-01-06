@@ -68,9 +68,9 @@ const TeamDashboardPage: React.FC = () => {
                                 </div>
                             )}
                         </div>
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-900">{team.teamName}</h1>
-                            <p className="text-gray-500">{team.location}</p>
+                        <div className="text-left">
+                            <h1 className="text-2xl font-bold text-gray-900 text-left">{team.teamName}</h1>
+                            <p className="text-gray-500 text-left">{team.location}</p>
                         </div>
                     </div>
                     <div className="flex flex-wrap gap-2">

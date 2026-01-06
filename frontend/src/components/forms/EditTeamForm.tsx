@@ -109,9 +109,9 @@ const EditTeamForm: React.FC<EditTeamFormProps> = ({ teamId, onSuccess }) => {
                         <Users className="w-8 h-8 text-emerald-600" />
                     )}
                 </div>
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Edit Team</h2>
-                    <p className="text-gray-500">Update your team information</p>
+                <div className="text-left">
+                    <h2 className="text-2xl font-bold text-gray-900 text-left">Edit Team</h2>
+                    <p className="text-gray-500 text-left">Update your team information</p>
                 </div>
             </div>
 

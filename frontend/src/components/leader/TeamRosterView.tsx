@@ -56,8 +56,8 @@ const RosterMemberCard: React.FC<RosterMemberCardProps> = ({
                 <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
                     <User className="w-5 h-5 text-emerald-600" />
                 </div>
-                <div>
-                    <p className="font-medium text-gray-900">Player #{member.playerId}</p>
+                <div className="text-left">
+                    <p className="font-medium text-gray-900 text-left">Player #{member.playerId}</p>
                     <div className="flex items-center gap-2 mt-0.5">
                         <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${getRoleBadge(member.role)}`}>
                             {getRoleIcon(member.role)}
@@ -173,7 +173,7 @@ const TeamRosterView: React.FC<TeamRosterViewProps> = ({ teamId, isLeader = fals
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Team Roster</h2>
+                <h2 className="text-xl font-bold text-gray-900 text-left">Team Roster</h2>
                 <span className="text-sm text-gray-500">{activeMembers.length} active members</span>
             </div>
 
@@ -193,7 +193,7 @@ const TeamRosterView: React.FC<TeamRosterViewProps> = ({ teamId, isLeader = fals
 
             {inactiveMembers.length > 0 && (
                 <div className="mt-8">
-                    <h3 className="text-sm font-medium text-gray-500 uppercase mb-3">Inactive Members</h3>
+                    <h3 className="text-sm font-medium text-gray-500 uppercase mb-3 text-left">Inactive Members</h3>
                     <div className="space-y-3">
                         {inactiveMembers.map(member => (
                             <RosterMemberCard

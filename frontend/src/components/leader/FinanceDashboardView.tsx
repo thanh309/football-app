@@ -94,9 +94,9 @@ const FinanceDashboardView: React.FC<FinanceDashboardViewProps> = ({ teamId }) =
                     <div className="divide-y divide-gray-100">
                         {recentTransactions.map((tx: TransactionLog) => (
                             <div key={tx.transactionId} className="flex items-center justify-between p-4">
-                                <div>
-                                    <p className="font-medium text-gray-900">{tx.description || 'No description'}</p>
-                                    <p className="text-sm text-gray-500">
+                                <div className="text-left">
+                                    <p className="font-medium text-gray-900 text-left">{tx.description || 'No description'}</p>
+                                    <p className="text-sm text-gray-500 text-left">
                                         {new Date(tx.createdAt).toLocaleDateString()}
                                     </p>
                                 </div>

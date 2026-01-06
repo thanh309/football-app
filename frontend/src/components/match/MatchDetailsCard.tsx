@@ -100,21 +100,21 @@ const MatchDetailsCard: React.FC<MatchDetailsCardProps> = ({ matchId }) => {
 
                     <div className="flex items-center gap-3 text-gray-600">
                         <Users className="w-5 h-5 text-emerald-500" />
-                        <div>
-                            <p className="font-medium text-gray-900">
+                        <div className="text-left">
+                            <p className="font-medium text-gray-900 text-left">
                                 Team #{match.hostTeamId}
                                 {match.opponentTeamId && ` vs Team #${match.opponentTeamId}`}
                             </p>
-                            <p className="text-sm text-gray-500">Teams</p>
+                            <p className="text-sm text-gray-500 text-left">Teams</p>
                         </div>
                     </div>
 
                     {match.fieldId && (
                         <div className="flex items-center gap-3 text-gray-600">
                             <MapPin className="w-5 h-5 text-emerald-500" />
-                            <div>
-                                <p className="font-medium text-gray-900">Field #{match.fieldId}</p>
-                                <p className="text-sm text-gray-500">Location</p>
+                            <div className="text-left">
+                                <p className="font-medium text-gray-900 text-left">Field #{match.fieldId}</p>
+                                <p className="text-sm text-gray-500 text-left">Location</p>
                             </div>
                         </div>
                     )}

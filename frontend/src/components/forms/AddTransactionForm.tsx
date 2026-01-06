@@ -87,9 +87,9 @@ const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
                 <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
                     <DollarSign className="w-6 h-6 text-emerald-600" />
                 </div>
-                <div>
-                    <h2 className="text-xl font-bold text-gray-900">Add Transaction</h2>
-                    <p className="text-gray-500 text-sm">Record a new income or expense</p>
+                <div className="text-left">
+                    <h2 className="text-xl font-bold text-gray-900 text-left">Add Transaction</h2>
+                    <p className="text-gray-500 text-sm text-left">Record a new income or expense</p>
                 </div>
             </div>
 
