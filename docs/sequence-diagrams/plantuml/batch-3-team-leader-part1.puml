@@ -1,0 +1,314 @@
+@startuml UC-TL-01_Create_Team
+title UC-TL-01: Create Team Profile
+
+actor "Team Leader" as Leader
+boundary "TeamCreationForm" as TeamForm
+control "TeamController" as TeamCtrl
+control "TeamService" as TeamSvc
+control "get_current_user" as AuthDep
+entity "TeamProfile" as TeamProf
+boundary "SuccessMessageDisplay" as SuccessMsg
+boundary "ErrorMessageDisplay" as ErrorMsg
+
+Leader -> Leader : clicks "Create Team"
+Leader -> TeamForm : opens form
+activate TeamForm
+
+Leader -> TeamForm : enters team details\n(name, description, location)
+TeamForm -> TeamCtrl : POST /api/teams
+activate TeamCtrl
+
+TeamCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> TeamCtrl : UserAccount
+deactivate AuthDep
+
+TeamCtrl -> TeamSvc : create_team(leader_id, name, description, location)
+activate TeamSvc
+
+alt validation fails (duplicate name)
+    TeamSvc --> TeamCtrl : ValueError
+    TeamCtrl -> ErrorMsg : <<create>> HTTPException(400)
+    activate ErrorMsg
+    ErrorMsg --> Leader : display error
+    deactivate ErrorMsg
+else validation succeeds
+    TeamSvc -> TeamProf : <<create>> with status=PENDING
+    activate TeamProf
+    TeamProf --> TeamSvc : created
+    deactivate TeamProf
+    
+    TeamSvc --> TeamCtrl : TeamProfile
+    
+    TeamCtrl -> SuccessMsg : <<create>>
+    activate SuccessMsg
+    SuccessMsg --> Leader : display success
+    deactivate SuccessMsg
+    
+    TeamCtrl --> Leader : redirect to team dashboard
+end
+
+deactivate TeamSvc
+deactivate TeamCtrl
+deactivate TeamForm
+
+@enduml
+
+@startuml UC-TL-02_Edit_Team
+title UC-TL-02: Edit Team Profile
+
+actor "Team Leader" as Leader
+boundary "TeamProfileView" as TeamView
+boundary "TeamEditForm" as EditForm
+control "TeamController" as TeamCtrl
+control "TeamService" as TeamSvc
+control "get_current_user" as AuthDep
+entity "TeamProfile" as TeamProf
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Leader -> TeamView : clicks "Edit Team"
+activate TeamView
+
+TeamView -> EditForm : <<create>> pre-filled with current data
+activate EditForm
+
+Leader -> EditForm : updates fields
+EditForm -> TeamCtrl : PUT /api/teams/{team_id}
+activate TeamCtrl
+
+TeamCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> TeamCtrl : UserAccount
+deactivate AuthDep
+
+TeamCtrl -> TeamSvc : get_team_by_id()
+activate TeamSvc
+TeamSvc --> TeamCtrl : TeamProfile
+deactivate TeamSvc
+
+TeamCtrl -> TeamCtrl : verify team.leader_id == user.user_id
+
+alt not authorized
+    TeamCtrl --> Leader : HTTPException(403, "Not authorized")
+else authorized
+    TeamCtrl -> TeamSvc : update_team(team, data)
+    activate TeamSvc
+    TeamSvc -> TeamProf : update attributes
+    activate TeamProf
+    TeamProf --> TeamSvc : updated
+    deactivate TeamProf
+    TeamSvc --> TeamCtrl : updated TeamProfile
+    deactivate TeamSvc
+    
+    TeamCtrl -> SuccessMsg : <<create>>
+    activate SuccessMsg
+    SuccessMsg --> Leader : display success
+    deactivate SuccessMsg
+    
+    TeamCtrl --> TeamView : refresh view
+end
+
+deactivate TeamCtrl
+deactivate EditForm
+deactivate TeamView
+
+@enduml
+
+@startuml UC-TL-03_Manage_Roster
+title UC-TL-03: Manage Team Roster
+
+actor "Team Leader" as Leader
+actor "Player" as Player
+boundary "RosterManagementView" as RosterView
+control "TeamController" as TeamCtrl
+control "get_current_user" as AuthDep
+entity "RosterRepository" as RosterRepo
+entity "TeamRoster" as Roster
+entity "Notification" as Notif
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Leader -> TeamCtrl : GET /api/teams/{team_id}/roster
+activate TeamCtrl
+
+TeamCtrl -> RosterRepo : find_by_team()
+activate RosterRepo
+RosterRepo --> TeamCtrl : roster list
+deactivate RosterRepo
+
+TeamCtrl -> RosterView : <<create>> with current roster
+activate RosterView
+RosterView --> Leader : display roster
+
+== Add Player ==
+
+Leader -> RosterView : add player
+RosterView -> TeamCtrl : POST /api/teams/{team_id}/roster
+TeamCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> TeamCtrl : UserAccount
+deactivate AuthDep
+
+TeamCtrl -> TeamCtrl : verify team.leader_id == user.user_id
+TeamCtrl -> Roster : <<create>>
+activate Roster
+Roster --> TeamCtrl : created
+deactivate Roster
+
+TeamCtrl -> RosterRepo : save()
+
+== Remove Player ==
+
+Leader -> RosterView : remove player
+RosterView -> TeamCtrl : DELETE /api/teams/{team_id}/roster/{player_id}
+TeamCtrl -> RosterRepo : delete()
+activate RosterRepo
+RosterRepo --> TeamCtrl : deleted
+deactivate RosterRepo
+
+TeamCtrl -> SuccessMsg : <<create>>
+activate SuccessMsg
+SuccessMsg --> Leader : display success
+deactivate SuccessMsg
+
+TeamCtrl --> RosterView : update roster list
+
+deactivate RosterView
+deactivate TeamCtrl
+
+@enduml
+
+@startuml UC-TL-04_Approve_Requests
+title UC-TL-04: Approve Player Requests
+
+actor "Team Leader" as Leader
+actor "Player" as Player
+boundary "JoinRequestList" as ReqList
+control "TeamController" as TeamCtrl
+control "TeamService" as TeamSvc
+control "get_current_user" as AuthDep
+entity "JoinRequestRepository" as ReqRepo
+entity "JoinRequest" as JoinReq
+entity "TeamRoster" as Roster
+entity "Notification" as Notif
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Leader -> TeamCtrl : GET /api/teams/{team_id}/join-requests
+activate TeamCtrl
+
+TeamCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> TeamCtrl : UserAccount
+deactivate AuthDep
+
+TeamCtrl -> TeamSvc : get_pending_requests()
+activate TeamSvc
+TeamSvc --> TeamCtrl : pending requests
+deactivate TeamSvc
+
+TeamCtrl -> ReqList : <<create>>
+activate ReqList
+ReqList --> Leader : display pending requests
+
+Leader -> ReqList : clicks Accept/Reject
+ReqList -> TeamCtrl : PUT /api/join-requests/{request_id}/{action}
+
+TeamCtrl -> ReqRepo : find_by_id()
+activate ReqRepo
+ReqRepo --> TeamCtrl : JoinRequest
+deactivate ReqRepo
+
+TeamCtrl -> TeamSvc : process_join_request(request, accept)
+activate TeamSvc
+
+alt Accepted
+    TeamSvc -> JoinReq : update status = ACCEPTED
+    activate JoinReq
+    deactivate JoinReq
+    
+    TeamSvc -> Roster : <<create>>
+    activate Roster
+    Roster --> TeamSvc : created
+    deactivate Roster
+else Rejected
+    TeamSvc -> JoinReq : update status = REJECTED
+    activate JoinReq
+    deactivate JoinReq
+end
+
+TeamSvc --> TeamCtrl : processed
+deactivate TeamSvc
+
+TeamCtrl -> SuccessMsg : <<create>>
+activate SuccessMsg
+SuccessMsg --> Leader : display result
+deactivate SuccessMsg
+
+TeamCtrl --> ReqList : remove from pending list
+
+deactivate ReqList
+deactivate TeamCtrl
+
+@enduml
+
+@startuml UC-TL-05_Delete_Team
+title UC-TL-05: Delete Team
+
+actor "Team Leader" as Leader
+actor "Team Members" as Members
+boundary "TeamSettingsView" as SettingsView
+boundary "ConfirmationDialog" as ConfirmDlg
+control "TeamController" as TeamCtrl
+control "TeamService" as TeamSvc
+control "get_current_user" as AuthDep
+entity "TeamProfile" as TeamProf
+entity "TeamRoster" as Roster
+entity "Notification" as Notif
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Leader -> SettingsView : clicks "Delete Team"
+activate SettingsView
+
+SettingsView -> ConfirmDlg : <<create>> with critical warning
+activate ConfirmDlg
+ConfirmDlg --> Leader : display confirmation
+
+Leader -> ConfirmDlg : confirms deletion
+ConfirmDlg -> TeamCtrl : DELETE /api/teams/{team_id}
+activate TeamCtrl
+
+TeamCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> TeamCtrl : UserAccount
+deactivate AuthDep
+
+TeamCtrl -> TeamSvc : get_team_by_id()
+activate TeamSvc
+TeamSvc --> TeamCtrl : TeamProfile
+deactivate TeamSvc
+
+TeamCtrl -> TeamCtrl : verify team.leader_id == user.user_id
+
+alt not authorized
+    TeamCtrl --> Leader : HTTPException(403)
+else authorized
+    TeamCtrl -> TeamSvc : delete_team(team)
+    activate TeamSvc
+    TeamSvc -> TeamProf : soft-delete or delete
+    activate TeamProf
+    destroy TeamProf
+    TeamSvc --> TeamCtrl : deleted
+    deactivate TeamSvc
+    
+    TeamCtrl -> SuccessMsg : <<create>>
+    activate SuccessMsg
+    SuccessMsg --> Leader : display success
+    deactivate SuccessMsg
+    
+    TeamCtrl --> Leader : redirect to main dashboard
+end
+
+deactivate ConfirmDlg
+deactivate TeamCtrl
+deactivate SettingsView
+
+@enduml

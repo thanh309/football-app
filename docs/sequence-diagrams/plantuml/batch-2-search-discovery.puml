@@ -1,0 +1,208 @@
+@startuml UC-SD-01_Search_Teams
+title UC-SD-01: Search for Teams
+
+actor "User" as User
+boundary "SearchBar" as SearchBar
+boundary "SearchResultsView" as ResultsView
+control "SearchController" as SearchCtrl
+entity "TeamProfile" as TeamProf
+boundary "EmptyStateDisplay" as EmptyState
+
+User -> SearchBar : enters search criteria\n(name, location, skill level)
+activate SearchBar
+
+SearchBar -> SearchCtrl : GET /api/search/teams
+activate SearchCtrl
+
+SearchCtrl -> SearchCtrl : build SQL query\nWHERE status == VERIFIED
+SearchCtrl -> SearchCtrl : apply filters\n(team_name.ilike, location.ilike, skill_level)
+
+SearchCtrl -> TeamProf : query
+activate TeamProf
+TeamProf --> SearchCtrl : results
+deactivate TeamProf
+
+alt no matches found
+    SearchCtrl -> EmptyState : <<create>>
+    activate EmptyState
+    EmptyState --> User : "No results found"
+    deactivate EmptyState
+else matches found
+    SearchCtrl -> ResultsView : <<create>> with TeamProfileResponse[]
+    activate ResultsView
+    ResultsView --> User : display results
+    deactivate ResultsView
+end
+
+deactivate SearchCtrl
+deactivate SearchBar
+
+@enduml
+
+@startuml UC-SD-02_Search_Fields
+title UC-SD-02: Search for Fields
+
+actor "User" as User
+boundary "SearchBar" as SearchBar
+boundary "SearchResultsView" as ResultsView
+control "SearchController" as SearchCtrl
+entity "FieldProfile" as FieldProf
+entity "FieldAmenity" as FieldAmen
+boundary "EmptyStateDisplay" as EmptyState
+
+User -> SearchBar : enters search criteria\n(location, price range, amenities)
+activate SearchBar
+
+SearchBar -> SearchCtrl : GET /api/search/fields
+activate SearchCtrl
+
+SearchCtrl -> SearchCtrl : build SQL query\nWHERE status == VERIFIED
+SearchCtrl -> SearchCtrl : apply filters\n(field_name.ilike, location.ilike, price range)
+
+SearchCtrl -> FieldProf : query with FieldAmenity subquery
+activate FieldProf
+FieldProf --> SearchCtrl : results
+deactivate FieldProf
+
+alt no matches found
+    SearchCtrl -> EmptyState : <<create>>
+    activate EmptyState
+    EmptyState --> User : "No results found"
+    deactivate EmptyState
+else matches found
+    SearchCtrl -> ResultsView : <<create>> with FieldProfileResponse[]
+    activate ResultsView
+    ResultsView --> User : display results
+    deactivate ResultsView
+end
+
+deactivate SearchCtrl
+deactivate SearchBar
+
+@enduml
+
+@startuml UC-SD-03_Search_Players
+title UC-SD-03: Search for Players
+
+actor "User" as User
+boundary "SearchBar" as SearchBar
+boundary "SearchResultsView" as ResultsView
+control "SearchController" as SearchCtrl
+entity "PlayerProfile" as PlayerProf
+boundary "EmptyStateDisplay" as EmptyState
+
+User -> SearchBar : enters search criteria\n(name, position, skill level)
+activate SearchBar
+
+SearchBar -> SearchCtrl : GET /api/search/players
+activate SearchCtrl
+
+SearchCtrl -> SearchCtrl : build SQL query on PlayerProfile
+SearchCtrl -> SearchCtrl : apply filters\n(display_name.ilike, position.ilike, skill_level)
+
+SearchCtrl -> PlayerProf : query
+activate PlayerProf
+PlayerProf --> SearchCtrl : results
+deactivate PlayerProf
+
+alt no matches found
+    SearchCtrl -> EmptyState : <<create>>
+    activate EmptyState
+    EmptyState --> User : "No results found"
+    deactivate EmptyState
+else matches found
+    SearchCtrl -> ResultsView : <<create>> with PlayerProfileResponse[]
+    activate ResultsView
+    ResultsView --> User : display results
+    deactivate ResultsView
+end
+
+deactivate SearchCtrl
+deactivate SearchBar
+
+@enduml
+
+@startuml UC-SD-04_Search_Owners
+title UC-SD-04: Search for Field Owners
+
+actor "User" as User
+boundary "SearchBar" as SearchBar
+boundary "SearchResultsView" as ResultsView
+control "SearchController" as SearchCtrl
+entity "UserAccount" as UserAcct
+entity "FieldProfile" as FieldProf
+boundary "EmptyStateDisplay" as EmptyState
+
+User -> SearchBar : enters search criteria\n(owner name, location)
+activate SearchBar
+
+SearchBar -> SearchCtrl : GET /api/search/owners
+activate SearchCtrl
+
+SearchCtrl -> SearchCtrl : build SQL query\nJOIN UserAccount with FieldProfile\nGROUPED BY user with COUNT > 0
+SearchCtrl -> SearchCtrl : apply filters\n(username.ilike, location.ilike)
+
+SearchCtrl -> UserAcct : query with FieldProfile join
+activate UserAcct
+UserAcct --> SearchCtrl : results with fieldCount
+deactivate UserAcct
+
+alt no matches found
+    SearchCtrl -> EmptyState : <<create>>
+    activate EmptyState
+    EmptyState --> User : "No results found"
+    deactivate EmptyState
+else matches found
+    SearchCtrl -> ResultsView : <<create>> with OwnerSearchResponse[]
+    activate ResultsView
+    ResultsView --> User : display results
+    deactivate ResultsView
+end
+
+deactivate SearchCtrl
+deactivate SearchBar
+
+@enduml
+
+@startuml UC-SD-05_View_Match
+title UC-SD-05: View Match Information
+
+actor "User" as User
+boundary "MatchDetailView" as MatchView
+control "MatchController" as MatchCtrl
+control "MatchService" as MatchSvc
+entity "MatchEvent" as MatchEvt
+boundary "ErrorMessageDisplay" as ErrorMsg
+
+User -> User : selects a match from schedule
+User -> MatchCtrl : GET /api/matches/{match_id}
+activate MatchCtrl
+
+MatchCtrl -> MatchSvc : get_match_by_id()
+activate MatchSvc
+
+MatchSvc -> MatchEvt : query
+activate MatchEvt
+MatchEvt --> MatchSvc : result
+deactivate MatchEvt
+
+alt match not found
+    MatchSvc --> MatchCtrl : null
+    MatchCtrl -> ErrorMsg : <<create>> HTTPException(404)
+    activate ErrorMsg
+    ErrorMsg --> User : "Match not found"
+    deactivate ErrorMsg
+else match found
+    MatchSvc --> MatchCtrl : MatchEvent
+    deactivate MatchSvc
+    
+    MatchCtrl -> MatchCtrl : match_to_response()
+    MatchCtrl -> MatchView : <<create>> with MatchEventResponse
+    activate MatchView
+    MatchView --> User : display date, time, venue, teams, status
+    deactivate MatchView
+end
+
+deactivate MatchCtrl
+
+@enduml

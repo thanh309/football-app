@@ -1,0 +1,243 @@
+@startuml UC-AM-01_Verify_Teams
+title UC-AM-01: Verify Team Profiles
+
+actor "Moderator" as Mod
+boundary "PendingTeamsListView" as TeamsList
+boundary "TeamReviewPanel" as ReviewPanel
+control "ModerationController" as ModCtrl
+control "get_current_user" as AuthDep
+control "require_moderator" as ModDep
+entity "TeamProfile" as TeamProf
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Mod -> ModCtrl : GET /api/moderation/teams/pending
+activate ModCtrl
+
+ModCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> ModCtrl : UserAccount
+deactivate AuthDep
+
+ModCtrl -> ModDep : check MODERATOR role
+activate ModDep
+ModDep --> ModCtrl : authorized
+deactivate ModDep
+
+ModCtrl -> TeamProf : query WHERE status = PENDING
+activate TeamProf
+TeamProf --> ModCtrl : pending teams
+deactivate TeamProf
+
+ModCtrl -> TeamsList : <<create>>
+activate TeamsList
+TeamsList --> Mod : display pending teams
+
+Mod -> TeamsList : selects team
+TeamsList -> ModCtrl : GET /api/moderation/teams/{team_id}
+
+ModCtrl -> ReviewPanel : <<create>>
+activate ReviewPanel
+ReviewPanel --> Mod : show details
+
+Mod -> ReviewPanel : makes decision
+ReviewPanel -> ModCtrl : PUT /api/moderation/teams/{id}/verify
+
+alt approved
+    ModCtrl -> TeamProf : status = VERIFIED
+    activate TeamProf
+    TeamProf --> ModCtrl : updated
+    deactivate TeamProf
+else rejected
+    ModCtrl -> TeamProf : status = REJECTED, set reason
+    activate TeamProf
+    TeamProf --> ModCtrl : updated
+    deactivate TeamProf
+end
+
+ModCtrl -> SuccessMsg : <<create>>
+activate SuccessMsg
+SuccessMsg --> Mod : result
+deactivate SuccessMsg
+
+deactivate ReviewPanel
+deactivate TeamsList
+deactivate ModCtrl
+@enduml
+
+@startuml UC-AM-02_Verify_Fields
+title UC-AM-02: Verify Field Profiles
+
+actor "Moderator" as Mod
+boundary "PendingFieldsListView" as FieldsList
+boundary "FieldReviewPanel" as ReviewPanel
+control "ModerationController" as ModCtrl
+control "require_moderator" as ModDep
+entity "FieldProfile" as FieldProf
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Mod -> ModCtrl : GET /api/moderation/fields/pending
+activate ModCtrl
+
+ModCtrl -> ModDep : check MODERATOR role
+activate ModDep
+ModDep --> ModCtrl : authorized
+deactivate ModDep
+
+ModCtrl -> FieldProf : query WHERE status = PENDING
+activate FieldProf
+FieldProf --> ModCtrl : pending fields
+deactivate FieldProf
+
+ModCtrl -> FieldsList : <<create>>
+activate FieldsList
+FieldsList --> Mod : display pending
+
+Mod -> FieldsList : selects field
+FieldsList -> ModCtrl : GET /api/moderation/fields/{id}
+ModCtrl -> ReviewPanel : <<create>>
+activate ReviewPanel
+ReviewPanel --> Mod : show details
+
+Mod -> ReviewPanel : decision
+ReviewPanel -> ModCtrl : PUT /api/moderation/fields/{id}/verify
+
+alt approved
+    ModCtrl -> FieldProf : status = VERIFIED
+    activate FieldProf
+    deactivate FieldProf
+else rejected
+    ModCtrl -> FieldProf : status = REJECTED
+    activate FieldProf
+    deactivate FieldProf
+end
+
+ModCtrl -> SuccessMsg : <<create>>
+SuccessMsg --> Mod : result
+
+deactivate ReviewPanel
+deactivate FieldsList
+deactivate ModCtrl
+@enduml
+
+@startuml UC-AM-03_Suspend_User
+title UC-AM-03: Suspend / Reactivate Users
+
+actor "Moderator" as Mod
+boundary "UserListView" as UserList
+boundary "UserDetailView" as UserDetail
+control "ModerationController" as ModCtrl
+control "require_moderator" as ModDep
+entity "UserAccount" as UserAcct
+entity "ModerationLog" as ModLog
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+== Suspend User ==
+Mod -> ModCtrl : GET /api/moderation/users
+activate ModCtrl
+
+ModCtrl -> ModDep : check role
+activate ModDep
+ModDep --> ModCtrl : authorized
+deactivate ModDep
+
+ModCtrl -> UserList : <<create>>
+activate UserList
+UserList --> Mod : display users
+
+Mod -> UserList : select user
+UserList -> UserDetail : <<create>>
+activate UserDetail
+UserDetail --> Mod : show details
+
+Mod -> UserDetail : clicks "Suspend User"
+UserDetail -> ModCtrl : PUT /api/moderation/users/{id}/suspend
+
+ModCtrl -> UserAcct : status = SUSPENDED
+activate UserAcct
+UserAcct --> ModCtrl : updated
+deactivate UserAcct
+
+ModCtrl -> ModLog : <<create>> action=SUSPEND
+activate ModLog
+ModLog --> ModCtrl : logged
+deactivate ModLog
+
+ModCtrl -> SuccessMsg : <<create>>
+SuccessMsg --> Mod : success
+
+== Reactivate User ==
+Mod -> UserDetail : clicks "Reactivate"
+UserDetail -> ModCtrl : PUT /api/moderation/users/{id}/reactivate
+
+ModCtrl -> UserAcct : status = ACTIVE
+activate UserAcct
+deactivate UserAcct
+
+ModCtrl -> ModLog : <<create>> action=REACTIVATE
+activate ModLog
+deactivate ModLog
+
+ModCtrl -> SuccessMsg : <<create>>
+SuccessMsg --> Mod : success
+
+deactivate UserDetail
+deactivate UserList
+deactivate ModCtrl
+@enduml
+
+@startuml UC-AM-04_Moderate_Reports
+title UC-AM-04: Moderate Reported Content
+
+actor "Moderator" as Mod
+boundary "ReportListView" as ReportList
+boundary "ReportDetailView" as ReportDetail
+control "ModerationController" as ModCtrl
+control "require_moderator" as ModDep
+entity "Report" as Report
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Mod -> ModCtrl : GET /api/moderation/reports?status=PENDING
+activate ModCtrl
+
+ModCtrl -> ModDep : check role
+activate ModDep
+ModDep --> ModCtrl : authorized
+deactivate ModDep
+
+ModCtrl -> Report : query ORDER BY created_at DESC
+activate Report
+Report --> ModCtrl : reports
+deactivate Report
+
+ModCtrl -> ReportList : <<create>>
+activate ReportList
+ReportList --> Mod : display reports
+
+Mod -> ReportList : select report
+ReportList -> ModCtrl : GET /api/moderation/reports/{id}
+ModCtrl -> ReportDetail : <<create>>
+activate ReportDetail
+ReportDetail --> Mod : show details
+
+Mod -> ReportDetail : take action
+ReportDetail -> ModCtrl : PUT /api/moderation/reports/{id}/resolve?action=X
+
+alt resolve
+    ModCtrl -> Report : status = RESOLVED, set resolved_at
+    activate Report
+    Report --> ModCtrl : updated
+    deactivate Report
+else dismiss
+    ModCtrl -> Report : status = DISMISSED, set resolved_at
+    activate Report
+    Report --> ModCtrl : updated
+    deactivate Report
+end
+
+ModCtrl -> SuccessMsg : <<create>>
+SuccessMsg --> Mod : result
+
+deactivate ReportDetail
+deactivate ReportList
+deactivate ModCtrl
+@enduml

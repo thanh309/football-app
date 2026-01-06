@@ -1,0 +1,371 @@
+@startuml UC-CM-01_Receive_Notifications
+title UC-CM-01: Receive Notifications
+
+actor "User" as User
+boundary "NotificationBell" as Bell
+boundary "NotificationCenter" as NotifCenter
+boundary "NotificationListView" as NotifList
+control "NotificationController" as NotifCtrl
+control "NotificationService" as NotifSvc
+control "get_current_user" as AuthDep
+entity "Notification" as Notif
+boundary "NotificationBadge" as Badge
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+User -> Bell : clicks bell icon
+activate Bell
+
+Bell -> NotifCtrl : GET /api/notifications?unreadOnly=false
+activate NotifCtrl
+
+NotifCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> NotifCtrl : UserAccount
+deactivate AuthDep
+
+NotifCtrl -> NotifSvc : get_notifications()
+activate NotifSvc
+NotifSvc -> Notif : query WHERE user_id ORDER BY created_at DESC
+activate Notif
+Notif --> NotifSvc : notifications
+deactivate Notif
+NotifSvc --> NotifCtrl : NotificationResponse[]
+deactivate NotifSvc
+
+NotifCtrl -> NotifList : <<create>>
+activate NotifList
+NotifList --> User : display notifications
+
+User -> NotifList : clicks notification
+NotifList -> NotifCtrl : PUT /api/notifications/{id}/read
+NotifCtrl -> NotifSvc : mark as read
+activate NotifSvc
+NotifSvc -> Notif : is_read = true
+activate Notif
+deactivate Notif
+NotifSvc --> NotifCtrl : updated
+deactivate NotifSvc
+
+User -> NotifList : clicks "Mark All Read"
+NotifList -> NotifCtrl : PUT /api/notifications/mark-all-read
+NotifCtrl -> SuccessMsg : <<create>>
+SuccessMsg --> User : success
+NotifCtrl --> Badge : update count
+
+deactivate NotifList
+deactivate NotifCtrl
+deactivate Bell
+@enduml
+
+@startuml UC-CM-02_Manage_Settings
+title UC-CM-02: Manage Notification Settings
+
+actor "User" as User
+boundary "SettingsPage" as Settings
+boundary "NotificationPreferencesForm" as PrefForm
+control "NotificationController" as NotifCtrl
+control "get_current_user" as AuthDep
+entity "NotificationPreference" as Pref
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+User -> Settings : opens Notification Settings
+activate Settings
+
+Settings -> NotifCtrl : GET /api/notifications/preferences
+activate NotifCtrl
+
+NotifCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> NotifCtrl : UserAccount
+deactivate AuthDep
+
+NotifCtrl -> Pref : query WHERE user_id
+activate Pref
+
+alt no preferences exist
+    NotifCtrl -> Pref : <<create>> with defaults
+end
+
+Pref --> NotifCtrl : preferences
+deactivate Pref
+
+NotifCtrl -> PrefForm : <<create>>
+activate PrefForm
+PrefForm --> User : show settings
+
+User -> PrefForm : toggles preferences
+User -> PrefForm : saves changes
+PrefForm -> NotifCtrl : PUT /api/notifications/preferences
+
+NotifCtrl -> Pref : update values
+activate Pref
+Pref --> NotifCtrl : updated
+deactivate Pref
+
+NotifCtrl -> SuccessMsg : <<create>>
+SuccessMsg --> User : success
+
+deactivate PrefForm
+deactivate NotifCtrl
+deactivate Settings
+@enduml
+
+@startuml UC-CI-01_Browse_Content
+title UC-CI-01: Browse Public Content
+
+actor "User" as User
+boundary "CommunityFeed" as Feed
+boundary "PostListView" as PostList
+boundary "PostDetailView" as PostDetail
+control "ContentController" as ContentCtrl
+control "ContentService" as ContentSvc
+entity "Post" as Post
+
+User -> ContentCtrl : GET /api/posts?limit=20&offset=0
+activate ContentCtrl
+
+ContentCtrl -> ContentSvc : get_posts()
+activate ContentSvc
+ContentSvc -> Post : query WHERE is_hidden=false
+activate Post
+Post --> ContentSvc : posts
+deactivate Post
+ContentSvc --> ContentCtrl : PostResponse[]
+deactivate ContentSvc
+
+ContentCtrl -> PostList : <<create>> with PostCards
+activate PostList
+PostList --> User : display feed
+
+User -> PostList : scrolls
+PostList -> ContentCtrl : GET /api/posts?limit=20&offset=20
+ContentCtrl --> PostList : more posts
+
+User -> PostList : clicks post
+PostList -> ContentCtrl : GET /api/posts/{post_id}
+ContentCtrl -> ContentSvc : get_post_by_id()
+activate ContentSvc
+ContentSvc --> ContentCtrl : Post
+deactivate ContentSvc
+
+ContentCtrl -> PostDetail : <<create>>
+activate PostDetail
+PostDetail --> User : show details
+deactivate PostDetail
+
+deactivate PostList
+deactivate ContentCtrl
+@enduml
+
+@startuml UC-CI-02_Create_Posts
+title UC-CI-02: Create Community Posts
+
+actor "User" as User
+boundary "PostCreator" as Creator
+boundary "ImageUploader" as Uploader
+control "ContentController" as ContentCtrl
+control "ContentService" as ContentSvc
+control "get_current_user" as AuthDep
+entity "Post" as Post
+entity "MediaAsset" as Media
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+User -> Creator : clicks "Create Post"
+activate Creator
+
+User -> Creator : enters content, visibility
+opt attach image
+    User -> Uploader : select image
+    activate Uploader
+    deactivate Uploader
+end
+
+User -> Creator : submit
+Creator -> ContentCtrl : POST /api/posts
+activate ContentCtrl
+
+ContentCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> ContentCtrl : UserAccount
+deactivate AuthDep
+
+ContentCtrl -> ContentSvc : create_post()
+activate ContentSvc
+ContentSvc -> Post : <<create>>
+activate Post
+Post --> ContentSvc : created
+deactivate Post
+
+opt imageUrl provided
+    ContentSvc -> Media : <<create>>
+    activate Media
+    Media --> ContentSvc : linked
+    deactivate Media
+end
+
+ContentSvc --> ContentCtrl : PostResponse
+deactivate ContentSvc
+
+ContentCtrl -> SuccessMsg : <<create>>
+SuccessMsg --> User : success
+
+deactivate ContentCtrl
+deactivate Creator
+@enduml
+
+@startuml UC-CI-03_Comment_Posts
+title UC-CI-03: Comment on Posts
+
+actor "User" as User
+actor "Post Author" as Author
+boundary "PostDetailView" as PostDetail
+boundary "CommentSection" as Comments
+boundary "CommentInput" as Input
+control "ContentController" as ContentCtrl
+control "ContentService" as ContentSvc
+control "get_current_user" as AuthDep
+entity "Comment" as Comment
+entity "Post" as Post
+
+User -> PostDetail : opens post
+activate PostDetail
+
+PostDetail -> ContentCtrl : GET /api/posts/{id}/comments
+activate ContentCtrl
+ContentCtrl -> ContentSvc : get_comments_by_post()
+activate ContentSvc
+ContentSvc --> ContentCtrl : CommentResponse[]
+deactivate ContentSvc
+
+ContentCtrl -> Comments : <<create>>
+activate Comments
+Comments --> User : display comments
+
+User -> Input : enters comment
+activate Input
+User -> Input : submit
+Input -> ContentCtrl : POST /api/posts/{id}/comments
+
+ContentCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> ContentCtrl : UserAccount
+deactivate AuthDep
+
+ContentCtrl -> ContentSvc : create_comment()
+activate ContentSvc
+ContentSvc -> Comment : <<create>>
+activate Comment
+Comment --> ContentSvc : created
+deactivate Comment
+ContentSvc -> Post : increment comment_count
+activate Post
+deactivate Post
+ContentSvc --> ContentCtrl : CommentResponse
+deactivate ContentSvc
+
+ContentCtrl --> Comments : display new comment
+
+deactivate Input
+deactivate Comments
+deactivate ContentCtrl
+deactivate PostDetail
+@enduml
+
+@startuml UC-CI-04_Like_React
+title UC-CI-04: Like/React Content
+
+actor "User" as User
+boundary "PostCard" as PostCard
+boundary "ReactionButton" as ReactBtn
+control "ContentController" as ContentCtrl
+control "get_current_user" as AuthDep
+entity "Reaction" as Reaction
+entity "Post" as Post
+boundary "ReactionCountDisplay" as CountDisplay
+
+User -> ReactBtn : clicks reaction
+activate ReactBtn
+
+ReactBtn -> ContentCtrl : POST /api/posts/{id}/reactions
+activate ContentCtrl
+
+ContentCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> ContentCtrl : UserAccount
+deactivate AuthDep
+
+ContentCtrl -> Reaction : query existing
+activate Reaction
+
+alt exists same type (toggle off)
+    Reaction -> Reaction : delete
+    ContentCtrl -> Post : decrement reaction_count
+    activate Post
+    deactivate Post
+else exists different type (update)
+    Reaction -> Reaction : update type
+else no reaction (new)
+    ContentCtrl -> Reaction : <<create>>
+    ContentCtrl -> Post : increment reaction_count
+    activate Post
+    deactivate Post
+end
+
+Reaction --> ContentCtrl : result
+deactivate Reaction
+
+ContentCtrl -> CountDisplay : update
+ContentCtrl --> ReactBtn : ReactionResponse
+
+deactivate ContentCtrl
+deactivate ReactBtn
+@enduml
+
+@startuml UC-CI-05_Report_Misconduct
+title UC-CI-05: Report Misconduct
+
+actor "User" as User
+actor "Moderator" as Mod
+boundary "ReportDialog" as Dialog
+boundary "ReportForm" as Form
+control "ContentController" as ContentCtrl
+control "get_current_user" as AuthDep
+entity "Report" as Report
+boundary "SuccessMessageDisplay" as SuccessMsg
+boundary "ErrorMessageDisplay" as ErrorMsg
+
+User -> Dialog : clicks "Report"
+activate Dialog
+Dialog -> Form : <<create>>
+activate Form
+Form --> User : show form
+
+User -> Form : selects content type, reason
+User -> Form : submit
+Form -> ContentCtrl : POST /api/posts/report
+activate ContentCtrl
+
+ContentCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> ContentCtrl : UserAccount
+deactivate AuthDep
+
+ContentCtrl -> ContentCtrl : parse contentType enum
+
+alt invalid content type
+    ContentCtrl -> ErrorMsg : <<create>> HTTPException(400)
+    ErrorMsg --> User : error
+else valid
+    ContentCtrl -> Report : <<create>> status=PENDING
+    activate Report
+    Report --> ContentCtrl : created
+    deactivate Report
+    
+    ContentCtrl -> SuccessMsg : <<create>>
+    SuccessMsg --> User : "Report submitted"
+end
+
+deactivate ContentCtrl
+deactivate Form
+deactivate Dialog
+@enduml

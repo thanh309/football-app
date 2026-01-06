@@ -1,0 +1,204 @@
+@startuml UC-AU-01_Register
+title UC-AU-01: Register
+
+actor "User" as User
+boundary "RegistrationForm" as RegForm
+control "AuthController" as AuthCtrl
+control "AuthService" as AuthSvc
+entity "UserRepository" as UserRepo
+entity "UserAccount" as UserAcct
+entity "PlayerProfile" as PlayerProf
+boundary "SuccessMessageDisplay" as SuccessMsg
+boundary "ErrorMessageDisplay" as ErrorMsg
+
+User -> RegForm : selects "Register"
+activate RegForm
+
+User -> RegForm : enters credentials\n(username, email, password, role)
+RegForm -> AuthCtrl : POST /api/auth/register
+activate AuthCtrl
+
+AuthCtrl -> AuthSvc : register()
+activate AuthSvc
+
+AuthSvc -> UserRepo : find_by_username()
+activate UserRepo
+UserRepo --> AuthSvc : result
+deactivate UserRepo
+
+AuthSvc -> UserRepo : find_by_email()
+activate UserRepo
+UserRepo --> AuthSvc : result
+deactivate UserRepo
+
+alt validation fails (duplicate username/email)
+    AuthSvc --> AuthCtrl : ValidationError
+    AuthCtrl -> ErrorMsg : <<create>>
+    activate ErrorMsg
+    ErrorMsg --> User : display error
+    deactivate ErrorMsg
+else validation succeeds
+    AuthSvc -> UserAcct : <<create>> with hash_password()
+    activate UserAcct
+    
+    opt role includes "Player"
+        AuthSvc -> PlayerProf : <<create>>
+        activate PlayerProf
+        deactivate PlayerProf
+    end
+    
+    AuthSvc -> AuthSvc : create_access_token()
+    AuthSvc -> AuthSvc : create_refresh_token()
+    AuthSvc --> AuthCtrl : tokens + user data
+    deactivate UserAcct
+    
+    AuthCtrl -> SuccessMsg : <<create>>
+    activate SuccessMsg
+    SuccessMsg --> User : display success
+    deactivate SuccessMsg
+    
+    AuthCtrl --> User : redirect to dashboard
+end
+
+deactivate AuthSvc
+deactivate AuthCtrl
+deactivate RegForm
+
+@enduml
+
+@startuml UC-AU-02_Login
+title UC-AU-02: Login
+
+actor "User" as User
+boundary "LoginForm" as LoginForm
+control "AuthController" as AuthCtrl
+control "AuthService" as AuthSvc
+entity "UserRepository" as UserRepo
+entity "UserAccount" as UserAcct
+boundary "ErrorMessageDisplay" as ErrorMsg
+
+User -> LoginForm : enters username and password
+activate LoginForm
+
+User -> LoginForm : clicks "Login"
+LoginForm -> AuthCtrl : POST /api/auth/login
+activate AuthCtrl
+
+AuthCtrl -> AuthSvc : login()
+activate AuthSvc
+
+AuthSvc -> UserRepo : find_by_username()
+activate UserRepo
+UserRepo --> AuthSvc : UserAccount
+deactivate UserRepo
+
+AuthSvc -> AuthSvc : verify_password()
+
+alt invalid credentials or account not ACTIVE
+    AuthSvc --> AuthCtrl : AuthenticationError
+    AuthCtrl -> ErrorMsg : <<create>>
+    activate ErrorMsg
+    ErrorMsg --> User : display error
+    deactivate ErrorMsg
+else valid credentials
+    AuthSvc -> AuthSvc : create_access_token()
+    AuthSvc -> AuthSvc : create_refresh_token()
+    AuthSvc --> AuthCtrl : tokens + user data
+    AuthCtrl --> User : redirect to dashboard
+end
+
+deactivate AuthSvc
+deactivate AuthCtrl
+deactivate LoginForm
+
+@enduml
+
+@startuml UC-AU-03_Logout
+title UC-AU-03: Logout
+
+actor "Authenticated User" as User
+boundary "NavigationBar" as NavBar
+control "AuthController" as AuthCtrl
+control "get_current_user" as AuthDep
+
+User -> NavBar : clicks "Logout"
+activate NavBar
+
+NavBar -> AuthCtrl : POST /api/auth/logout
+activate AuthCtrl
+
+AuthCtrl -> AuthDep : verify JWT token
+activate AuthDep
+AuthDep -> AuthDep : verify_access_token()
+AuthDep --> AuthCtrl : UserAccount
+deactivate AuthDep
+
+AuthCtrl --> User : MessageResponse("Logged out successfully")
+
+User -> User : clear stored tokens
+User -> User : redirect to Login page
+
+deactivate AuthCtrl
+deactivate NavBar
+
+@enduml
+
+@startuml UC-AU-04_Change_Password
+title UC-AU-04: Change Password
+
+actor "Authenticated User" as User
+boundary "PasswordChangeForm" as PwdForm
+control "AuthController" as AuthCtrl
+control "AuthService" as AuthSvc
+control "get_current_user" as AuthDep
+entity "UserRepository" as UserRepo
+entity "UserAccount" as UserAcct
+boundary "SuccessMessageDisplay" as SuccessMsg
+boundary "ErrorMessageDisplay" as ErrorMsg
+
+User -> PwdForm : opens form
+activate PwdForm
+
+User -> PwdForm : enters current & new password
+PwdForm -> AuthCtrl : PUT /api/auth/password
+activate AuthCtrl
+
+AuthCtrl -> AuthDep : verify JWT token
+activate AuthDep
+AuthDep --> AuthCtrl : UserAccount
+deactivate AuthDep
+
+AuthCtrl -> AuthSvc : change_password()
+activate AuthSvc
+
+AuthSvc -> AuthSvc : verify_password(current)
+
+alt incorrect current password
+    AuthSvc --> AuthCtrl : InvalidPasswordError
+    AuthCtrl -> ErrorMsg : <<create>>
+    activate ErrorMsg
+    ErrorMsg --> User : display error
+    deactivate ErrorMsg
+else correct password
+    AuthSvc -> UserAcct : update password_hash\nwith hash_password()
+    activate UserAcct
+    
+    AuthSvc -> UserRepo : update()
+    AuthSvc -> UserRepo : commit()
+    deactivate UserAcct
+    
+    AuthSvc --> AuthCtrl : success
+    
+    AuthCtrl -> SuccessMsg : <<create>>
+    activate SuccessMsg
+    SuccessMsg --> User : display success
+    deactivate SuccessMsg
+    
+    AuthCtrl --> PwdForm : clear form
+end
+
+deactivate AuthSvc
+deactivate AuthCtrl
+deactivate PwdForm
+
+@enduml

@@ -1,0 +1,294 @@
+@startuml UC-PL-01_Edit_Profile
+title UC-PL-01: Edit Player Profile
+
+actor "Player" as Player
+boundary "PlayerProfileView" as ProfileView
+boundary "PlayerEditForm" as EditForm
+control "PlayerController" as PlayerCtrl
+control "get_current_user" as AuthDep
+entity "PlayerRepository" as PlayerRepo
+entity "PlayerProfile" as PlayerProf
+entity "MediaAsset" as Media
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Player -> PlayerCtrl : GET /api/players/profile
+activate PlayerCtrl
+
+PlayerCtrl -> EditForm : <<create>> pre-filled
+activate EditForm
+EditForm --> Player : display current profile
+
+Player -> EditForm : updates fields\n(displayName, position, skillLevel, bio, profileImageUrl)
+
+EditForm -> PlayerCtrl : PUT /api/players/profile
+
+PlayerCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> PlayerCtrl : UserAccount
+deactivate AuthDep
+
+PlayerCtrl -> PlayerRepo : find_by_user_id()
+activate PlayerRepo
+PlayerRepo --> PlayerCtrl : PlayerProfile
+deactivate PlayerRepo
+
+PlayerCtrl -> PlayerProf : setattr() for each field
+activate PlayerProf
+
+opt profileImageUrl provided
+    PlayerCtrl -> Media : <<create>>
+    activate Media
+    Media --> PlayerCtrl : created
+    deactivate Media
+end
+
+PlayerCtrl -> PlayerRepo : update()
+PlayerRepo -> PlayerRepo : commit()
+PlayerProf --> PlayerCtrl : updated
+deactivate PlayerProf
+
+PlayerCtrl -> SuccessMsg : <<create>>
+activate SuccessMsg
+SuccessMsg --> Player : display success
+deactivate SuccessMsg
+
+PlayerCtrl --> EditForm : show updated profile
+
+deactivate EditForm
+deactivate PlayerCtrl
+
+@enduml
+
+@startuml UC-PL-02_Request_Join
+title UC-PL-02: Request to Join Team
+
+actor "Player" as Player
+actor "Team Leader" as Leader
+boundary "TeamSearchView" as SearchView
+boundary "TeamDetailView" as DetailView
+control "TeamController" as TeamCtrl
+control "TeamService" as TeamSvc
+control "get_current_user" as AuthDep
+entity "PlayerRepository" as PlayerRepo
+entity "RosterRepository" as RosterRepo
+entity "JoinRequest" as JoinReq
+entity "Notification" as Notif
+boundary "SuccessMessageDisplay" as SuccessMsg
+boundary "ErrorMessageDisplay" as ErrorMsg
+
+Player -> SearchView : browses/searches teams
+activate SearchView
+SearchView --> Player : display results
+
+Player -> DetailView : selects team
+activate DetailView
+DetailView --> Player : show team details
+
+Player -> DetailView : clicks "Request to Join"
+DetailView -> TeamCtrl : POST /api/teams/{team_id}/join-requests
+activate TeamCtrl
+
+TeamCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> TeamCtrl : UserAccount
+deactivate AuthDep
+
+TeamCtrl -> PlayerRepo : find_by_user_id()
+activate PlayerRepo
+PlayerRepo --> TeamCtrl : PlayerProfile
+deactivate PlayerRepo
+
+TeamCtrl -> RosterRepo : find_by_team_and_player()
+activate RosterRepo
+RosterRepo --> TeamCtrl : existing membership
+deactivate RosterRepo
+
+alt already member or is team leader
+    TeamCtrl -> ErrorMsg : <<create>> HTTPException(400)
+    activate ErrorMsg
+    ErrorMsg --> Player : display error
+    deactivate ErrorMsg
+else eligible
+    TeamCtrl -> TeamSvc : create_join_request(team_id, player_id, message)
+    activate TeamSvc
+    
+    TeamSvc -> JoinReq : <<create>> with status=PENDING
+    activate JoinReq
+    JoinReq --> TeamSvc : created
+    deactivate JoinReq
+    
+    TeamSvc --> TeamCtrl : JoinRequest
+    deactivate TeamSvc
+    
+    TeamCtrl -> SuccessMsg : <<create>>
+    activate SuccessMsg
+    SuccessMsg --> Player : display success
+    deactivate SuccessMsg
+end
+
+deactivate TeamCtrl
+deactivate DetailView
+deactivate SearchView
+
+@enduml
+
+@startuml UC-PL-03_Leave_Team
+title UC-PL-03: Leave Team
+
+actor "Player" as Player
+actor "Team Leader" as Leader
+boundary "MyTeamsView" as TeamsView
+boundary "ConfirmationDialog" as ConfirmDlg
+control "TeamController" as TeamCtrl
+control "get_current_user" as AuthDep
+entity "RosterRepository" as RosterRepo
+entity "TeamRoster" as Roster
+entity "Notification" as Notif
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Player -> TeamCtrl : GET /api/teams/user/{user_id}
+activate TeamCtrl
+
+TeamCtrl -> TeamsView : <<create>> with player's teams
+activate TeamsView
+TeamsView --> Player : display teams
+
+Player -> TeamsView : selects team to leave
+TeamsView -> ConfirmDlg : <<create>>
+activate ConfirmDlg
+ConfirmDlg --> Player : display confirmation
+
+Player -> ConfirmDlg : confirms
+ConfirmDlg -> TeamCtrl : DELETE /api/teams/{team_id}/roster/{player_id}
+
+TeamCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> TeamCtrl : UserAccount
+deactivate AuthDep
+
+TeamCtrl -> RosterRepo : find_by_team_and_player()
+activate RosterRepo
+RosterRepo --> TeamCtrl : TeamRoster
+deactivate RosterRepo
+
+TeamCtrl -> RosterRepo : delete()
+activate RosterRepo
+RosterRepo --> TeamCtrl : deleted
+deactivate RosterRepo
+
+TeamCtrl -> SuccessMsg : <<create>>
+activate SuccessMsg
+SuccessMsg --> Player : display success
+deactivate SuccessMsg
+
+TeamCtrl --> TeamsView : remove team from list
+
+deactivate ConfirmDlg
+deactivate TeamsView
+deactivate TeamCtrl
+
+@enduml
+
+@startuml UC-PL-04_View_Schedule
+title UC-PL-04: View Match Schedule
+
+actor "Player" as Player
+boundary "ScheduleView" as SchedView
+control "PlayerController" as PlayerCtrl
+entity "RosterRepository" as RosterRepo
+entity "MatchRepository" as MatchRepo
+entity "MatchEvent" as MatchEvt
+entity "TeamRoster" as Roster
+boundary "MatchListDisplay" as MatchList
+
+Player -> PlayerCtrl : GET /api/players/{player_id}/schedule
+activate PlayerCtrl
+
+PlayerCtrl -> RosterRepo : find_by_player()
+activate RosterRepo
+RosterRepo --> PlayerCtrl : team memberships
+deactivate RosterRepo
+
+PlayerCtrl -> PlayerCtrl : extract team_ids from active roster
+
+loop for each team_id
+    PlayerCtrl -> MatchRepo : find_by_team(team_id)
+    activate MatchRepo
+    MatchRepo --> PlayerCtrl : matches
+    deactivate MatchRepo
+end
+
+PlayerCtrl -> PlayerCtrl : remove duplicates
+PlayerCtrl -> PlayerCtrl : sort by (match_date, start_time)
+
+PlayerCtrl -> MatchList : <<create>> with MatchEventResponse[]
+activate MatchList
+MatchList --> Player : display schedule
+deactivate MatchList
+
+Player -> Player : views previous and upcoming matches
+
+deactivate PlayerCtrl
+
+@enduml
+
+@startuml UC-PL-05_Confirm_Attendance
+title UC-PL-05: Confirm Match Attendance
+
+actor "Player" as Player
+actor "Team Leader" as Leader
+boundary "MatchDetailView" as MatchView
+control "MatchController" as MatchCtrl
+control "get_current_user" as AuthDep
+entity "PlayerRepository" as PlayerRepo
+entity "RosterRepository" as RosterRepo
+entity "AttendanceRepository" as AttendRepo
+entity "AttendanceRecord" as Attendance
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Player -> MatchView : opens match detail
+activate MatchView
+
+Player -> MatchView : clicks "Confirm Attendance"
+MatchView -> MatchCtrl : POST /api/matches/{match_id}/attendance/confirm
+activate MatchCtrl
+
+MatchCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> MatchCtrl : UserAccount
+deactivate AuthDep
+
+MatchCtrl -> PlayerRepo : find_by_user_id()
+activate PlayerRepo
+PlayerRepo --> MatchCtrl : PlayerProfile
+deactivate PlayerRepo
+
+MatchCtrl -> RosterRepo : find_by_player()
+activate RosterRepo
+RosterRepo --> MatchCtrl : team memberships
+deactivate RosterRepo
+
+MatchCtrl -> MatchCtrl : verify player is in match team
+
+alt not a player in this match
+    MatchCtrl --> Player : HTTPException(403)
+else eligible
+    MatchCtrl -> Attendance : create or update\nstatus=PRESENT
+    activate Attendance
+    Attendance -> Attendance : set confirmed_at = utcnow()
+    Attendance -> Attendance : set confirmed_by = user.user_id
+    Attendance --> MatchCtrl : saved
+    deactivate Attendance
+    
+    MatchCtrl -> SuccessMsg : <<create>>
+    activate SuccessMsg
+    SuccessMsg --> Player : display success
+    deactivate SuccessMsg
+    
+    MatchCtrl --> MatchView : update button to "Confirmed"
+end
+
+deactivate MatchCtrl
+deactivate MatchView
+
+@enduml

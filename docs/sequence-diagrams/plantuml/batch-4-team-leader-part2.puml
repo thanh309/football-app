@@ -1,0 +1,311 @@
+@startuml UC-TL-06_Create_Match
+title UC-TL-06: Create Match Events
+
+actor "Team Leader" as Leader
+actor "Stadium Owner" as Owner
+boundary "MatchCreationForm" as MatchForm
+control "MatchController" as MatchCtrl
+control "MatchService" as MatchSvc
+control "TeamService" as TeamSvc
+control "get_current_user" as AuthDep
+entity "MatchEvent" as MatchEvt
+boundary "SuccessMessageDisplay" as SuccessMsg
+boundary "ErrorMessageDisplay" as ErrorMsg
+
+Leader -> MatchForm : opens form
+activate MatchForm
+
+Leader -> MatchForm : enters match details\n(date, time, field, visibility)
+MatchForm -> MatchCtrl : POST /api/matches
+activate MatchCtrl
+
+MatchCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> MatchCtrl : UserAccount
+deactivate AuthDep
+
+MatchCtrl -> TeamSvc : get_team_by_id(hostTeamId)
+activate TeamSvc
+TeamSvc --> MatchCtrl : TeamProfile
+deactivate TeamSvc
+
+MatchCtrl -> MatchCtrl : verify team.leader_id == user.user_id
+
+alt not authorized
+    MatchCtrl -> ErrorMsg : <<create>> HTTPException(403)
+    activate ErrorMsg
+    ErrorMsg --> Leader : display error
+    deactivate ErrorMsg
+else authorized
+    MatchCtrl -> MatchSvc : create_match(host_team_id, match_date, start_time, field_id, visibility)
+    activate MatchSvc
+    
+    MatchSvc -> MatchEvt : <<create>> with status=SCHEDULED
+    activate MatchEvt
+    MatchEvt --> MatchSvc : created
+    deactivate MatchEvt
+    
+    MatchSvc --> MatchCtrl : MatchEvent
+    deactivate MatchSvc
+    
+    MatchCtrl -> SuccessMsg : <<create>>
+    activate SuccessMsg
+    SuccessMsg --> Leader : display success
+    deactivate SuccessMsg
+    
+    MatchCtrl --> Leader : show match in schedule
+end
+
+deactivate MatchCtrl
+deactivate MatchForm
+
+@enduml
+
+@startuml UC-TL-07_Cancel_Match
+title UC-TL-07: Cancel Match Events
+
+actor "Team Leader" as Leader
+actor "Stadium Owner" as Owner
+actor "Opponent Team Leader" as Opponent
+boundary "MatchDetailView" as MatchView
+boundary "ConfirmationDialog" as ConfirmDlg
+control "MatchController" as MatchCtrl
+control "MatchService" as MatchSvc
+control "TeamService" as TeamSvc
+control "get_current_user" as AuthDep
+entity "MatchEvent" as MatchEvt
+entity "Notification" as Notif
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Leader -> MatchView : clicks "Cancel Match"
+activate MatchView
+
+MatchView -> ConfirmDlg : <<create>>
+activate ConfirmDlg
+ConfirmDlg --> Leader : display confirmation
+
+Leader -> ConfirmDlg : confirms cancellation
+ConfirmDlg -> MatchCtrl : PUT /api/matches/{match_id}/cancel
+activate MatchCtrl
+
+MatchCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> MatchCtrl : UserAccount
+deactivate AuthDep
+
+MatchCtrl -> MatchSvc : get_match_by_id()
+activate MatchSvc
+MatchSvc --> MatchCtrl : MatchEvent
+deactivate MatchSvc
+
+MatchCtrl -> TeamSvc : get_team_by_id()
+activate TeamSvc
+TeamSvc --> MatchCtrl : TeamProfile
+deactivate TeamSvc
+
+MatchCtrl -> MatchCtrl : verify authorization
+
+MatchCtrl -> MatchSvc : cancel_match(match)
+activate MatchSvc
+MatchSvc -> MatchEvt : update status = CANCELLED
+activate MatchEvt
+MatchEvt --> MatchSvc : updated
+deactivate MatchEvt
+MatchSvc --> MatchCtrl : cancelled
+deactivate MatchSvc
+
+MatchCtrl -> SuccessMsg : <<create>>
+activate SuccessMsg
+SuccessMsg --> Leader : display success
+deactivate SuccessMsg
+
+MatchCtrl --> MatchView : update match status
+
+deactivate ConfirmDlg
+deactivate MatchCtrl
+deactivate MatchView
+
+@enduml
+
+@startuml UC-TL-08_Respond_Invitation
+title UC-TL-08: Respond to Match Invitations
+
+actor "Team Leader" as Leader
+actor "Inviting Team Leader" as Inviter
+boundary "InvitationListView" as InviteList
+control "MatchController" as MatchCtrl
+control "MatchService" as MatchSvc
+control "get_current_user" as AuthDep
+entity "InvitationRepository" as InviteRepo
+entity "MatchInvitation" as Invite
+entity "MatchEvent" as MatchEvt
+entity "Notification" as Notif
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Leader -> MatchCtrl : GET /api/matches/team/{team_id}/invitations
+activate MatchCtrl
+
+MatchCtrl -> InviteRepo : find_pending_by_team()
+activate InviteRepo
+InviteRepo --> MatchCtrl : pending invitations
+deactivate InviteRepo
+
+MatchCtrl -> InviteList : <<create>>
+activate InviteList
+InviteList --> Leader : display invitations
+
+Leader -> InviteList : clicks Accept/Decline
+InviteList -> MatchCtrl : PUT /api/invitations/{invitation_id}/{action}
+
+MatchCtrl -> InviteRepo : find_by_id()
+activate InviteRepo
+InviteRepo --> MatchCtrl : MatchInvitation
+deactivate InviteRepo
+
+MatchCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> MatchCtrl : UserAccount
+deactivate AuthDep
+
+MatchCtrl -> MatchCtrl : verify invited_team.leader_id == user.user_id
+
+MatchCtrl -> MatchSvc : respond_to_invitation(invitation, accept)
+activate MatchSvc
+
+alt Accepted
+    MatchSvc -> Invite : update status = ACCEPTED
+    activate Invite
+    deactivate Invite
+    
+    MatchSvc -> MatchEvt : update opponent_team_id
+    activate MatchEvt
+    MatchEvt --> MatchSvc : updated
+    deactivate MatchEvt
+else Declined
+    MatchSvc -> Invite : update status = DECLINED
+    activate Invite
+    deactivate Invite
+end
+
+MatchSvc --> MatchCtrl : processed
+deactivate MatchSvc
+
+MatchCtrl -> SuccessMsg : <<create>>
+activate SuccessMsg
+SuccessMsg --> Leader : display result
+deactivate SuccessMsg
+
+deactivate InviteList
+deactivate MatchCtrl
+
+@enduml
+
+@startuml UC-TL-09_Track_Attendance
+title UC-TL-09: Track Match Attendance
+
+actor "Team Leader" as Leader
+boundary "AttendanceView" as AttendView
+control "MatchController" as MatchCtrl
+control "MatchService" as MatchSvc
+control "get_current_user" as AuthDep
+entity "MatchEvent" as MatchEvt
+entity "AttendanceRecord" as Attendance
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Leader -> MatchCtrl : GET /api/matches/{match_id}/attendance
+activate MatchCtrl
+
+MatchCtrl -> AttendView : <<create>> with player list
+activate AttendView
+AttendView --> Leader : display attendance status
+
+Leader -> AttendView : toggles status\n(Present/Absent/Excused)
+Leader -> AttendView : clicks "Save"
+
+AttendView -> MatchCtrl : POST /api/matches/{match_id}/attendance/batch
+MatchCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> MatchCtrl : UserAccount
+deactivate AuthDep
+
+MatchCtrl -> MatchCtrl : verify leader authorization\n(host or opponent team leader)
+
+loop for each record in data.records
+    MatchCtrl -> Attendance : update or <<create>>
+    activate Attendance
+    Attendance --> MatchCtrl : saved
+    deactivate Attendance
+end
+
+MatchCtrl -> SuccessMsg : <<create>>
+activate SuccessMsg
+SuccessMsg --> Leader : display success
+deactivate SuccessMsg
+
+MatchCtrl -> MatchCtrl : GET /api/matches/{match_id}/attendance/stats
+MatchCtrl --> AttendView : show attendance summary
+
+deactivate AttendView
+deactivate MatchCtrl
+
+@enduml
+
+@startuml UC-TL-10_Manage_Funds
+title UC-TL-10: Manage Team Funds
+
+actor "Team Leader" as Leader
+boundary "FinanceDashboard" as FinDash
+boundary "TransactionForm" as TxForm
+control "TeamController" as TeamCtrl
+control "get_current_user" as AuthDep
+entity "TeamWallet" as Wallet
+entity "TransactionLog" as TxLog
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Leader -> TeamCtrl : GET /api/teams/{team_id}/wallet
+activate TeamCtrl
+
+TeamCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> TeamCtrl : UserAccount
+deactivate AuthDep
+
+TeamCtrl -> TeamCtrl : verify team.leader_id == user.user_id
+
+TeamCtrl -> FinDash : <<create>> with current balance
+activate FinDash
+
+TeamCtrl -> TeamCtrl : GET /api/teams/{team_id}/wallet/transactions
+FinDash --> Leader : display balance and history
+
+Leader -> FinDash : clicks "Add Transaction"
+FinDash -> TxForm : <<create>>
+activate TxForm
+
+Leader -> TxForm : selects type (Deposit/Withdraw/Expense)
+Leader -> TxForm : enters amount, description, category
+
+TxForm -> TeamCtrl : POST /api/teams/{team_id}/wallet/{type}
+
+TeamCtrl -> Wallet : update balance
+activate Wallet
+Wallet --> TeamCtrl : updated
+deactivate Wallet
+
+TeamCtrl -> TxLog : <<create>>
+activate TxLog
+TxLog --> TeamCtrl : created
+deactivate TxLog
+
+TeamCtrl -> SuccessMsg : <<create>>
+activate SuccessMsg
+SuccessMsg --> Leader : display success
+deactivate SuccessMsg
+
+TeamCtrl --> FinDash : refresh dashboard
+
+deactivate TxForm
+deactivate FinDash
+deactivate TeamCtrl
+
+@enduml

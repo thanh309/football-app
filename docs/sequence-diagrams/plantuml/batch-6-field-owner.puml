@@ -1,0 +1,207 @@
+@startuml UC-FO-01_Create_Field
+title UC-FO-01: Create Field Profile
+
+actor "Field Owner" as Owner
+actor "Moderator" as Mod
+boundary "FieldCreationForm" as FieldForm
+control "FieldController" as FieldCtrl
+control "FieldService" as FieldSvc
+control "get_current_user" as AuthDep
+entity "FieldProfile" as FieldProf
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Owner -> FieldForm : opens form
+activate FieldForm
+
+Owner -> FieldForm : enters details, uploads photos
+FieldForm -> FieldCtrl : POST /api/fields
+activate FieldCtrl
+
+FieldCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> FieldCtrl : UserAccount
+deactivate AuthDep
+
+FieldCtrl -> FieldSvc : create_field()
+activate FieldSvc
+FieldSvc -> FieldProf : <<create>> status=PENDING
+activate FieldProf
+FieldProf --> FieldSvc : created
+deactivate FieldProf
+FieldSvc --> FieldCtrl : FieldProfile
+deactivate FieldSvc
+
+FieldCtrl -> SuccessMsg : <<create>>
+activate SuccessMsg
+SuccessMsg --> Owner : display success
+deactivate SuccessMsg
+
+deactivate FieldCtrl
+deactivate FieldForm
+@enduml
+
+@startuml UC-FO-02_Edit_Field
+title UC-FO-02: Edit Field Profile
+
+actor "Field Owner" as Owner
+boundary "FieldEditForm" as EditForm
+control "FieldController" as FieldCtrl
+control "FieldService" as FieldSvc
+control "get_current_user" as AuthDep
+entity "FieldProfile" as FieldProf
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Owner -> EditForm : modifies details
+activate EditForm
+EditForm -> FieldCtrl : PUT /api/fields/{field_id}
+activate FieldCtrl
+
+FieldCtrl -> AuthDep : verify JWT
+activate AuthDep
+AuthDep --> FieldCtrl : UserAccount
+deactivate AuthDep
+
+FieldCtrl -> FieldSvc : get_field_by_id()
+activate FieldSvc
+FieldSvc --> FieldCtrl : FieldProfile
+deactivate FieldSvc
+
+FieldCtrl -> FieldCtrl : verify owner
+FieldCtrl -> FieldSvc : update_field()
+activate FieldSvc
+FieldSvc -> FieldProf : update
+activate FieldProf
+FieldProf --> FieldSvc : updated
+deactivate FieldProf
+FieldSvc --> FieldCtrl : updated
+deactivate FieldSvc
+
+FieldCtrl -> SuccessMsg : <<create>>
+activate SuccessMsg
+SuccessMsg --> Owner : success
+deactivate SuccessMsg
+
+deactivate FieldCtrl
+deactivate EditForm
+@enduml
+
+@startuml UC-FO-03_View_Bookings
+title UC-FO-03: View Booking Requests
+
+actor "Field Owner" as Owner
+boundary "BookingRequestList" as BookingList
+control "BookingController" as BookingCtrl
+control "BookingService" as BookingSvc
+control "FieldService" as FieldSvc
+boundary "EmptyStateDisplay" as EmptyState
+
+Owner -> BookingCtrl : GET /api/bookings/owner/pending
+activate BookingCtrl
+
+BookingCtrl -> FieldSvc : get_fields_by_owner()
+activate FieldSvc
+FieldSvc --> BookingCtrl : fields
+deactivate FieldSvc
+
+loop each field
+    BookingCtrl -> BookingSvc : get_bookings_by_field(PENDING)
+    activate BookingSvc
+    BookingSvc --> BookingCtrl : pending bookings
+    deactivate BookingSvc
+end
+
+alt no requests
+    BookingCtrl -> EmptyState : <<create>>
+    activate EmptyState
+    EmptyState --> Owner : "No booking requests"
+    deactivate EmptyState
+else has requests
+    BookingCtrl -> BookingList : <<create>>
+    activate BookingList
+    BookingList --> Owner : display requests
+    deactivate BookingList
+end
+
+deactivate BookingCtrl
+@enduml
+
+@startuml UC-FO-04_Response_Bookings
+title UC-FO-04: Response Booking Requests
+
+actor "Field Owner" as Owner
+boundary "BookingDetailView" as DetailView
+control "BookingController" as BookingCtrl
+control "BookingService" as BookingSvc
+entity "BookingRequest" as BookingReq
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Owner -> DetailView : view booking
+activate DetailView
+
+alt Approve
+    DetailView -> BookingCtrl : PUT /api/bookings/{id}/approve
+    activate BookingCtrl
+    BookingCtrl -> BookingSvc : approve_booking()
+    activate BookingSvc
+    BookingSvc -> BookingReq : status = CONFIRMED
+    activate BookingReq
+    BookingReq --> BookingSvc : updated
+    deactivate BookingReq
+    BookingSvc --> BookingCtrl : approved
+    deactivate BookingSvc
+else Reject
+    DetailView -> BookingCtrl : PUT /api/bookings/{id}/reject
+    BookingCtrl -> BookingSvc : reject_booking()
+    activate BookingSvc
+    BookingSvc -> BookingReq : status = REJECTED
+    activate BookingReq
+    BookingReq --> BookingSvc : updated
+    deactivate BookingReq
+    BookingSvc --> BookingCtrl : rejected
+    deactivate BookingSvc
+end
+
+BookingCtrl -> SuccessMsg : <<create>>
+activate SuccessMsg
+SuccessMsg --> Owner : result
+deactivate SuccessMsg
+
+deactivate BookingCtrl
+deactivate DetailView
+@enduml
+
+@startuml UC-FO-05_Manage_Calendar
+title UC-FO-05: Manage Booking Calendar
+
+actor "Field Owner" as Owner
+boundary "CalendarView" as CalView
+control "FieldController" as FieldCtrl
+entity "FieldCalendar" as Calendar
+boundary "SuccessMessageDisplay" as SuccessMsg
+
+Owner -> FieldCtrl : GET /api/fields/{id}/calendar
+activate FieldCtrl
+FieldCtrl -> CalView : <<create>>
+activate CalView
+CalView --> Owner : show calendar
+
+== Block Slot ==
+Owner -> FieldCtrl : POST /api/fields/{id}/calendar/block
+FieldCtrl -> Calendar : <<create>> BLOCKED
+activate Calendar
+Calendar --> FieldCtrl : created
+deactivate Calendar
+FieldCtrl -> SuccessMsg : <<create>>
+SuccessMsg --> Owner : success
+
+== Unblock Slot ==
+Owner -> FieldCtrl : PUT /api/fields/calendar/{id}/unblock
+FieldCtrl -> Calendar : delete()
+activate Calendar
+destroy Calendar
+FieldCtrl -> SuccessMsg : <<create>>
+SuccessMsg --> Owner : success
+
+deactivate CalView
+deactivate FieldCtrl
+@enduml
