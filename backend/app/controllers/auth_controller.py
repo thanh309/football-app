@@ -118,8 +118,8 @@ async def refresh_token(
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     
-    new_access_token = create_access_token({"sub": user.user_id})
-    new_refresh_token = create_refresh_token({"sub": user.user_id})
+    new_access_token = create_access_token({"sub": str(user.user_id)})
+    new_refresh_token = create_refresh_token({"sub": str(user.user_id)})
     
     return AuthResponse(
         accessToken=new_access_token,
