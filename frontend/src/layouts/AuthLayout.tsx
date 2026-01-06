@@ -14,7 +14,7 @@ export const AuthLayout = () => {
                 <Outlet />
             </div>
             <div className="mt-8 text-sm text-slate-500">
-                &copy; 2024 Kick-off Platform.
+                &copy; 2025 Kick-off Platform.
             </div>
         </div>
     );

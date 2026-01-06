@@ -81,7 +81,7 @@ export const PublicLayout = () => {
                         <Rocket className="h-5 w-5" />
                         <span>Kick-off</span>
                     </div>
-                    <p className="text-sm text-slate-500">© 2024 Kick-off Platform. All rights reserved.</p>
+                    <p className="text-sm text-slate-500">© 2025 Kick-off Platform. All rights reserved.</p>
                 </div>
             </footer>
         </div>

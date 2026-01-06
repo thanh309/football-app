@@ -7,6 +7,7 @@ import {
     Bell,
     LogOut,
     Menu,
+    Rocket,
     Shield,
     MapPin,
     Trophy,
@@ -74,7 +75,8 @@ export const DashboardLayout = () => {
                     isSidebarOpen ? "translate-x-0" : "-translate-x-full"
                 )}
             >
-                <div className="h-16 flex items-center justify-center border-b border-slate-200 dark:border-slate-700">
+                <div className="h-16 flex items-center justify-center gap-2 border-b border-slate-200 dark:border-slate-700">
+                    <Rocket className="h-6 w-6 text-primary-600" />
                     <span className="text-xl font-bold text-primary-600">Kick-off</span>
                 </div>
 
