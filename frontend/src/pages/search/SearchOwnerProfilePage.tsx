@@ -63,7 +63,7 @@ const SearchOwnerProfilePage: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex-1">
-                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">{owner.username}</h1>
+                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2 text-left">{owner.username}</h1>
                         <div className="flex items-center gap-2 text-slate-600 mb-2">
                             <Calendar className="w-4 h-4" />
                             <span className="text-sm">
@@ -99,7 +99,7 @@ const SearchOwnerProfilePage: React.FC = () => {
                                     <MapPin className="w-8 h-8 text-slate-400" />
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="font-semibold text-slate-900 mb-1">{field.fieldName}</h3>
+                                    <h3 className="font-semibold text-slate-900 mb-1 text-left">{field.fieldName}</h3>
                                     <p className="text-sm text-slate-600 flex items-center gap-1 mb-2">
                                         <MapPin className="w-4 h-4" />
                                         {field.location}

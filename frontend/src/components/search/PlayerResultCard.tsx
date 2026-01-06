@@ -37,7 +37,7 @@ const PlayerResultCard: React.FC<PlayerResultCardProps> = ({ player }) => {
                         )}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 text-lg truncate">{player.displayName}</h3>
+                        <h3 className="font-semibold text-gray-900 text-lg truncate text-left">{player.displayName}</h3>
                         {player.position && (
                             <p className="text-sm text-gray-500 flex items-center gap-1 mt-0.5">
                                 <Target className="w-3.5 h-3.5" />

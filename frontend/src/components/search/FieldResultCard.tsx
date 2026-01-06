@@ -30,16 +30,16 @@ const FieldResultCard: React.FC<FieldResultCardProps> = ({ field }) => {
 
             <div className="p-5">
                 <div className="flex items-start justify-between gap-2">
-                    <div>
-                        <h3 className="font-semibold text-gray-900 text-lg truncate">{field.fieldName}</h3>
+                    <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 text-lg text-left">{field.fieldName}</h3>
                         {field.location && (
-                            <p className="text-sm text-gray-500 flex items-center gap-1 mt-0.5">
-                                <MapPin className="w-3.5 h-3.5" />
-                                {field.location}
+                            <p className="text-sm text-gray-500 flex items-start gap-1 mt-0.5 text-left">
+                                <MapPin className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                                <span>{field.location}</span>
                             </p>
                         )}
                     </div>
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${getStatusBadge(field.status)}`}>
+                    <span className={`flex-shrink-0 text-xs px-2.5 py-1 rounded-full font-medium ${getStatusBadge(field.status)}`}>
                         {field.status}
                     </span>
                 </div>

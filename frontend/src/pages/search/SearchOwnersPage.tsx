@@ -49,7 +49,7 @@ const SearchOwnersPage: React.FC = () => {
                                     </span>
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold text-slate-900">{owner.username}</h3>
+                                    <h3 className="font-semibold text-slate-900 text-left">{owner.username}</h3>
                                     <p className="text-sm text-slate-500">{owner.location}</p>
                                 </div>
                             </div>

@@ -60,7 +60,7 @@ const ModDashboardPage: React.FC = () => {
                                 <item.icon className="w-6 h-6 text-white" />
                             </div>
                             <div className="w-full">
-                                <p className="text-sm text-slate-500 text-left">{item.label}</p>
+                                <p className="text-sm text-slate-500 text-center">{item.label}</p>
                                 <p className="text-3xl font-bold text-slate-900 text-center">{item.value}</p>
                             </div>
                         </div>

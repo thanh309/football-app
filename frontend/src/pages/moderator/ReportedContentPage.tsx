@@ -9,6 +9,7 @@ const ReportedContentPage: React.FC = () => {
                 title="Reported Content"
                 subtitle="Review and take action on content reported by users."
                 backLink={{ label: 'Back to Dashboard', to: '/mod' }}
+                className="text-left"
             />
             <ReportedContentListView />
         </PageContainer>

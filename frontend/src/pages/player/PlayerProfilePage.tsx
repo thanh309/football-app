@@ -55,12 +55,8 @@ const PlayerProfilePage: React.FC = () => {
                     <PlayerProfileForm
                         player={player}
                         onSuccess={handleSaveSuccess}
+                        onCancel={() => setIsEditing(false)}
                     />
-                    <div className="mt-4 flex justify-start">
-                        <Button variant="ghost" onClick={() => setIsEditing(false)}>
-                            Cancel
-                        </Button>
-                    </div>
                 </ContentCard>
             ) : (
                 <PlayerProfileView player={player} />

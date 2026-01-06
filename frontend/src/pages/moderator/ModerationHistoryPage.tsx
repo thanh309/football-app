@@ -9,6 +9,7 @@ const ModerationHistoryPage: React.FC = () => {
                 title="Moderation History"
                 subtitle="View the history of all moderation actions taken."
                 backLink={{ label: 'Back to Dashboard', to: '/mod' }}
+                className="text-center"
             />
             <ModerationHistoryView />
         </PageContainer>

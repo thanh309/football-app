@@ -1,4 +1,4 @@
-import { User, Calendar, Target, Ruler, Weight } from 'lucide-react';
+import { User, Calendar, Target, Ruler, Weight, Trophy, Footprints } from 'lucide-react';
 import type { PlayerProfile } from '../../types';
 
 interface PlayerProfileViewProps {
@@ -65,30 +65,40 @@ const PlayerProfileView: React.FC<PlayerProfileViewProps> = ({
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 border-b border-gray-100">
                 {player.skillLevel && (
-                    <div className="text-center">
-                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getSkillLevelColor(player.skillLevel)}`}>
-                            Level {player.skillLevel}
-                        </span>
-                        <p className="text-sm text-gray-500 mt-1">{getSkillLevelLabel(player.skillLevel)}</p>
+                    <div className="text-center flex flex-col items-center">
+                        <Trophy className="w-5 h-5 text-gray-400 mb-1" />
+                        <div className="h-8 flex items-center justify-center mb-1">
+                            <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getSkillLevelColor(player.skillLevel)}`}>
+                                Level {player.skillLevel}
+                            </span>
+                        </div>
+                        <p className="text-sm text-gray-500">{getSkillLevelLabel(player.skillLevel)}</p>
                     </div>
                 )}
                 {player.preferredFoot && (
-                    <div className="text-center">
-                        <p className="font-semibold text-gray-900">{player.preferredFoot}</p>
+                    <div className="text-center flex flex-col items-center">
+                        <Footprints className="w-5 h-5 text-gray-400 mb-1" />
+                        <div className="h-8 flex items-center justify-center mb-1">
+                            <p className="font-semibold text-gray-900">{player.preferredFoot}</p>
+                        </div>
                         <p className="text-sm text-gray-500">Preferred Foot</p>
                     </div>
                 )}
                 {player.height && (
                     <div className="text-center flex flex-col items-center">
                         <Ruler className="w-5 h-5 text-gray-400 mb-1" />
-                        <p className="font-semibold text-gray-900">{player.height} cm</p>
+                        <div className="h-8 flex items-center justify-center mb-1">
+                            <p className="font-semibold text-gray-900">{player.height} cm</p>
+                        </div>
                         <p className="text-sm text-gray-500">Height</p>
                     </div>
                 )}
                 {player.weight && (
                     <div className="text-center flex flex-col items-center">
                         <Weight className="w-5 h-5 text-gray-400 mb-1" />
-                        <p className="font-semibold text-gray-900">{player.weight} kg</p>
+                        <div className="h-8 flex items-center justify-center mb-1">
+                            <p className="font-semibold text-gray-900">{player.weight} kg</p>
+                        </div>
                         <p className="text-sm text-gray-500">Weight</p>
                     </div>
                 )}

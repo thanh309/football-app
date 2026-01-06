@@ -31,7 +31,7 @@ const FieldReviewView: React.FC<FieldReviewViewProps> = ({ fieldId }) => {
                                 </span>
                             </div>
                             {field.description && (
-                                <p className="text-gray-600">{field.description}</p>
+                                <p className="text-gray-600 text-left">{field.description}</p>
                             )}
                         </div>
                     </div>

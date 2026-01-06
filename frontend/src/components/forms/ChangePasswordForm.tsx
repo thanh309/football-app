@@ -88,7 +88,7 @@ const ChangePasswordForm: React.FC = () => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 max-w-md">
+        <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto">
             <div className="mb-6">
                 <h3 className="text-xl font-semibold text-gray-900">Change Password</h3>
                 <p className="mt-1 text-sm text-gray-600">

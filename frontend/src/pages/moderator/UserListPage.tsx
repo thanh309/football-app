@@ -9,6 +9,7 @@ const UserListPage: React.FC = () => {
                 title="User Management"
                 subtitle="Search and manage user accounts."
                 backLink={{ label: 'Back to Dashboard', to: '/mod' }}
+                className="text-left"
             />
             <UserSearchView />
         </PageContainer>

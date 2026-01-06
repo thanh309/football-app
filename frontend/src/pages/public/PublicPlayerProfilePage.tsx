@@ -59,8 +59,8 @@ const PublicPlayerProfilePage: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex-1">
-                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">{player.displayName}</h1>
-                        {player.position && <p className="text-lg text-primary-600 font-medium mb-4">{player.position}</p>}
+                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2 text-left">{player.displayName}</h1>
+                        {player.position && <p className="text-lg text-primary-600 font-medium mb-4 text-left">{player.position}</p>}
                         {player.skillLevel && (
                             <div className="flex items-center gap-2">
                                 <span className="text-sm text-slate-500">Skill Level:</span>
@@ -79,7 +79,7 @@ const PublicPlayerProfilePage: React.FC = () => {
             {/* Bio */}
             {player.bio && (
                 <ContentCard title="About" className="mb-6">
-                    <p className="text-slate-600 whitespace-pre-wrap">{player.bio}</p>
+                    <p className="text-slate-600 whitespace-pre-wrap text-left">{player.bio}</p>
                 </ContentCard>
             )}
 

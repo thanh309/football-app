@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 interface PlayerProfileFormProps {
     player: PlayerProfile;
     onSuccess?: () => void;
+    onCancel?: () => void;
 }
 
 const positionOptions = [
@@ -37,7 +38,7 @@ const skillLevelOptions = [
     { value: '10', label: '10 - Professional' },
 ];
 
-const PlayerProfileForm: React.FC<PlayerProfileFormProps> = ({ player, onSuccess }) => {
+const PlayerProfileForm: React.FC<PlayerProfileFormProps> = ({ player, onSuccess, onCancel }) => {
     const updateMutation = useUpdatePlayerProfile();
 
     const [formData, setFormData] = useState({
@@ -156,7 +157,12 @@ const PlayerProfileForm: React.FC<PlayerProfileFormProps> = ({ player, onSuccess
                 rows={4}
             />
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-3">
+                {onCancel && (
+                    <Button type="button" variant="ghost" onClick={onCancel}>
+                        Cancel
+                    </Button>
+                )}
                 <Button
                     type="submit"
                     isLoading={updateMutation.isPending}

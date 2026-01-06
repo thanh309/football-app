@@ -31,9 +31,9 @@ const PendingFieldsListView: React.FC = () => {
                     <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                         <Shield className="w-5 h-5 text-blue-600" />
                     </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-900">Pending Fields</h2>
-                        <p className="text-sm text-gray-500">Review and verify new field registrations</p>
+                    <div className="text-left">
+                        <h2 className="text-xl font-bold text-gray-900 text-left">Pending Fields</h2>
+                        <p className="text-sm text-gray-500 text-left">Review and verify new field registrations</p>
                     </div>
                 </div>
                 <span className="bg-amber-100 text-amber-700 text-sm px-3 py-1 rounded-full">
@@ -53,9 +53,9 @@ const PendingFieldsListView: React.FC = () => {
                                 <p className="text-sm text-gray-500">Owner #{field.ownerId}</p>
                             </div>
 
-                            <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                                <MapPin className="w-4 h-4 text-emerald-500" />
-                                <span className="line-clamp-1">{field.location}</span>
+                            <div className="flex items-center gap-2 text-sm text-gray-600 mb-3 text-left">
+                                <MapPin className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                                <span className="line-clamp-1 text-left">{field.location}</span>
                             </div>
 
                             <div className="text-lg font-semibold text-emerald-600 mb-3">

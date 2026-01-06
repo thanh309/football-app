@@ -31,9 +31,9 @@ const ReportedContentListView: React.FC = () => {
                     <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
                         <Flag className="w-5 h-5 text-red-600" />
                     </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-900">Reported Content</h2>
-                        <p className="text-sm text-gray-500">Review and moderate reported content</p>
+                    <div className="text-left">
+                        <h2 className="text-xl font-bold text-gray-900 text-left">Reported Content</h2>
+                        <p className="text-sm text-gray-500 text-left">Review and moderate reported content</p>
                     </div>
                 </div>
                 <span className="bg-red-100 text-red-700 text-sm px-3 py-1 rounded-full">
@@ -46,10 +46,10 @@ const ReportedContentListView: React.FC = () => {
                     <thead className="bg-gray-50">
                         <tr>
                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Type</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Reason</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Reporter</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Date</th>
-                            <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Action</th>
+                            <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Reason</th>
+                            <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Reporter</th>
+                            <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Date</th>
+                            <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Action</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -63,12 +63,12 @@ const ReportedContentListView: React.FC = () => {
                                         </span>
                                     </div>
                                 </td>
-                                <td className="px-4 py-3 text-sm text-gray-600">{report.reason}</td>
-                                <td className="px-4 py-3 text-sm text-gray-600">User #{report.reporterId}</td>
-                                <td className="px-4 py-3 text-sm text-gray-600">
+                                <td className="px-4 py-3 text-sm text-gray-600 text-center">{report.reason}</td>
+                                <td className="px-4 py-3 text-sm text-gray-600 text-center">User #{report.reporterId}</td>
+                                <td className="px-4 py-3 text-sm text-gray-600 text-center">
                                     {new Date(report.createdAt).toLocaleDateString()}
                                 </td>
-                                <td className="px-4 py-3 text-right">
+                                <td className="px-4 py-3 text-center">
                                     <Link to={`/mod/reports/${report.reportId}`}>
                                         <Button size="sm" variant="ghost" leftIcon={<Eye className="w-4 h-4" />}>
                                             Review

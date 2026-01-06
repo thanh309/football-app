@@ -44,9 +44,9 @@ const ModerationHistoryView: React.FC = () => {
                     <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
                         <History className="w-5 h-5 text-gray-600" />
                     </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-900">Moderation History</h2>
-                        <p className="text-sm text-gray-500">Review all moderation actions</p>
+                    <div className="text-left">
+                        <h2 className="text-xl font-bold text-gray-900 text-left">Moderation History</h2>
+                        <p className="text-sm text-gray-500 text-left">Review all moderation actions</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -72,25 +72,25 @@ const ModerationHistoryView: React.FC = () => {
                     <table className="w-full">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Action</th>
-                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Target</th>
-                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Reason</th>
-                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Mod</th>
-                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Date</th>
+                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Action</th>
+                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Target</th>
+                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Reason</th>
+                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Mod</th>
+                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Date</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {history.map((item: ModerationLog) => (
                                 <tr key={item.logId} className="hover:bg-gray-50">
-                                    <td className="px-4 py-3">
+                                    <td className="px-4 py-3 text-center">
                                         <span className={`text-xs px-2 py-1 rounded-full ${getActionColor(item.action)}`}>
                                             {item.action}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-gray-900">User #{item.targetUserId}</td>
-                                    <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">{item.reason || '-'}</td>
-                                    <td className="px-4 py-3 text-sm text-gray-600">#{item.moderatorId}</td>
-                                    <td className="px-4 py-3 text-sm text-gray-600">
+                                    <td className="px-4 py-3 text-sm text-gray-900 text-center">User #{item.targetUserId}</td>
+                                    <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate text-center">{item.reason || '-'}</td>
+                                    <td className="px-4 py-3 text-sm text-gray-600 text-center">#{item.moderatorId}</td>
+                                    <td className="px-4 py-3 text-sm text-gray-600 text-center">
                                         {new Date(item.createdAt).toLocaleDateString()}
                                     </td>
                                 </tr>
