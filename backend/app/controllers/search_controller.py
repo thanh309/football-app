@@ -176,7 +176,7 @@ async def search_players(
             position=p.position,
             skillLevel=p.skill_level,
             bio=p.bio,
-            profileImage=p.profile_image,
+            profileImage=p.profile_image.storage_path if p.profile_image else None,
             dateOfBirth=p.date_of_birth.isoformat() if p.date_of_birth else None,
             height=p.height,
             weight=p.weight,
