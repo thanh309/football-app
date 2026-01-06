@@ -59,9 +59,9 @@ class ModerationLogResponse(BaseModel):
 class UserSummaryResponse(BaseModel):
     userId: int
     email: str
-    fullName: str
-    role: str
-    isActive: bool
+    username: str
+    roles: List[str]
+    status: str
     createdAt: str
 
 
@@ -378,9 +378,9 @@ async def get_users(
         UserSummaryResponse(
             userId=u.user_id,
             email=u.email,
-            fullName=u.username,  # UserAccount doesn't have full_name, use username
-            role=u.roles[0] if u.roles else "Player",  # Get first role from list
-            isActive=u.status.value == "Active",  # Use status enum check
+            username=u.username,
+            roles=u.roles if u.roles else ["Player"],
+            status=u.status.value,
             createdAt=u.created_at.isoformat(),
         ) for u in users
     ]
@@ -404,9 +404,9 @@ async def get_user_details(
     return UserSummaryResponse(
         userId=target_user.user_id,
         email=target_user.email,
-        fullName=target_user.username,
-        role=target_user.roles[0] if target_user.roles else "Player",
-        isActive=target_user.status.value == "Active",
+        username=target_user.username,
+        roles=target_user.roles if target_user.roles else ["Player"],
+        status=target_user.status.value,
         createdAt=target_user.created_at.isoformat(),
     )
 
