@@ -1,9 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MatchDetailsCard } from '../../components/match';
-import { ConfirmAttendanceButton } from '../../components/player';
-import { LoadingSpinner, PageContainer, PageHeader, ContentCard } from '../../components/common';
-import { MatchStatus } from '../../types';
+import { LoadingSpinner, PageContainer, PageHeader } from '../../components/common';
 import { useMatchDetails } from '../../api/hooks/useMatch';
 
 const MatchDetailsPage: React.FC = () => {
@@ -40,29 +38,8 @@ const MatchDetailsPage: React.FC = () => {
                 backLink={{ label: 'Back to Schedule', to: '/schedule' }}
             />
 
-            {/* Match Card */}
-            <div className="mb-6">
-                <MatchDetailsCard matchId={matchIdNum} />
-            </div>
-
-            {/* Attendance Action */}
-            {match.status === MatchStatus.SCHEDULED && (
-                <ContentCard title="Your Attendance" className="mb-6">
-                    <p className="text-slate-600 mb-4">
-                        Please confirm whether you will attend this match.
-                    </p>
-                    <ConfirmAttendanceButton matchId={match.matchId} />
-                </ContentCard>
-            )}
-
-            {/* Match Info */}
-            <ContentCard title="Additional Information">
-                {match.description ? (
-                    <p className="text-slate-600">{match.description}</p>
-                ) : (
-                    <p className="text-slate-500">No additional information provided.</p>
-                )}
-            </ContentCard>
+            {/* Match Card - contains attendance and description */}
+            <MatchDetailsCard matchId={matchIdNum} />
         </PageContainer>
     );
 };

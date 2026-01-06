@@ -244,15 +244,29 @@ async def respond_to_invitation(
 @router.get("/{match_id}/attendance", response_model=List[AttendanceRecordResponse])
 async def get_attendance(
     match_id: int,
-    match_service: MatchService = Depends(get_match_service)
+    match_service: MatchService = Depends(get_match_service),
+    db: AsyncSession = Depends(get_db)
 ):
     """Get match attendance."""
+    from app.repositories.player_repository import PlayerRepository
+    
     records = await match_service.get_match_attendance(match_id)
+    
+    # Get player profiles to map player_id -> user_id
+    player_repo = PlayerRepository(db)
+    player_ids = [r.player_id for r in records]
+    player_to_user = {}
+    for player_id in player_ids:
+        player = await player_repo.find_by_id(player_id)
+        if player:
+            player_to_user[player_id] = player.user_id
+    
     return [
         AttendanceRecordResponse(
             attendanceId=r.attendance_id,
             matchId=r.match_id,
             playerId=r.player_id,
+            userId=player_to_user.get(r.player_id),
             teamId=r.team_id,
             status=r.status.value,
             confirmedAt=r.confirmed_at.isoformat() if r.confirmed_at else None,

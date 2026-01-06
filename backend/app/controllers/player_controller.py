@@ -128,6 +128,62 @@ async def get_player_by_user_id(
 from typing import List
 from app.schemas.match import MatchEventResponse
 
+
+@router.get("/user/{user_id}/schedule", response_model=List[MatchEventResponse])
+async def get_user_schedule(
+    user_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """Get player's match schedule by user_id (looks up player first)."""
+    from app.repositories.team_repository import RosterRepository
+    from app.repositories.match_repository import MatchRepository
+    
+    player_repo = PlayerRepository(db)
+    player = await player_repo.find_by_user_id(user_id)
+    if not player:
+        return []  # User has no player profile
+    
+    roster_repo = RosterRepository(db)
+    match_repo = MatchRepository(db)
+    
+    # Get all teams player is a member of
+    roster_entries = await roster_repo.find_by_player(player.player_id)
+    team_ids = [r.team_id for r in roster_entries if r.is_active]
+    
+    # Get matches for all those teams
+    all_matches = []
+    for team_id in team_ids:
+        matches = await match_repo.find_by_team(team_id)
+        all_matches.extend(matches)
+    
+    # Remove duplicates and sort by date
+    seen = set()
+    unique_matches = []
+    for m in all_matches:
+        if m.match_id not in seen:
+            seen.add(m.match_id)
+            unique_matches.append(m)
+    
+    unique_matches.sort(key=lambda m: (m.match_date, m.start_time))
+    
+    return [
+        MatchEventResponse(
+            matchId=m.match_id,
+            hostTeamId=m.host_team_id,
+            opponentTeamId=m.opponent_team_id,
+            fieldId=m.field_id,
+            bookingId=m.booking_id,
+            matchDate=m.match_date.isoformat(),
+            startTime=m.start_time.isoformat(),
+            endTime=m.end_time.isoformat() if m.end_time else None,
+            status=m.status.value,
+            visibility=m.visibility.value,
+            description=m.description,
+            createdAt=m.created_at.isoformat(),
+            updatedAt=m.updated_at.isoformat(),
+        ) for m in unique_matches
+    ]
+
 @router.get("/{player_id}/schedule", response_model=List[MatchEventResponse])
 async def get_player_schedule(
     player_id: int,

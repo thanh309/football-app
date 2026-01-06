@@ -89,10 +89,10 @@ export const matchService = {
     },
 
     /**
-     * Get player's match schedule (all teams)
+     * Get player's match schedule (by user_id, looks up player first)
      */
-    getPlayerSchedule: async (playerId: number): Promise<MatchEvent[]> => {
-        const response = await api.get<MatchEvent[]>(`/players/${playerId}/schedule`);
+    getPlayerSchedule: async (userId: number): Promise<MatchEvent[]> => {
+        const response = await api.get<MatchEvent[]>(`/players/user/${userId}/schedule`);
         return response.data;
     },
 

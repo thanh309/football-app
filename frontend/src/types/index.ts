@@ -389,6 +389,7 @@ export interface AttendanceRecord {
     attendanceId: number; // Primary Key
     matchId: number; // Foreign Key -> MatchEvent
     playerId: number; // Foreign Key -> PlayerProfile
+    userId?: number; // Foreign Key -> UserAccount (for comparison with current user)
     teamId: number; // Foreign Key -> TeamProfile
     status: AttendanceStatus;
     confirmedAt?: string;

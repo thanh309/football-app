@@ -81,6 +81,7 @@ class AttendanceRecordResponse(BaseModel):
     attendanceId: int
     matchId: int
     playerId: int
+    userId: Optional[int] = None  # Added for frontend comparison with current user
     teamId: int
     status: str
     confirmedAt: Optional[str] = None

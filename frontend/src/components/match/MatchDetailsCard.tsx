@@ -17,7 +17,7 @@ const MatchDetailsCard: React.FC<MatchDetailsCardProps> = ({ matchId }) => {
     const confirmMutation = useConfirmAttendance();
 
     const hasConfirmed = attendance?.some(
-        a => a.playerId === user?.userId && a.status === 'Present'
+        a => a.userId === user?.userId && a.status === 'Present'
     );
 
     const handleConfirmAttendance = async () => {
@@ -43,7 +43,10 @@ const MatchDetailsCard: React.FC<MatchDetailsCardProps> = ({ matchId }) => {
 
     const matchDate = new Date(match.matchDate);
     const isPast = matchDate < new Date();
-    const canConfirmAttendance = !isPast && match.status === 'Scheduled' && !hasConfirmed;
+    // Allow attendance confirmation for scheduled, pending approval, or in-progress matches that haven't passed
+    const attendableStatuses = ['Scheduled', 'PendingApproval', 'InProgress', 'LookingForField'];
+    const isCompletedOrCancelled = match.status === 'Completed' || match.status === 'Cancelled';
+    const canConfirmAttendance = !isPast && attendableStatuses.includes(match.status) && !hasConfirmed;
 
 
 
@@ -144,10 +147,12 @@ const MatchDetailsCard: React.FC<MatchDetailsCardProps> = ({ matchId }) => {
                         >
                             Confirm Attendance
                         </Button>
-                    ) : isPast ? (
+                    ) : isCompletedOrCancelled ? (
                         <p className="text-gray-500">Match has ended</p>
+                    ) : isPast ? (
+                        <p className="text-gray-500">Match has passed</p>
                     ) : (
-                        <p className="text-gray-500">Attendance confirmation not available</p>
+                        <p className="text-gray-500">You are not a player in this match</p>
                     )}
                 </div>
             </div>
