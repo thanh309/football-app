@@ -96,11 +96,11 @@ const UserSearchView: React.FC = () => {
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">User</th>
-                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Email</th>
-                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Roles</th>
-                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Status</th>
-                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Joined</th>
-                                <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Action</th>
+                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Email</th>
+                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Roles</th>
+                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Status</th>
+                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Joined</th>
+                                <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -114,17 +114,17 @@ const UserSearchView: React.FC = () => {
                                             <span className="font-medium text-gray-900">{user.username}</span>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
-                                    <td className="px-4 py-3 text-sm text-gray-600">{user.roles.join(', ')}</td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-4 py-3 text-sm text-gray-600 text-center">{user.email}</td>
+                                    <td className="px-4 py-3 text-sm text-gray-600 text-center">{user.roles.join(', ')}</td>
+                                    <td className="px-4 py-3 text-center">
                                         <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(user.status)}`}>
                                             {user.status}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-gray-600">
+                                    <td className="px-4 py-3 text-sm text-gray-600 text-center">
                                         {new Date(user.createdAt).toLocaleDateString()}
                                     </td>
-                                    <td className="px-4 py-3 text-right">
+                                    <td className="px-4 py-3 text-center">
                                         <Link to={`/mod/users/${user.userId}`}>
                                             <Button size="sm" variant="ghost" leftIcon={<Eye className="w-4 h-4" />}>
                                                 View
