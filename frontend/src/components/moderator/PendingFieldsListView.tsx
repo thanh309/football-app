@@ -59,7 +59,7 @@ const PendingFieldsListView: React.FC = () => {
                             </div>
 
                             <div className="text-lg font-semibold text-emerald-600 mb-3">
-                                ${field.defaultPricePerHour}/hour
+                                ${(field as any).pricePerHour ?? 0}/hour
                             </div>
 
                             <div className="flex items-center justify-between text-sm text-gray-500">

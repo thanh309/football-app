@@ -293,9 +293,40 @@ async def get_pending_fields(
             "ownerId": f.owner_id,
             "location": f.location,
             "description": f.description,
+            "pricePerHour": float(f.default_price_per_hour) if f.default_price_per_hour else None,
             "createdAt": f.created_at.isoformat(),
         } for f in fields
     ]
+
+
+@router.get("/fields/{field_id}", response_model=dict)
+async def get_field_for_review(
+    field_id: int,
+    user: UserAccount = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get a single field by ID for moderator review."""
+    await require_moderator(user)
+    
+    result = await db.execute(
+        select(FieldProfile).where(FieldProfile.field_id == field_id)
+    )
+    field = result.scalar_one_or_none()
+    
+    if not field:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Field not found")
+    
+    return {
+        "fieldId": field.field_id,
+        "fieldName": field.field_name,
+        "ownerId": field.owner_id,
+        "location": field.location,
+        "description": field.description,
+        "pricePerHour": float(field.default_price_per_hour) if field.default_price_per_hour else None,
+        "capacity": field.capacity,
+        "status": field.status.value,
+        "createdAt": field.created_at.isoformat(),
+    }
 
 
 @router.put("/fields/{field_id}/verify", response_model=dict)
